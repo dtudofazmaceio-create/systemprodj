@@ -1473,7 +1473,7 @@ Origem</label>
             </div>
             <div class="form-group" id="balance-group">
                 <label for="account-balance">Saldo (R$)</label>
-                <input type="text" id="account-balance" step="0.01" placeholder="0.00">
+                <input type="number" id="account-balance" step="0.01" placeholder="0.00">
             </div>
             <div class="btn-container">
     
@@ -2072,7 +2072,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('add-new-quote-btn-aba').addEventListener('click', () => openEventQuoteModal('new'));
     document.getElementById('generate-event-quote-doc-tab').addEventListener('click', () => openEventQuoteModal('new'));
     
-    // APRIMORADO - Botão de cadastro rápido de cliente dentro do Pedido
+    // APRIMORADO - Botões de cadastro rápido de cliente nos modais
+// APRIMORADO - Botão de cadastro rápido de cliente dentro do Pedido
     document.getElementById('add-client-from-order-btn').addEventListener('click', () => {
         // 1. Salva os dados que você já digitou no formulário de pedido
         const orderData = getFormData('event-order-form');
@@ -2455,66 +2456,41 @@ document.getElementById('add-client-from-contract-btn').addEventListener('click'
   }
 
   function handleAccountSubmit(e) {
-    e.preventDefault(); 
+    e.preventDefault();
     const form = e.target;
-    
     const id = form.querySelector('#edit-account-id').value;
     const accountIdForAdjustment = form.dataset.accountId;
-
-    // Pega o valor digitado como TEXTO primeiro, para podermos tratar a vírgula
-    const rawValue = form.querySelector('#account-balance').value; 
-    // Troca vírgula por ponto (ex: 100,50 vira 100.50) e converte para número
-    const balanceValue = parseFloat(rawValue ? rawValue.replace(',', '.') : 0);
-
-    // CASO 1: EDITAR DADOS DA CONTA (Apenas Nome ou Tipo)
-    if (id) { 
+    if (id) { // Modo Edição
         let acc = accounts.find(a => a.id === parseFloat(id));
         if (acc) {
             acc.name = form.querySelector('#account-name').value;
             acc.type = form.querySelector('#account-type').value;
         }
-    } 
-    // CASO 2: AJUSTAR O SALDO
-    else if (accountIdForAdjustment) { 
+    } else if (accountIdForAdjustment) { // Modo Ajuste de Saldo
+        const newBalance = parseFloat(form.querySelector('#account-balance').value);
         let acc = accounts.find(a => a.id === parseFloat(accountIdForAdjustment));
-        
-        if (!acc) {
-            alert("Erro: Conta não encontrada.");
-            return;
-        }
-        
-        // Se o valor digitado não for um número válido, avisa e para
-        if (isNaN(balanceValue)) {
-            alert("Por favor, digite um valor válido para o saldo.");
-            return;
-        }
+        if (acc && !isNaN(newBalance)) {
+            recalculateAllBalances();
+            const currentCalculatedBalance = accounts.find(a => a.id === parseFloat(accountIdForAdjustment)).balance;
+            const adjustment = newBalance - currentCalculatedBalance;
+            acc.initialBalance = (acc.initialBalance || 0) + adjustment;
 
-        // 1. Garante saldo atualizado
-        recalculateAllBalances(); 
-        const currentBalance = acc.balance;
-        
-        // 2. Calcula a diferença necessária
-        const adjustment = balanceValue - currentBalance;
-        
-        // 3. Cria a transação de ajuste se houver diferença
-        if (adjustment !== 0) {
-            transactions.push({
-                id: Date.now(),
-                type: adjustment > 0 ? 'receita' : 'despesa',
-                amount: Math.abs(adjustment),
-                date: new Date().toISOString().split('T')[0],
-                description: 'Ajuste de Saldo',
-                category: 'Ajuste',
-                status: 'confirmada',
-                toAccount: acc.id,
-                createdAt: new Date().toISOString()
-            });
+            if (adjustment !== 0) {
+                transactions.push({
+                    id: Date.now(),
+                    type: adjustment > 0 ? 'receita' : 'despesa',
+                    amount: Math.abs(adjustment),
+                    date: new Date().toISOString().split('T')[0],
+                    description: 'Ajuste de Saldo',
+                    category: 'Ajuste',
+                    status: 'confirmada',
+                    toAccount: acc.id,
+                    createdAt: new Date().toISOString()
+                });
+            }
         }
-    } 
-    // CASO 3: CRIAR NOVA CONTA
-    else { 
-        const initialBalance = isNaN(balanceValue) ? 0 : balanceValue;
-        
+    } else { // Modo Nova Conta
+        const initialBalance = parseFloat(form.querySelector('#account-balance').value) || 0;
         const newAccount = {
             id: Date.now(),
             name: form.querySelector('#account-name').value,
@@ -2524,11 +2500,9 @@ document.getElementById('add-client-from-contract-btn').addEventListener('click'
         };
         accounts.push(newAccount);
     }
-    
-    // Salva, Atualiza a tela e Fecha
     saveData(); 
     updateUI();
-    document.getElementById('account-modal').classList.remove('active');
+    form.closest('.modal').classList.remove('active');
   }
   
   function handleGoalSubmit(e){
@@ -4107,43 +4081,35 @@ function updateClientsList() {
     });
   }
 
-  function function addModernDocLayout(doc, title) {
+  function addModernDocLayout(doc, title) {
     const pageHeight = doc.internal.pageSize.height;
     const pageWidth = doc.internal.pageSize.width;
     const primaryColor = '#6a11cb';
     const margin = 15;
 
-    // 1. AUMENTO DA BARRA DE CABEÇALHO (De 35 para 55)
     doc.setFillColor(primaryColor);
-    doc.rect(0, 0, pageWidth, 55, 'F'); 
-    
-    // 2. LOGO MAIOR
+    doc.rect(0, 0, pageWidth, 35, 'F');
     if (userLogo) {
-      // Aumentei as dimensões máximas de 70x20 para 120x45
-      addLogoToPdf(doc, margin, 5, 120, 45); 
+      addLogoToPdf(doc, margin, 8, 70, 20);
     }
 
-    // 3. DADOS DA EMPRESA MAIORES E MAIS VISÍVEIS
+    doc.setFontSize(10);
     doc.setTextColor('#FFFFFF');
     doc.setFont(undefined, 'bold');
     if (userInfo.name) {
-      doc.setFontSize(15); // Aumentado de 10 para 15
-      doc.text(userInfo.name, pageWidth - margin, 22, { align: 'right' });
+      doc.text(userInfo.name, pageWidth - margin, 17, { align: 'right' });
     }
     if (userInfo.cpf) {
         doc.setFont(undefined, 'normal');
-        doc.setFontSize(12); // Aumentado de 9 para 12
-        doc.text(userInfo.cpf, pageWidth - margin, 32, { align: 'right' });
+        doc.setFontSize(9);
+        doc.text(userInfo.cpf, pageWidth - margin, 25, { align: 'right' });
     }
 
-    // Linha de rodapé
     doc.setDrawColor(primaryColor);
     doc.line(margin, pageHeight - 15, pageWidth - margin, pageHeight - 15);
     doc.setFontSize(8);
     doc.setTextColor('#888888');
     doc.text(`Documento gerado por FinancePro em ${new Date().toLocaleDateString('pt-BR')}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
-    
-    // Bordas decorativas
     doc.setLineWidth(1.5);
     doc.setDrawColor(primaryColor);
     doc.rect(5, 5, pageWidth - 10, pageHeight - 10, 'S');
@@ -4151,20 +4117,15 @@ function updateClientsList() {
     doc.setLineWidth(0.5);
     doc.setDrawColor('#AAAAAA');
     doc.rect(7, 7, pageWidth - 14, pageHeight - 14, 'S');
-    
-    // Título do Documento
     doc.setFontSize(18);
     doc.setTextColor(primaryColor);
     doc.setFont(undefined, 'bold');
-    // Ajustei a posição Y do título para baixo (de 55 para 80) para não bater no cabeçalho maior
-    doc.text(title, pageWidth / 2, 80, { align: 'center' });
+    doc.text(title, pageWidth / 2, 55, { align: 'center' });
 
     doc.setTextColor('#000000');
     doc.setFont(undefined, 'normal');
     doc.setDrawColor('#000000');
-    
-    // Retorna um startY mais baixo para o conteúdo começar depois do cabeçalho novo
-    return { startY: 100 }; 
+    return { startY: 70 };
   }
 
   function addLogoToPdf(doc, x, y, maxWidth, maxHeight) {
@@ -4244,9 +4205,8 @@ function updateClientsList() {
     const headingFontSize = 14;
     const lineSpacing = 11;
     
-    // Chama o layout novo
-    addModernDocLayout(doc, ""); 
-    let y = 90; // Começa um pouco mais para baixo por causa da logo maior
+    addModernDocLayout(doc, "");
+    let y = 70;
 
     doc.setFont(undefined, 'bold');
     doc.setFontSize(headingFontSize);
@@ -4254,13 +4214,9 @@ function updateClientsList() {
     doc.text("CONTRATO DE PRESTAÇÃO DE SERVIÇOS ARTÍSTICOS DE DJ", pageWidth / 2, y, { align: 'center' });
     y += lineSpacing * 2;
 
-    // --- Funções auxiliares internas mantidas ---
+
     const addClause = (title, text) => {
-        if (y > doc.internal.pageSize.height - 120) {
-            doc.addPage();
-            addModernDocLayout(doc, "");
-            y = 90;
-        }
+        if (y > doc.internal.pageSize.height - 120) return;
         doc.setFont(undefined, 'bold');
         doc.setFontSize(titleFontSize);
         doc.setTextColor(primaryColor);
@@ -4287,7 +4243,6 @@ function updateClientsList() {
         y += (lineSpacing / 2);
     };
     
-    // --- Conteúdo do Contrato (Mantido igual) ---
     doc.setFont(undefined, 'bold');
     doc.setFontSize(titleFontSize);
     doc.setTextColor(primaryColor);
@@ -4296,7 +4251,6 @@ function updateClientsList() {
 
     let partesText = `CONTRATANTE: ${document.getElementById('contract-client-name').textContent}, CPF/CNPJ nº ${document.getElementById('contract-client-doc').textContent}, com endereço em ${document.getElementById('contract-client-address').textContent}.`;
     addClause('DAS PARTES', partesText);
-    
     partesText = `CONTRATADO: ${document.getElementById('contract-company-name').textContent}, CPF/CNPJ nº ${document.getElementById('contract-company-doc').textContent}, doravante denominado DJ.`;
     const lines = doc.splitTextToSize(partesText, usableWidth);
     doc.setFont(undefined, 'normal');
@@ -4304,55 +4258,24 @@ function updateClientsList() {
     doc.setTextColor('#333333');
     doc.text(lines, margin, y);
     y += (lines.length * lineSpacing) + lineSpacing;
-
     addClause('CLÁUSULA 1ª - DO OBJETO', `Prestação de serviços de Disc Jockey (DJ) para o evento em ${document.getElementById('contract-event-location').textContent}, no dia ${document.getElementById('contract-event-date').textContent}, das ${document.getElementById('contract-event-start').textContent} às ${document.getElementById('contract-event-end').textContent}.`);
-    
     addClause('CLÁUSULA 2ª - OBRIGAÇÕES DO CONTRATADO', 'O DJ se compromete a:');
     addList([ 'Fornecer equipamentos contratados e compatíveis com o porte do evento;', 'Comparecer ao local com antecedência para montagem e testes;', 'Executar o repertório musical alinhado previamente com o CONTRATANTE;', 'Manter conduta profissional e zelar pela qualidade técnica da apresentação.']);
-    
     addClause('CLÁUSULA 3ª - OBRIGAÇÕES DO CONTRATANTE', 'O CONTRATANTE se compromete a:');
     addList([ 'Disponibilizar local seguro e protegido de intempéries para a montagem dos equipamentos;', 'Garantir ponto de energia elétrica estável e exclusivo para os equipamentos do DJ;', 'Efetuar o pagamento do valor acordado na forma e prazos definidos na Cláusula 4ª.']);
-    
     addClause('CLÁUSULA 4ª - DO VALOR E PAGAMENTO', `O valor total dos serviços é de ${document.getElementById('contract-total-value').textContent} (${document.getElementById('contract-total-value-extenso').textContent}), pago da seguinte forma: ${document.getElementById('contract-payment-1').textContent}% na assinatura, ${document.getElementById('contract-payment-2').textContent}% até 7 dias antes do evento, e ${document.getElementById('contract-payment-3').textContent}% no dia do evento.`);
-    
     addClause('CLÁUSULA 5ª - DA RESCISÃO', `Em caso de cancelamento pelo CONTRATANTE, a multa será de 50% do valor total se cancelado com menos de 30 dias de antecedência. O não comparecimento injustificado do CONTRATADO implicará na devolução integral dos valores pagos, acrescido de multa de 50% sobre o valor do contrato.`);
-    
     addClause('CLÁUSULA 6ª - DO FORO', `Fica eleito o foro da comarca de ${document.getElementById('contract-legal-place').textContent} para dirimir quaisquer litígios oriundos deste contrato.`);
-    
     y += lineSpacing * 2;
     doc.text('E, por estarem justos e contratados, assinam o presente em duas vias de igual teor e forma.', margin, y);
     y += lineSpacing * 4;
     
-    // --- ÁREA DAS ASSINATURAS (MODIFICADA) ---
-    
-    // Garante que as assinaturas não fiquem no fim da página sem espaço
-    if (y > doc.internal.pageSize.height - 80) {
-        doc.addPage();
-        addModernDocLayout(doc, "");
-        y = 100;
-    }
-
     const signatureWidth = usableWidth / 2 - 20;
-    
-    // Desenha as linhas
-    doc.setDrawColor(0); // Preto
-    doc.setLineWidth(1);
-    doc.line(margin, y, margin + signatureWidth, y); // Linha esquerda
-    doc.line(pageWidth - margin - signatureWidth, y, pageWidth - margin, y); // Linha direita
-    
-    y += lineSpacing + 5; // Espaço entre linha e texto
-    
-    doc.setFont(undefined, 'bold');
-    doc.setFontSize(10); // Fonte um pouco maior para as assinaturas
-    
-    // Centraliza o texto com base na largura da linha
-    // Centro Esquerda = Margem + Metade da linha
-    const centerLeft = margin + (signatureWidth / 2);
-    // Centro Direita = LarguraTotal - Margem - Metade da linha
-    const centerRight = pageWidth - margin - (signatureWidth / 2);
-
-    doc.text('CONTRATANTE', centerLeft, y, { align: 'center' });
-    doc.text('CONTRATADO', centerRight, y, { align: 'center' });
+    doc.line(margin, y, margin + signatureWidth, y);
+    doc.line(pageWidth - margin - signatureWidth, y, pageWidth - margin, y);
+    y += lineSpacing;
+    doc.text('CONTRATANTE', margin, y);
+    doc.text('CONTRATADO', pageWidth - margin, y, { align: 'right' });
     
     doc.save(`Contrato_DJ_${document.getElementById('contract-client-name').textContent.replace(/\s/g, '_')}.pdf`);
   }
@@ -5053,7 +4976,7 @@ function showCommitmentsForDay(dateString) {
                                   <option value="realizado" ${c.status === 'realizado' ? 'selected' : ''}>Realizado</option>
                                   <option value="cancelado" ${c.status === 'cancelado' ? 'selected' : ''}>Cancelado</option>
                              </select>
-                             <button class="btn btn-xs btn-danger" data-action="delete-commitment-from-calendar" data-id="${c.id}" title="Excluir"><i class="fas fa-trash"></i></button>
+                             <button class="btn btn-xs btn-danger" data-action="delete-commitment-from-calendar" data-id="${c.id}"title="Excluir"><i class="fas fa-trash"></i></button>
                           </div>
                       </div>
                   </div>
@@ -5265,7 +5188,6 @@ function showCommitmentsForDay(dateString) {
           showCommitmentsForDay(dateString);   // Recarrega a lista do dia no modal
       }
   }
-
   init();
 });
 </script>
