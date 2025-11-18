@@ -1473,7 +1473,7 @@ Origem</label>
             </div>
             <div class="form-group" id="balance-group">
                 <label for="account-balance">Saldo (R$)</label>
-                <input type="number" id="account-balance" step="0.01" placeholder="0.00">
+                <input type="text" id="account-balance" step="0.01" placeholder="0.00">
             </div>
             <div class="btn-container">
     
@@ -2072,26 +2072,31 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('add-new-quote-btn-aba').addEventListener('click', () => openEventQuoteModal('new'));
     document.getElementById('generate-event-quote-doc-tab').addEventListener('click', () => openEventQuoteModal('new'));
     
-    // APRIMORADO - Botões de cadastro rápido de cliente nos modais
-document.getElementById('add-client-from-order-btn').addEventListener('click', () => {
-    // 1. Salva os dados do formulário de pedido
-    const orderData = getFormData('event-order-form');
+    // APRIMORADO - Botão de cadastro rápido de cliente dentro do Pedido
+    document.getElementById('add-client-from-order-btn').addEventListener('click', () => {
+        // 1. Salva os dados que você já digitou no formulário de pedido
+        const orderData = getFormData('event-order-form');
 
-    // 2. Abre o modal de cliente com um "callback"
-    openClientModal('new', null, (newClientId) => {
-        // 3. Re-abre o modal de Pedido (com os dados salvos)
-        openEventOrderModal('new', null, orderData); 
+        // 2. FECHA o modal de Pedido para não ficarem dois abertos
+        document.getElementById('event-order-modal').classList.remove('active');
 
-        // 4. Atualiza a lista de clientes nesse modal
-        const clientSelect = document.getElementById('order-client-select');
-        populateSelect(clientSelect, clients, 'name', 'id');
+        // 3. Abre o modal de cliente com um "callback" (instrução do que fazer ao terminar)
+        openClientModal('new', null, (newClientId) => {
+            
+            // 4. Quando salvar o cliente, essa parte roda: Re-abre o modal de Pedido
+            // Passando os dados salvos (orderData) para não perder o que foi digitado
+            openEventOrderModal('new', null, orderData); 
 
-        // 5. Seleciona o novo cliente
-        if (newClientId) {
-            clientSelect.value = newClientId;
-        }
+            // 5. Atualiza a lista de clientes dentro do select
+            const clientSelect = document.getElementById('order-client-select');
+            populateSelect(clientSelect, clients, 'name', 'id');
+
+            // 6. Já deixa o novo cliente selecionado automaticamente
+            if (newClientId) {
+                clientSelect.value = newClientId;
+            }
+        });
     });
-});
 
 document.getElementById('add-client-from-quote-btn').addEventListener('click', () => {
     // 1. Salva os dados do formulário de orçamento
@@ -2282,12 +2287,13 @@ document.getElementById('add-client-from-contract-btn').addEventListener('click'
             'delete-client': () => deleteItem(clients, id, 'Cliente'),
             'edit-client': () => openClientModal('edit', id),
             'delete-commitment': () => deleteItem(commitments, id, 'Compromisso'),
+            'delete-commitment-from-calendar': () => handleDeleteFromCalendar(id),
             'edit-commitment': () => openCommitmentModal('edit', id),
             'edit-commitment-from-calendar': () => {
                 document.getElementById('calendar-commitments-modal').classList.remove('active');
                 openCommitmentModal('edit', id);
             },
-            'delete-order': () => deleteItem(eventOrders, id, 'Pedido'),
+            'delete-order': () => deleteOrderAndCommitment(id),
             'edit-order': () => openEventOrderModal('edit', id),
             'view-order': () => openViewOrderModal(id),
             'remove-service': () => removeServiceItem(target),
@@ -2449,41 +2455,66 @@ document.getElementById('add-client-from-contract-btn').addEventListener('click'
   }
 
   function handleAccountSubmit(e) {
-    e.preventDefault();
+    e.preventDefault(); 
     const form = e.target;
+    
     const id = form.querySelector('#edit-account-id').value;
     const accountIdForAdjustment = form.dataset.accountId;
-    if (id) { // Modo Edição
+
+    // Pega o valor digitado como TEXTO primeiro, para podermos tratar a vírgula
+    const rawValue = form.querySelector('#account-balance').value; 
+    // Troca vírgula por ponto (ex: 100,50 vira 100.50) e converte para número
+    const balanceValue = parseFloat(rawValue ? rawValue.replace(',', '.') : 0);
+
+    // CASO 1: EDITAR DADOS DA CONTA (Apenas Nome ou Tipo)
+    if (id) { 
         let acc = accounts.find(a => a.id === parseFloat(id));
         if (acc) {
             acc.name = form.querySelector('#account-name').value;
             acc.type = form.querySelector('#account-type').value;
         }
-    } else if (accountIdForAdjustment) { // Modo Ajuste de Saldo
-        const newBalance = parseFloat(form.querySelector('#account-balance').value);
+    } 
+    // CASO 2: AJUSTAR O SALDO
+    else if (accountIdForAdjustment) { 
         let acc = accounts.find(a => a.id === parseFloat(accountIdForAdjustment));
-        if (acc && !isNaN(newBalance)) {
-            recalculateAllBalances();
-            const currentCalculatedBalance = accounts.find(a => a.id === parseFloat(accountIdForAdjustment)).balance;
-            const adjustment = newBalance - currentCalculatedBalance;
-            acc.initialBalance = (acc.initialBalance || 0) + adjustment;
-
-            if (adjustment !== 0) {
-                transactions.push({
-                    id: Date.now(),
-                    type: adjustment > 0 ? 'receita' : 'despesa',
-                    amount: Math.abs(adjustment),
-                    date: new Date().toISOString().split('T')[0],
-                    description: 'Ajuste de Saldo',
-                    category: 'Ajuste',
-                    status: 'confirmada',
-                    toAccount: acc.id,
-                    createdAt: new Date().toISOString()
-                });
-            }
+        
+        if (!acc) {
+            alert("Erro: Conta não encontrada.");
+            return;
         }
-    } else { // Modo Nova Conta
-        const initialBalance = parseFloat(form.querySelector('#account-balance').value) || 0;
+        
+        // Se o valor digitado não for um número válido, avisa e para
+        if (isNaN(balanceValue)) {
+            alert("Por favor, digite um valor válido para o saldo.");
+            return;
+        }
+
+        // 1. Garante saldo atualizado
+        recalculateAllBalances(); 
+        const currentBalance = acc.balance;
+        
+        // 2. Calcula a diferença necessária
+        const adjustment = balanceValue - currentBalance;
+        
+        // 3. Cria a transação de ajuste se houver diferença
+        if (adjustment !== 0) {
+            transactions.push({
+                id: Date.now(),
+                type: adjustment > 0 ? 'receita' : 'despesa',
+                amount: Math.abs(adjustment),
+                date: new Date().toISOString().split('T')[0],
+                description: 'Ajuste de Saldo',
+                category: 'Ajuste',
+                status: 'confirmada',
+                toAccount: acc.id,
+                createdAt: new Date().toISOString()
+            });
+        }
+    } 
+    // CASO 3: CRIAR NOVA CONTA
+    else { 
+        const initialBalance = isNaN(balanceValue) ? 0 : balanceValue;
+        
         const newAccount = {
             id: Date.now(),
             name: form.querySelector('#account-name').value,
@@ -2493,9 +2524,11 @@ document.getElementById('add-client-from-contract-btn').addEventListener('click'
         };
         accounts.push(newAccount);
     }
+    
+    // Salva, Atualiza a tela e Fecha
     saveData(); 
     updateUI();
-    form.closest('.modal').classList.remove('active');
+    document.getElementById('account-modal').classList.remove('active');
   }
   
   function handleGoalSubmit(e){
@@ -4962,13 +4995,14 @@ function showCommitmentsForDay(dateString) {
 
                               ${financialInfoHtml} ${c.linkedOrderId ? `<button class="btn btn-xs" data-action="edit-order-from-calendar" data-id="${c.linkedOrderId}" style="margin-top:10px;" onclick="event.stopPropagation()"><i class="fas fa-eye"></i> Ver/Editar Pedido</button>` : ''}
                           </div>
-                          <div class="form-group" style="margin-bottom: 0; min-width: 120px;">
-                             <select class="commitment-status-select" data-id="${c.id}" style="padding: 5px 8px; font-size: 0.85rem;" onclick="event.stopPropagation()">
+                          <div style="display: flex; gap: 5px; align-items: center; justify-content: flex-end; min-width: 160px;">
+                             <select class="commitment-status-select" data-id="${c.id}" style="padding: 5px 8px; font-size: 0.85rem; flex: 1;" onclick="event.stopPropagation()">
                                   <option value="agendado" ${c.status === 'agendado' ? 'selected' : ''}>Agendado</option>
                                   <option value="confirmado" ${c.status === 'confirmado' ? 'selected' : ''}>Confirmado</option>
                                   <option value="realizado" ${c.status === 'realizado' ? 'selected' : ''}>Realizado</option>
                                   <option value="cancelado" ${c.status === 'cancelado' ? 'selected' : ''}>Cancelado</option>
                              </select>
+                             <button class="btn btn-xs btn-danger" data-action="delete-commitment-from-calendar" data-id="${c.id}" title="Excluir"><i class="fas fa-trash"></i></button>
                           </div>
                       </div>
                   </div>
@@ -5137,6 +5171,48 @@ function showCommitmentsForDay(dateString) {
             tension: 0.2
         }]
     };
+  }
+// --- NOVA FUNÇÃO: Exclui Pedido e o Compromisso da Agenda vinculado ---
+  function deleteOrderAndCommitment(id) {
+    if (confirm('Tem certeza que deseja excluir este Pedido? O compromisso agendado para ele também será removido.')) {
+        // 1. Remove o Pedido
+        const orderIndex = eventOrders.findIndex(o => o.id === id);
+        if (orderIndex > -1) eventOrders.splice(orderIndex, 1);
+
+        // 2. Remove o Compromisso vinculado (se houver)
+        const commIndex = commitments.findIndex(c => c.linkedOrderId === id);
+        if (commIndex > -1) commitments.splice(commIndex, 1);
+
+        // 3. Salva e Atualiza a tela
+        saveData();
+        updateUI();
+    }
+  }
+// --- NOVA FUNÇÃO: Gerencia exclusão direto da Agenda ---
+  function handleDeleteFromCalendar(id) {
+      const commitment = commitments.find(c => c.id === id);
+      if (!commitment) return;
+      
+      const dateString = commitment.date.split('T')[0]; // Guarda a data para atualizar a tela depois
+
+      // CASO 1: É vinculado a um Pedido?
+      if (commitment.linkedOrderId) {
+          // Usa a função que criamos antes (que já pede confirmação e apaga os dois)
+          // Nota: Como deleteOrderAndCommitment usa 'confirm', se o usuário cancelar, a execução para lá.
+          // Precisamos verificar se o item ainda existe para saber se atualizamos a tela.
+          deleteOrderAndCommitment(commitment.linkedOrderId);
+      } 
+      // CASO 2: É um agendamento avulso
+      else {
+          deleteItem(commitments, id, 'Compromisso');
+      }
+
+      // Atualiza a visualização do modal da agenda para o item sumir na hora
+      // (Verifica se o item foi realmente deletado antes de atualizar)
+      if (!commitments.find(c => c.id === id)) {
+          renderCalendar(calendarCurrentDate); // Atualiza as bolinhas no calendário de fundo
+          showCommitmentsForDay(dateString);   // Recarrega a lista do dia no modal
+      }
   }
 
   init();
