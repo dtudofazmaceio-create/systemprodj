@@ -1947,12 +1947,13 @@ class="modal-content">
       <div id="view-quote-modal-body"></div>
       <div class="btn-container" style="justify-content: space-between;">
         <div style="display:flex; gap: 10px;">
+          <button type="button" class="btn" id="view-quote-modal-download-btn"><i class="fas fa-download"></i> Baixar PDF</button>
           <button 
-    class="btn btn-primary" 
-    onclick="generatePDFFromElement('orcamentoParaPDF', 'Orçamento do Cliente')" 
->
-    <i class="fas fa-file-pdf"></i> Baixar PDF
-</button>
+          class="btn btn-primary" 
+            onclick="generatePDFFromElement('orcamentoParaPDF', currentOrder.client || 'Orcamento')" 
+           >
+            <i class="fas fa-file-pdf"></i> Baixar PDF
+          </button>
           <button type="button" class="btn btn-success" id="view-quote-modal-approve-btn"><i class="fas fa-check"></i> Aprovar e Converter em Pedido</button>
           <button type="button" class="btn btn-danger" id="view-quote-modal-reject-btn"><i class="fas fa-times"></i> Recusar Orçamento</button>
         </div>
@@ -4078,6 +4079,10 @@ function updateClientsList() {
                 <div class="transaction-actions">
                     ${statusBadge}
                     <button class="btn btn-xs" data-action="view-${item.type}" data-id="${item.id}" title="Visualizar"><i class="fas fa-eye"></i></button>
+                   <div id="orcamentoParaPDF"> 
+                   <div class="modal-body-details">
+                  </div>
+                   </div>
                     <button class="btn btn-xs" data-action="edit-${item.type}" data-id="${item.id}" title="Editar"><i class="fas fa-edit"></i></button>
                     <button class="btn btn-xs btn-danger" data-action="delete-${item.type}" data-id="${item.id}" title="Excluir"><i class="fas fa-trash"></i></button>
                 </div>
@@ -5195,41 +5200,41 @@ function showCommitmentsForDay(dateString) {
   }
   init();
 });
-// --- FUNÇÃO DE GERAÇÃO DE PDF (FIX) ---
-// Transforma o conteúdo de um elemento HTML (div ou tabela) em PDF.
+// --- FUNÇÃO PARA CORRIGIR O BOTÃO DE DOWNLOAD PDF ---
+// Ela tenta transformar em PDF o elemento HTML que você informar (pelo ID).
 function generatePDFFromElement(elementId, orderName = 'Orcamento') {
-    // Verifica se as bibliotecas (jsPDF) estão carregadas
+    // Verifica se as bibliotecas foram carregadas
     if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') {
-        alert("Erro: O sistema de PDF (jsPDF) não está carregado. Verifique os links no <head>.");
+        alert("Erro: As bibliotecas de PDF (jsPDF) não foram carregadas corretamente.");
         return;
     }
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     
-    // 1. Tenta encontrar o elemento HTML
     const element = document.getElementById(elementId);
     if (!element) {
-        alert(`Erro Crítico: O elemento com ID "${elementId}" não foi encontrado. Verifique o ID no Passo 2.`);
+        alert(`Erro: Elemento com ID "${elementId}" não encontrado. Verifique se o ID está correto.`);
         return;
     }
 
-    // 2. Define o título do documento
+    // 1. Título Padrão
     doc.setFontSize(18);
     doc.text(`Detalhes do Orçamento: ${orderName}`, 14, 20);
 
-    // 3. Usa a biblioteca autotable para converter a tabela HTML em PDF
+    // 2. Tenta gerar a tabela automaticamente
+    // Esta parte é otimizada para capturar tabelas HTML.
     doc.autoTable({
         html: `#${elementId}`, // Seleciona o elemento pelo ID
-        startY: 30, // Posição inicial
+        startY: 30,
         styles: { fontSize: 10 },
         headStyles: { fillColor: [106, 17, 203] } // Cor do cabeçalho
     });
 
-    // 4. Salva o arquivo no computador
+    // 3. Salva o arquivo
     doc.save(`${orderName.replace(/ /g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`);
 }
-// ------------------------------------------
+// --------------------------------------------------------
 </script>
 </body>
 </html>
