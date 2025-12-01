@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>Dj Pro Finance</title>
+<title>FinancePro - Controle Financeiro para Eventos</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
@@ -1948,12 +1948,6 @@ class="modal-content">
       <div class="btn-container" style="justify-content: space-between;">
         <div style="display:flex; gap: 10px;">
           <button type="button" class="btn" id="view-quote-modal-download-btn"><i class="fas fa-download"></i> Baixar PDF</button>
-          <button 
-          class="btn btn-primary" 
-            onclick="generatePDFFromElement('orcamentoParaPDF', currentOrder.client || 'Orcamento')" 
-           >
-            <i class="fas fa-file-pdf"></i> Baixar PDF
-          </button>
           <button type="button" class="btn btn-success" id="view-quote-modal-approve-btn"><i class="fas fa-check"></i> Aprovar e Converter em Pedido</button>
           <button type="button" class="btn btn-danger" id="view-quote-modal-reject-btn"><i class="fas fa-times"></i> Recusar Orçamento</button>
         </div>
@@ -5203,4 +5197,3 @@ function showCommitmentsForDay(dateString) {
 </script>
 </body>
 </html>
-
