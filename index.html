@@ -1947,7 +1947,12 @@ class="modal-content">
       <div id="view-quote-modal-body"></div>
       <div class="btn-container" style="justify-content: space-between;">
         <div style="display:flex; gap: 10px;">
-          <button type="button" class="btn" id="view-quote-modal-download-btn"><i class="fas fa-download"></i> Baixar PDF</button>
+          <button 
+    class="btn btn-primary" 
+    onclick="generatePDFFromElement('orcamentoParaPDF', 'Orçamento do Cliente')" 
+>
+    <i class="fas fa-file-pdf"></i> Baixar PDF
+</button>
           <button type="button" class="btn btn-success" id="view-quote-modal-approve-btn"><i class="fas fa-check"></i> Aprovar e Converter em Pedido</button>
           <button type="button" class="btn btn-danger" id="view-quote-modal-reject-btn"><i class="fas fa-times"></i> Recusar Orçamento</button>
         </div>
@@ -5190,6 +5195,41 @@ function showCommitmentsForDay(dateString) {
   }
   init();
 });
+// --- FUNÇÃO DE GERAÇÃO DE PDF (FIX) ---
+// Transforma o conteúdo de um elemento HTML (div ou tabela) em PDF.
+function generatePDFFromElement(elementId, orderName = 'Orcamento') {
+    // Verifica se as bibliotecas (jsPDF) estão carregadas
+    if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') {
+        alert("Erro: O sistema de PDF (jsPDF) não está carregado. Verifique os links no <head>.");
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    // 1. Tenta encontrar o elemento HTML
+    const element = document.getElementById(elementId);
+    if (!element) {
+        alert(`Erro Crítico: O elemento com ID "${elementId}" não foi encontrado. Verifique o ID no Passo 2.`);
+        return;
+    }
+
+    // 2. Define o título do documento
+    doc.setFontSize(18);
+    doc.text(`Detalhes do Orçamento: ${orderName}`, 14, 20);
+
+    // 3. Usa a biblioteca autotable para converter a tabela HTML em PDF
+    doc.autoTable({
+        html: `#${elementId}`, // Seleciona o elemento pelo ID
+        startY: 30, // Posição inicial
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [106, 17, 203] } // Cor do cabeçalho
+    });
+
+    // 4. Salva o arquivo no computador
+    doc.save(`${orderName.replace(/ /g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`);
+}
+// ------------------------------------------
 </script>
 </body>
 </html>
