@@ -1003,6 +1003,10 @@ fa-file-invoice"></i><span>Novo Recibo</span></div>
                     <div class="kpi-card-title">Lucro no Ano</div>
                     <div class="kpi-card-value" id="kpi-ytd-profit">R$ 0,00</div>
                 </div>
+<div class="kpi-card" style="border-left-color: var(--event-blue);"> 
+        <div class="kpi-card-title">Projeção Total (Eventos Futuros)</div>
+        <div class="kpi-card-value" id="kpi-future-projection">R$ 0,00</div> 
+      </div>
                 <div class="kpi-card">
          <div class="kpi-card-title">Margem de Lucro</div>
                     <div class="kpi-card-value" id="kpi-profit-margin">0%</div>
@@ -5098,6 +5102,7 @@ function showCommitmentsForDay(dateString) {
   function updateAnaliseDashboard() {
     const confirmedTxs = transactions.filter(t => t.status === 'confirmada');
     const today = new Date();
+updateProjectionKPI();
     
     const thisYearStart = new Date(today.getFullYear(), 0, 1);
     const ytdTxs = confirmedTxs.filter(t => new Date(t.date + 'T00:00:00') >= thisYearStart);
@@ -5358,6 +5363,47 @@ function showCommitmentsForDay(dateString) {
   }
   init();
 });
+/**
+ * @doc Função que calcula e atualiza o KPI de Projeção de Faturamento Total.
+ * * Soma o valor total de Pedidos de Eventos e Orçamentos Aprovados com data futura,
+ * fornecendo uma visão da receita esperada.
+ */
+function updateProjectionKPI() {
+    const today = new Date().toISOString().split('T')[0];
+    let totalProjection = 0;
+
+    // 1. Processar Pedidos de Eventos (EventOrders)
+    // Considera pedidos com data de evento igual ou posterior a hoje,
+    // e que não estejam 'cancelado' ou 'realizado'.
+    if (typeof eventOrders !== 'undefined') { // Verifica se a lista de pedidos existe
+        eventOrders.forEach(order => {
+            // Verifica data futura/hoje e status não finalizado/cancelado
+            if (order.eventDate >= today && order.status !== 'cancelado' && order.status !== 'realizado') {
+                const value = parseFloat(order.totalValue);
+                if (!isNaN(value)) {
+                    totalProjection += value;
+                }
+            }
+        });
+    }
+
+    // 2. Processar Orçamentos Aprovados (EventQuotes)
+    // Considera orçamentos 'aprovado-orcamento' com data de evento igual ou posterior a hoje.
+    if (typeof eventQuotes !== 'undefined') { // Verifica se a lista de orçamentos existe
+        eventQuotes.forEach(quote => {
+            // O status 'aprovado-orcamento' é uma receita esperada [cite: 2440]
+            if (quote.status === 'aprovado-orcamento' && quote.eventDate >= today) {
+                const value = parseFloat(quote.totalValue);
+                if (!isNaN(value)) {
+                    totalProjection += value;
+                }
+            }
+        });
+    }
+
+    // 3. Atualizar o Elemento HTML com o valor formatado
+    document.getElementById('kpi-future-projection').textContent = formatCurrency(totalProjection);
+}
 </script>
 </body>
 </html>
