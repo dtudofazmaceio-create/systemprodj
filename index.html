@@ -5280,38 +5280,67 @@ function showCommitmentsForDay(dateString) {
           showCommitmentsForDay(dateString);   // Recarrega a lista do dia no modal
       }
   }
-// --- FUNÇÃO DE PROJEÇÃO DE FATURAMENTO ---
+// --- FUNÇÃO DE PROJEÇÃO DE FATURAMENTO (CORRIGIDA) ---
   function updateRevenueProjection() {
     const today = new Date();
     const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
     const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
-    // Filtra transações de RECEITA dentro do mês atual
-    const monthTransactions = transactions.filter(t => {
+    // 1. Calcula o que já está RECEBIDO (Transações Confirmadas)
+    // Filtramos apenas as receitas confirmadas que cairam neste mês
+    const receivedTransactions = transactions.filter(t => {
         const tDate = new Date(t.date + 'T00:00:00');
-        return t.type === 'receita' && tDate >= monthStart && tDate <= monthEnd;
+        return t.type === 'receita' && 
+               (t.status === 'confirmada' || t.status === 'pago') &&
+               tDate >= monthStart && tDate <= monthEnd;
     });
 
-    // Calcula Recebido (Confirmada) vs Pendente
-    const received = monthTransactions
-        .filter(t => t.status === 'confirmada' || t.status === 'pago') // Aceita status antigo 'pago' se houver
-        .reduce((sum, t) => sum + t.amount, 0);
+    let totalReceived = receivedTransactions.reduce((sum, t) => sum + t.amount, 0);
 
-    const pending = monthTransactions
-        .filter(t => t.status === 'pendente')
-        .reduce((sum, t) => sum + t.amount, 0);
+    // 2. Calcula o A RECEBER (Pendentes Manuais + Saldo dos Pedidos)
+    
+    // A) Transações manuais pendentes (ex: uma promessa de pagamento sem pedido vinculado)
+    const pendingTransactions = transactions.filter(t => {
+        const tDate = new Date(t.date + 'T00:00:00');
+        return t.type === 'receita' && 
+               t.status === 'pendente' &&
+               tDate >= monthStart && tDate <= monthEnd;
+    });
+    let totalPending = pendingTransactions.reduce((sum, t) => sum + t.amount, 0);
 
-    const total = received + pending;
+    // B) Saldo restante dos PEDIDOS (Events) agendados para este mês
+    const monthOrders = eventOrders.filter(o => {
+        // Verifica se a data do evento é neste mês
+        const oDate = new Date(o.eventDate + 'T00:00:00');
+        return oDate >= monthStart && oDate <= monthEnd;
+    });
 
-    // Atualiza os textos na tela
-    document.getElementById('proj-received-val').textContent = formatCurrency(received);
-    document.getElementById('proj-pending-val').textContent = formatCurrency(pending);
-    document.getElementById('proj-total-val').textContent = formatCurrency(total);
+    monthOrders.forEach(order => {
+        // Verifica quanto já foi pago deste pedido (soma dos recibos PAGOS vinculados a ele)
+        // Isso evita somar duplicado o que já entrou em "totalReceived"
+        const paidReceipts = receipts.filter(r => r.orderId === order.id && r.status === 'pago');
+        const paidAmount = paidReceipts.reduce((sum, r) => sum + r.amount, 0);
 
-    // Atualiza a barra visual (porcentagem)
-    if (total > 0) {
-        const receivedPct = (received / total) * 100;
-        const pendingPct = (pending / total) * 100;
+        // O saldo é o Valor Total do Pedido menos o que já foi pago
+        const remainingBalance = (order.totalValue || 0) - paidAmount;
+
+        // Se ainda falta receber algo (saldo > 0), soma na previsão
+        if (remainingBalance > 0) {
+            totalPending += remainingBalance;
+        }
+    });
+
+    const grandTotal = totalReceived + totalPending;
+
+    // --- ATUALIZAÇÃO DA TELA (DOM) ---
+    document.getElementById('proj-received-val').textContent = formatCurrency(totalReceived);
+    document.getElementById('proj-pending-val').textContent = formatCurrency(totalPending);
+    document.getElementById('proj-total-val').textContent = formatCurrency(grandTotal);
+
+    // Atualiza a barra visual
+    if (grandTotal > 0) {
+        const receivedPct = (totalReceived / grandTotal) * 100;
+        const pendingPct = (totalPending / grandTotal) * 100;
 
         const barReceived = document.getElementById('proj-bar-received');
         const barPending = document.getElementById('proj-bar-pending');
@@ -5319,7 +5348,7 @@ function showCommitmentsForDay(dateString) {
         barReceived.style.width = `${receivedPct}%`;
         barPending.style.width = `${pendingPct}%`;
         
-        // Mostra % apenas se couber visualmente
+        // Mostra a % apenas se a barra for grande o suficiente
         barReceived.textContent = receivedPct > 10 ? `${receivedPct.toFixed(0)}%` : '';
         barPending.textContent = pendingPct > 10 ? `${pendingPct.toFixed(0)}%` : '';
     } else {
