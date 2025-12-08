@@ -844,6 +844,62 @@
       gap: 0;
     }
   }
+/* === ESTILOS DA PROJEÇÃO === */
+  .projection-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 10px;
+  }
+  .projection-values {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+  .proj-item {
+    text-align: center;
+    flex: 1;
+  }
+  .proj-label {
+    font-size: 0.85rem;
+    color: var(--gray);
+  }
+  .proj-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--dark);
+  }
+  .proj-total {
+    font-size: 1.4rem;
+    color: var(--primary);
+  }
+  .projection-bar-wrapper {
+    width: 100%;
+    height: 20px;
+    background-color: var(--gray-light);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+  }
+  .proj-bar-received {
+    height: 100%;
+    background-color: var(--success);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.75rem;
+  }
+  .proj-bar-pending {
+    height: 100%;
+    background-color: var(--warning); /* Laranja para pendente */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.75rem;
+  }
 
 </style>
 </head>
@@ -914,6 +970,35 @@ fa-file-invoice"></i><span>Novo Recibo</span></div>
                     <div class="kpi-card-title">Faturamento no Ano</div>
                     <div class="kpi-card-value" id="kpi-ytd-revenue">R$ 0,00</div>
                 </div>
+<div class="card">
+            <h2 class="section-title">Projeção de Faturamento (Mês Atual)</h2>
+            <div class="projection-container">
+                
+                <div class="projection-values">
+                    <div class="proj-item">
+                        <div class="proj-label">Já Recebido</div>
+                        <div class="proj-value" style="color: var(--success);" id="proj-received-val">R$ 0,00</div>
+                    </div>
+                    <div class="proj-item">
+                        <div class="proj-label">A Receber (Agendado)</div>
+                        <div class="proj-value" style="color: var(--warning);" id="proj-pending-val">R$ 0,00</div>
+                    </div>
+                    <div class="proj-item">
+                        <div class="proj-label">Previsão Total</div>
+                        <div class="proj-value proj-total" id="proj-total-val">R$ 0,00</div>
+                    </div>
+                </div>
+
+                <div class="projection-bar-wrapper">
+                    <div id="proj-bar-received" class="proj-bar-received" style="width: 0%"></div>
+                    <div id="proj-bar-pending" class="proj-bar-pending" style="width: 0%"></div>
+                </div>
+                
+                <p style="font-size: 0.8rem; color: var(--gray); text-align: center; margin-top: 5px;">
+                    * Baseado nas receitas confirmadas e pendentes deste mês.
+                </p>
+            </div>
+        </div>
          <div class="kpi-card">
                     <div class="kpi-card-title">Lucro no Ano</div>
                     <div class="kpi-card-value" id="kpi-ytd-profit">R$ 0,00</div>
@@ -2029,7 +2114,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (tabId === 'relatorios') updateAllCharts();
-    if (tabId === 'analise') updateAnaliseDashboard();
+    if (tabId === 'analise') {
+    updateAnaliseDashboard();
+    updateRevenueProjection(); // <--- Adicionamos esta chamada
+}
     if (tabId === 'Agenda') renderCalendar(calendarCurrentDate);
     if (tabId === 'documentos' || tabId === 'usuario') {
       document.getElementById('contract-company-name').textContent = userInfo.name || 'Sua Empresa de Eventos';
@@ -5191,6 +5279,53 @@ function showCommitmentsForDay(dateString) {
           renderCalendar(calendarCurrentDate); // Atualiza as bolinhas no calendário de fundo
           showCommitmentsForDay(dateString);   // Recarrega a lista do dia no modal
       }
+  }
+// --- FUNÇÃO DE PROJEÇÃO DE FATURAMENTO ---
+  function updateRevenueProjection() {
+    const today = new Date();
+    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+    // Filtra transações de RECEITA dentro do mês atual
+    const monthTransactions = transactions.filter(t => {
+        const tDate = new Date(t.date + 'T00:00:00');
+        return t.type === 'receita' && tDate >= monthStart && tDate <= monthEnd;
+    });
+
+    // Calcula Recebido (Confirmada) vs Pendente
+    const received = monthTransactions
+        .filter(t => t.status === 'confirmada' || t.status === 'pago') // Aceita status antigo 'pago' se houver
+        .reduce((sum, t) => sum + t.amount, 0);
+
+    const pending = monthTransactions
+        .filter(t => t.status === 'pendente')
+        .reduce((sum, t) => sum + t.amount, 0);
+
+    const total = received + pending;
+
+    // Atualiza os textos na tela
+    document.getElementById('proj-received-val').textContent = formatCurrency(received);
+    document.getElementById('proj-pending-val').textContent = formatCurrency(pending);
+    document.getElementById('proj-total-val').textContent = formatCurrency(total);
+
+    // Atualiza a barra visual (porcentagem)
+    if (total > 0) {
+        const receivedPct = (received / total) * 100;
+        const pendingPct = (pending / total) * 100;
+
+        const barReceived = document.getElementById('proj-bar-received');
+        const barPending = document.getElementById('proj-bar-pending');
+
+        barReceived.style.width = `${receivedPct}%`;
+        barPending.style.width = `${pendingPct}%`;
+        
+        // Mostra % apenas se couber visualmente
+        barReceived.textContent = receivedPct > 10 ? `${receivedPct.toFixed(0)}%` : '';
+        barPending.textContent = pendingPct > 10 ? `${pendingPct.toFixed(0)}%` : '';
+    } else {
+        document.getElementById('proj-bar-received').style.width = '0%';
+        document.getElementById('proj-bar-pending').style.width = '0%';
+    }
   }
   init();
 });
