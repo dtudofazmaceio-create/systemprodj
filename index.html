@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -904,6 +905,49 @@
     font-size: 0.75rem;
   }
 
+
+  /* ================================== */
+  /* PACOTES */
+  /* ================================== */
+  .package-card { border-left-color: var(--event-teal); }
+  .package-card::before { background: var(--event-teal); }
+
+  /* ================================== */
+  /* CLAUSE EDITOR */
+  /* ================================== */
+  #clause-editor-modal .modal-content { max-width: 750px; }
+  .clause-editor-item { margin-bottom: 18px; }
+  .clause-editor-item label {
+    display: block; font-weight: 600; color: var(--primary);
+    margin-bottom: 6px; font-size: 0.95rem;
+  }
+  .clause-editor-item textarea {
+    width: 100%; padding: 10px; border: 1px solid var(--gray-light);
+    border-radius: 8px; font-family: inherit; font-size: 0.9rem;
+    resize: vertical; min-height: 80px; line-height: 1.5;
+  }
+  .clause-editor-item textarea:focus {
+    outline: none; border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(106,17,203,0.15);
+  }
+  .clause-editor-info {
+    background: rgba(106,17,203,0.07); border-radius: 8px;
+    padding: 12px 15px; margin-bottom: 18px; font-size: 0.88rem;
+    color: var(--dark); border-left: 4px solid var(--primary);
+  }
+  /* KPI grid fix */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 15px; }
+  .kpi-card { background: var(--light-gray-bg); border-radius: 10px; padding: 15px; text-align: center; border: 1px solid var(--gray-light); }
+  .kpi-card-title { font-size: 0.85rem; color: var(--gray); margin-bottom: 5px; }
+  .kpi-card-value { font-size: 1.3rem; font-weight: 700; color: var(--primary); }
+  /* comparison grid */
+  .comparison-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+  .comparison-item { background: var(--light-gray-bg); border-radius: 10px; padding: 15px; border: 1px solid var(--gray-light); }
+  .comparison-item h3 { font-size: 0.9rem; color: var(--dark); margin-bottom: 8px; }
+  .top-list { list-style: none; padding: 0; }
+  .top-list li { padding: 6px 0; border-bottom: 1px solid var(--gray-light); font-size: 0.9rem; display: flex; justify-content: space-between; }
+  .top-list li:last-child { border-bottom: none; }
+
 </style>
 </head>
 <body>
@@ -928,6 +972,7 @@
         <div class="feature-item" data-tab-target="recibos"><i class="fas fa-file-invoice"></i><span>Recibos</span></div>
         <div class="feature-item" data-tab-target="clientes"><i class="fas fa-users"></i><span>Clientes</span></div>
         <div class="feature-item" data-tab-target="Agenda"><i class="fas fa-calendar-alt"></i><span>Agenda</span></div>
+        <div class="feature-item" data-tab-target="pacotes"><i class="fas fa-box-open"></i><span>Pacotes</span></div>
       </div>
 
       <div class="notifications-container" id="notifications-container">
@@ -950,6 +995,7 @@ fa-file-invoice"></i><span>Novo Recibo</span></div>
             <div class="shortcut-item" id="add-new-commitment-btn"><i class="fas fa-handshake"></i><span>Novo Compromisso</span></div>
             <div class="shortcut-item" data-tab-target="documentos"><i class="fas fa-file-alt"></i><span>Gerar Documentos</span></div>
             <div class="shortcut-item" data-tab-target="pedidos"><i class="fas fa-clipboard-check"></i><span>Pedidos e Orçamentos</span></div>
+            <div class="shortcut-item" data-tab-target="pacotes"><i class="fas fa-box-open"></i><span>Pacotes</span></div>
         </div>
       </div>
       
@@ -1465,6 +1511,16 @@ fa-download"></i> Baixar Pedido</button>
         </div>
       </div>
     </div>
+
+    <div class="tab-content" id="pacotes-content">
+      <div class="card">
+        <h2><i class="fas fa-box-open"></i> Pacotes de Serviços</h2>
+        <p style="color:var(--gray); margin-bottom:15px; font-size:0.9rem;">Cadastre pacotes de serviços para usar rapidamente ao criar pedidos e orçamentos.</p>
+        <button class="btn" style="margin-bottom:15px;" id="add-new-package-btn"><i class="fas fa-plus"></i> Novo Pacote</button>
+        <div id="packages-list" class="transactions-list-container"></div>
+      </div>
+    </div>
+
   </main>
   
   <nav class="bottom-nav">
@@ -1925,6 +1981,12 @@ class="modal-content">
         
         <div class="form-group">
           <label>Serviços</label>
+          <div style="margin-bottom:8px;">
+            <label style="font-size:0.85rem; color:var(--gray);">Carregar Pacote:</label>
+            <select id="order-load-package" style="padding:6px 10px; border:1px solid var(--gray-light); border-radius:6px; font-family:inherit; width:100%;">
+              <option value="">-- Selecione um pacote (opcional) --</option>
+            </select>
+          </div>
           <div id="order-services-container">
             </div>
           <button type="button" class="btn btn-xs" id="add-service-btn" style="margin-top: 5px;"><i class="fas fa-plus"></i> Adicionar Serviço</button>
@@ -1989,6 +2051,12 @@ class="modal-content">
         </div>
         <div class="form-group">
           <label>Serviços</label>
+          <div style="margin-bottom:8px;">
+            <label style="font-size:0.85rem; color:var(--gray);">Carregar Pacote:</label>
+            <select id="quote-load-package" style="padding:6px 10px; border:1px solid var(--gray-light); border-radius:6px; font-family:inherit; width:100%;">
+              <option value="">-- Selecione um pacote (opcional) --</option>
+            </select>
+          </div>
           <div id="quote-services-container"></div>
           <button type="button" class="btn btn-xs" id="add-service-quote-btn" style="margin-top: 5px;"><i class="fas fa-plus"></i> Adicionar Serviço</button>
         </div>
@@ -2062,6 +2130,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let eventOrders = parseLocalStorage('eventOrders', []);
   // NOVO RECURSO: Orçamentos
   let eventQuotes = parseLocalStorage('eventQuotes', []);
+  let packages = parseLocalStorage('packages', []);
   let calendarCurrentDate = new Date();
   let userLogo = parseLocalStorage('userLogo', null);
   let activeModalCallback = null; // NOVO - Variável para guardar o callback
@@ -2072,7 +2141,8 @@ document.addEventListener('DOMContentLoaded', () => {
     metas: 'Metas', cartoes: 'Cartões', relatorios: 'Relatórios',
     usuario: 'Perfil', backup: 'Backup',
     recibos: 'Recibos', clientes: 'Clientes', Agenda: 'Agenda',
-    documentos: 'Gerar Documentos', analise: 'Análise de Negócio', pedidos: 'Pedidos e Orçamentos'
+    documentos: 'Gerar Documentos', analise: 'Análise de Negócio', pedidos: 'Pedidos e Orçamentos',
+    pacotes: 'Pacotes de Serviços'
   };
   let activeFilters = {
     search: '',
@@ -2231,7 +2301,7 @@ document.getElementById('add-client-from-contract-btn').addEventListener('click'
     });
 });
 
-    document.getElementById('download-dj-contract').addEventListener('click', downloadDJContractAsPDF);
+    document.getElementById('download-dj-contract').addEventListener('click', () => openClauseEditor('contract', null));
     document.getElementById('download-event-order').addEventListener('click', downloadEventOrderAsPDF);
     document.getElementById('download-event-quote').addEventListener('click', downloadEventQuoteAsPDF);
 
@@ -2273,18 +2343,28 @@ document.getElementById('add-client-from-contract-btn').addEventListener('click'
             document.getElementById('logo-preview').src = '#';
         }
     });
-    document.getElementById('export-backup-btn').addEventListener('click', exportBackup);
+    // Package listeners
+    document.getElementById('add-new-package-btn').addEventListener('click', () => openPackageModal('new'));
+    document.getElementById('package-form').addEventListener('submit', handlePackageSubmit);
+    document.getElementById('add-package-service-btn').addEventListener('click', () => addPackageServiceItem());
+    document.getElementById('order-load-package').addEventListener('change', (e) => loadPackageToForm('order', e.target.value));
+    document.getElementById('quote-load-package').addEventListener('change', (e) => loadPackageToForm('quote', e.target.value));
+    // Clause editor listeners
+    document.getElementById('close-clause-editor').addEventListener('click', () => document.getElementById('clause-editor-modal').classList.remove('active'));
+    document.getElementById('cancel-clause-editor').addEventListener('click', () => document.getElementById('clause-editor-modal').classList.remove('active'));
+    document.getElementById('confirm-clause-editor').addEventListener('click', executeClauseEditorDownload);
+        document.getElementById('export-backup-btn').addEventListener('click', exportBackup);
     document.getElementById('import-trigger-btn').addEventListener('click', () => document.getElementById('import-backup-input').click());
     document.getElementById('import-backup-input').addEventListener('change', importBackup);
     
     document.getElementById('view-order-modal-download-btn').addEventListener('click', (e) => {
       const orderId = e.target.dataset.id;
-      if (orderId) downloadExistingOrderAsPDF(parseFloat(orderId));
+      if (orderId) openClauseEditor('order', parseFloat(orderId));
     });
     // NOVO RECURSO: Botões de ação no modal de visualização de orçamento
     document.getElementById('view-quote-modal-download-btn').addEventListener('click', (e) => {
         const quoteId = e.target.dataset.id;
-        if (quoteId) downloadExistingQuoteAsPDF(parseFloat(quoteId));
+        if (quoteId) openClauseEditor('quote', parseFloat(quoteId));
     });
     document.getElementById('view-quote-modal-approve-btn').addEventListener('click', (e) => {
         const quoteId = e.target.dataset.id;
@@ -2399,6 +2479,8 @@ document.getElementById('add-client-from-contract-btn').addEventListener('click'
             'edit-quote': () => openEventQuoteModal('edit', id),
             'view-quote': () => openViewQuoteModal(id),
             'approve-quote': () => convertQuoteToOrder(id),
+            'delete-package': () => deleteItem(packages, id, 'Pacote'),
+            'edit-package': () => openPackageModal('edit', id),
         };
         if(actions[action]) actions[action]();
     });
@@ -2473,6 +2555,7 @@ document.getElementById('add-client-from-contract-btn').addEventListener('click'
         localStorage.setItem('eventOrders', JSON.stringify(eventOrders));
         // NOVO RECURSO: Orçamentos
         localStorage.setItem('eventQuotes', JSON.stringify(eventQuotes));
+        localStorage.setItem('packages', JSON.stringify(packages));
         localStorage.setItem('userLogo', JSON.stringify(userLogo));
     } catch (e) {
         if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
@@ -3379,6 +3462,7 @@ function openCommitmentModal(mode, id = null, date = null) {
 
   const servicesContainer = document.getElementById('order-services-container');
   servicesContainer.innerHTML = '';
+  populatePackageSelects();
 
   if (mode === 'edit' && id) {
       const order = eventOrders.find(o => o.id === id);
@@ -3437,6 +3521,7 @@ function openCommitmentModal(mode, id = null, date = null) {
 
   const servicesContainer = document.getElementById('quote-services-container');
   servicesContainer.innerHTML = '';
+  populatePackageSelects();
 
   if (mode === 'edit' && id) {
     const quote = eventQuotes.find(q => q.id === id);
@@ -3687,6 +3772,7 @@ function openCommitmentModal(mode, id = null, date = null) {
     updateClientsList();
     updateCommitmentsList();
     updateOrdersList();
+    updatePackagesList();
   }
 
   function recalculateAllBalances() {
@@ -4485,7 +4571,7 @@ function updateClientsList() {
     doc.setFont(undefined, 'normal');
     doc.setTextColor('#333333');
     doc.text(doc.splitTextToSize(data.paymentTerms, doc.internal.pageSize.width - 30), 15, startY);
-    startY = doc.autoTable.previous.finalY > startY ? doc.autoTable.previous.finalY + 15 : startY + 15;
+    startY = doc.lastAutoTable ? (doc.lastAutoTable.finalY > startY ? doc.lastAutoTable.finalY + 15 : startY + 15) : startY + 15;
 
     doc.setFontSize(12);
     doc.setFont(undefined, 'bold');
@@ -4500,9 +4586,15 @@ function updateClientsList() {
     doc.save(`Pedido_${data.orderNumber}_${data.clientName.replace(/\s/g, '_')}.pdf`);
   }
 
-  // NOVO RECURSO: Função para baixar o Orçamento em PDF
+  // Função para baixar orçamento existente por ID (chamada do modal de visualização)
+  function downloadExistingQuoteAsPDF(quoteId) {
+    openClauseEditor('quote', quoteId);
+  }
+
+  // Função de download de orçamento (template baseado em DOM - não usada no fluxo atual)
   function downloadEventQuoteAsPDF(quoteId) {
-    const quote = eventQuotes.find(q => q.id === quoteId);
+    const realId = typeof quoteId === 'number' ? quoteId : null;
+    const quote = realId ? eventQuotes.find(q => q.id === realId) : null;
     if (!quote) return;
     const client = clients.find(c => c.id === quote.clientId) || {};
     const { jsPDF } = window.jspdf;
@@ -4569,8 +4661,10 @@ function updateClientsList() {
     doc.setFontSize(10);
     doc.setFont(undefined, 'normal');
     doc.setTextColor('#333333');
-    doc.text(doc.splitTextToSize(`Este orçamento é válido por ${quote.validity} dias a partir da data de emissão (${formatDate(quote.emissionDate)}). O valor está sujeito a alterações após este período. A contratação do serviço se dará mediante a assinatura de contrato e/ou pagamento de sinal.`, doc.internal.pageSize.width - 30), 15, startY);
-    startY += doc.splitTextToSize(doc.text, doc.internal.pageSize.width - 30).length * 5 + 10;
+    const condText = `Este orçamento é válido por ${quote.validity} dias a partir da data de emissão (${formatDate(quote.emissionDate)}). O valor está sujeito a alterações após este período. A contratação do serviço se dará mediante a assinatura de contrato e/ou pagamento de sinal.`;
+    const condLines = doc.splitTextToSize(condText, doc.internal.pageSize.width - 30);
+    doc.text(condLines, 15, startY);
+    startY += condLines.length * 5 + 10;
     
     doc.setFontSize(10);
     doc.setFont(undefined, 'bold');
@@ -4904,7 +4998,7 @@ function updateCommitmentOrderSelector(clientId) {
   }
   
   function exportBackup() {
-    const data = { accounts, transactions, goals, creditcards, userInfo, categories, receipts, clients, commitments, eventOrders, eventQuotes, userLogo };
+    const data = { accounts, transactions, goals, creditcards, userInfo, categories, receipts, clients, commitments, eventOrders, eventQuotes, userLogo, packages };
     const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -4932,7 +5026,8 @@ function updateCommitmentOrderSelector(clientId) {
           clients = data.clients || [];
           commitments = data.commitments || [];
           eventOrders = data.eventOrders || []; 
-          eventQuotes = data.eventQuotes || []; // NOVO
+          eventQuotes = data.eventQuotes || [];
+          packages = data.packages || []; // NOVO
           userLogo = data.userLogo || null;
           saveData();
           updateUI();
@@ -5360,9 +5455,465 @@ function showCommitmentsForDay(dateString) {
         document.getElementById('proj-bar-pending').style.width = '0%';
     }
   }
+
+  // ===================================================
+  // PACOTES - Package Management Functions
+  // ===================================================
+
+  function openPackageModal(mode, id = null) {
+    const modal = document.getElementById('package-modal');
+    const form = modal.querySelector('#package-form');
+    form.reset();
+    document.getElementById('edit-package-id').value = '';
+    modal.querySelector('#package-modal-title').textContent = 'Novo Pacote';
+    const container = document.getElementById('package-services-container');
+    container.innerHTML = '';
+
+    if (mode === 'edit' && id) {
+      const pkg = packages.find(p => p.id === id);
+      if (pkg) {
+        modal.querySelector('#package-modal-title').textContent = 'Editar Pacote';
+        document.getElementById('edit-package-id').value = pkg.id;
+        document.getElementById('package-name').value = pkg.name;
+        document.getElementById('package-description').value = pkg.description || '';
+        (pkg.services || []).forEach(s => addPackageServiceItem(s.description, s.value));
+      }
+    } else {
+      addPackageServiceItem();
+    }
+    modal.classList.add('active');
+  }
+
+  function addPackageServiceItem(desc = '', value = '') {
+    const container = document.getElementById('package-services-container');
+    const item = document.createElement('div');
+    item.className = 'order-service-item';
+    item.style.cssText = 'display:flex; gap:10px; margin-bottom:10px;';
+    item.innerHTML = `
+      <input type="text" placeholder="Descrição do serviço" class="order-service-desc" style="flex:2;" value="${desc}">
+      <input type="number" placeholder="Valor (R$)" step="0.01" min="0" class="order-service-value" style="flex:1;" value="${value}">
+      <button type="button" class="btn btn-xs btn-danger" data-action="remove-service"><i class="fas fa-times"></i></button>
+    `;
+    container.appendChild(item);
+  }
+
+  function handlePackageSubmit(e) {
+    e.preventDefault();
+    const id = document.getElementById('edit-package-id').value;
+    const services = [];
+    let totalValue = 0;
+    document.querySelectorAll('#package-services-container .order-service-item').forEach(item => {
+      const desc = item.querySelector('.order-service-desc').value.trim();
+      const val = parseFloat(item.querySelector('.order-service-value').value) || 0;
+      if (desc) { services.push({ description: desc, value: val }); totalValue += val; }
+    });
+    const data = {
+      name: document.getElementById('package-name').value,
+      description: document.getElementById('package-description').value,
+      services: services,
+      totalValue: totalValue,
+    };
+    if (id) {
+      const idx = packages.findIndex(p => p.id === parseFloat(id));
+      if (idx > -1) packages[idx] = { ...packages[idx], ...data };
+    } else {
+      packages.push({ ...data, id: Date.now() });
+    }
+    saveData();
+    updateUI();
+    document.getElementById('package-modal').classList.remove('active');
+  }
+
+  function updatePackagesList() {
+    const list = document.getElementById('packages-list');
+    if (!list) return;
+    list.innerHTML = '';
+    if (packages.length === 0) {
+      list.innerHTML = `<div style="text-align:center; padding:30px; color:var(--gray);"><i class="fas fa-box-open" style="font-size:3rem; margin-bottom:15px;"></i><p>Nenhum pacote cadastrado. Crie pacotes para agilizar seus orçamentos!</p></div>`;
+      return;
+    }
+    packages.sort((a, b) => a.name.localeCompare(b.name)).forEach(pkg => {
+      const card = document.createElement('div');
+      card.className = 'package-card transaction-card';
+      card.innerHTML = `
+        <div class="transaction-header">
+          <span class="category-badge"><i class="fas fa-box-open"></i> Pacote</span>
+          <span class="transaction-value" style="color:var(--event-teal);">${formatCurrency(pkg.totalValue)}</span>
+        </div>
+        <div class="transaction-body">
+          <span class="transaction-favorecido">${pkg.name}</span>
+          ${pkg.description ? `<span class="transaction-details">${pkg.description}</span>` : ''}
+          <div style="margin-top:8px; font-size:0.85rem; color:var(--gray);">
+            ${(pkg.services || []).map(s => `<div>• ${s.description}: ${formatCurrency(s.value)}</div>`).join('')}
+          </div>
+        </div>
+        <div class="transaction-footer">
+          <span></span>
+          <div class="transaction-actions">
+            <button class="btn btn-xs" data-action="edit-package" data-id="${pkg.id}"><i class="fas fa-edit"></i></button>
+            <button class="btn btn-xs btn-danger" data-action="delete-package" data-id="${pkg.id}"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>`;
+      list.appendChild(card);
+    });
+  }
+
+  function populatePackageSelects() {
+    ['order-load-package', 'quote-load-package'].forEach(selectId => {
+      const sel = document.getElementById(selectId);
+      if (!sel) return;
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">-- Selecione um pacote (opcional) --</option>';
+      packages.forEach(p => sel.add(new Option(`${p.name} (${formatCurrency(p.totalValue)})`, p.id)));
+      if (cur) sel.value = cur;
+    });
+  }
+
+  function loadPackageToForm(type, packageId) {
+    if (!packageId) return;
+    const pkg = packages.find(p => p.id === parseFloat(packageId));
+    if (!pkg) return;
+    const containerId = type === 'order' ? 'order-services-container' : 'quote-services-container';
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    (pkg.services || []).forEach(s => addServiceItem(type, s.description, s.value));
+    // Reset selector
+    const selId = type === 'order' ? 'order-load-package' : 'quote-load-package';
+    setTimeout(() => { const sel = document.getElementById(selId); if(sel) sel.value = ''; }, 100);
+  }
+
+  // ===================================================
+  // CLAUSE EDITOR - Edit clauses before PDF generation
+  // ===================================================
+
+  let clauseEditorCallback = null;
+
+  function openClauseEditor(type, id) {
+    const modal = document.getElementById('clause-editor-modal');
+    const body = document.getElementById('clause-editor-body');
+    body.innerHTML = '';
+    clauseEditorCallback = null;
+
+    if (type === 'order') {
+      const order = eventOrders.find(o => o.id === id);
+      if (!order) { alert('Pedido não encontrado!'); return; }
+      const client = clients.find(c => c.id === order.clientId) || {};
+      const clauseData = [
+        { id: 'c_payment', label: 'Condições de Pagamento', value: order.paymentTerms || '' },
+        { id: 'c_notes', label: 'Observações', value: order.notes || '' },
+      ];
+      renderClauseFields(body, clauseData);
+      clauseEditorCallback = () => {
+        const paymentTerms = document.getElementById('c_payment').value;
+        const notes = document.getElementById('c_notes').value;
+        const editedOrder = { ...order, paymentTerms, notes };
+        const cl = clients.find(c => c.id === editedOrder.clientId) || {};
+        const orderPdfData = {
+          clientName: cl.name || 'N/A', clientDoc: cl.document || 'N/A',
+          clientPhone: cl.phone || 'N/A', clientEmail: cl.email || 'N/A',
+          eventType: editedOrder.eventType, eventDate: formatDate(editedOrder.eventDate),
+          eventTime: editedOrder.eventTime, eventLocation: editedOrder.eventLocation,
+          eventGuests: editedOrder.eventGuests,
+          services: editedOrder.services.map((s, i) => [i + 1, s.description, formatCurrency(s.value)]),
+          totalValue: formatCurrency(editedOrder.totalValue),
+          paymentTerms: paymentTerms, notes: notes, orderNumber: editedOrder.orderNumber,
+        };
+        modal.classList.remove('active');
+        generateOrderPdf(orderPdfData);
+      };
+
+    } else if (type === 'quote') {
+      const quote = eventQuotes.find(q => q.id === id);
+      if (!quote) { alert('Orçamento não encontrado!'); return; }
+      const clauseData = [
+        { id: 'c_validity_note', label: 'Condições Gerais / Validade', value: `Este orçamento é válido por ${quote.validity} dias a partir da data de emissão (${formatDate(quote.emissionDate)}). O valor está sujeito a alterações após este período. A contratação do serviço se dará mediante a assinatura de contrato e/ou pagamento de sinal.` },
+        { id: 'c_notes', label: 'Observações', value: quote.notes || '' },
+      ];
+      renderClauseFields(body, clauseData);
+      clauseEditorCallback = () => {
+        const validityNote = document.getElementById('c_validity_note').value;
+        const notes = document.getElementById('c_notes').value;
+        const editedQuote = { ...quote, notes };
+        modal.classList.remove('active');
+        generateQuotePdf(editedQuote, validityNote, notes);
+      };
+
+    } else if (type === 'contract') {
+      // Read from the contract FORM inputs (modal is still open)
+      const getInput = (inputId) => {
+        const el = document.getElementById(inputId);
+        return el ? (el.value || el.textContent || '') : '';
+      };
+      const clientSel = document.getElementById('contract-client-select');
+      const selectedClientId = clientSel ? parseFloat(clientSel.value) : null;
+      const contractClient = clients.find(c => c.id === selectedClientId) || {};
+      const contractLocation = getInput('contract-event-location-input');
+      const contractDate = getInput('contract-event-date-input') ? formatDate(getInput('contract-event-date-input')) : '';
+      const contractStart = getInput('contract-event-start-input');
+      const contractEnd = getInput('contract-event-end-input');
+      const contractValue = getInput('contract-total-value-input');
+      const contractValueFormatted = contractValue ? formatCurrency(parseFloat(contractValue)) : '';
+      const contractValueWords = contractValue ? numberToWords(parseFloat(contractValue)) : '';
+      const pay1 = getInput('contract-payment-1-input');
+      const pay2 = getInput('contract-payment-2-input');
+      const pay3 = getInput('contract-payment-3-input');
+      const legalPlace = getInput('contract-legal-place-input');
+
+      const clauseData = [
+        { id: 'c_object', label: 'Cláusula 1ª - Do Objeto', value: `Prestação de serviços de Disc Jockey (DJ) para o evento em ${contractLocation}, no dia ${contractDate}, das ${contractStart} às ${contractEnd}.` },
+        { id: 'c_obligations_dj', label: 'Cláusula 2ª - Obrigações do Contratado', value: 'O DJ se compromete a:\n• Fornecer equipamentos contratados e compatíveis com o porte do evento;\n• Comparecer ao local com antecedência para montagem e testes;\n• Executar o repertório musical alinhado previamente com o CONTRATANTE;\n• Manter conduta profissional e zelar pela qualidade técnica da apresentação.' },
+        { id: 'c_obligations_client', label: 'Cláusula 3ª - Obrigações do Contratante', value: 'O CONTRATANTE se compromete a:\n• Disponibilizar local seguro e protegido de intempéries para a montagem dos equipamentos;\n• Garantir ponto de energia elétrica estável e exclusivo para os equipamentos do DJ;\n• Efetuar o pagamento do valor acordado na forma e prazos definidos na Cláusula 4ª.' },
+        { id: 'c_payment', label: 'Cláusula 4ª - Do Valor e Pagamento', value: `O valor total dos serviços é de ${contractValueFormatted} (${contractValueWords}), pago da seguinte forma: ${pay1}% na assinatura, ${pay2}% até 7 dias antes do evento, e ${pay3}% no dia do evento.` },
+        { id: 'c_rescission', label: 'Cláusula 5ª - Da Rescisão', value: 'Em caso de cancelamento pelo CONTRATANTE, a multa será de 50% do valor total se cancelado com menos de 30 dias de antecedência. O não comparecimento injustificado do CONTRATADO implicará na devolução integral dos valores pagos, acrescido de multa de 50%.' },
+        { id: 'c_forum', label: 'Cláusula 6ª - Do Foro', value: `Fica eleito o foro da comarca de ${legalPlace} para dirimir quaisquer litígios oriundos deste contrato.` },
+      ];
+      renderClauseFields(body, clauseData);
+      // Capture current values for the PDF callback
+      const capturedClientName = contractClient.name || getInput('contract-client-name') || 'N/A';
+      const capturedClientDoc = contractClient.document || '';
+      const capturedClientAddress = contractClient.address || '';
+      clauseEditorCallback = () => {
+        const editedClauses = {
+          object: document.getElementById('c_object').value,
+          obligationsDJ: document.getElementById('c_obligations_dj').value,
+          obligationsClient: document.getElementById('c_obligations_client').value,
+          payment: document.getElementById('c_payment').value,
+          rescission: document.getElementById('c_rescission').value,
+          forum: document.getElementById('c_forum').value,
+          clientName: capturedClientName,
+          clientDoc: capturedClientDoc,
+          clientAddress: capturedClientAddress,
+          companyName: userInfo.name || 'Prestador de Serviços',
+          companyCpf: userInfo.cpf || '',
+        };
+        modal.classList.remove('active');
+        downloadDJContractWithClauses(editedClauses);
+      };
+      // Close the DJ contract modal first
+      document.getElementById('dj-contract-modal').classList.remove('active');
+    }
+
+    modal.classList.add('active');
+  }
+
+  function renderClauseFields(container, clauseData) {
+    clauseData.forEach(c => {
+      const div = document.createElement('div');
+      div.className = 'clause-editor-item';
+      div.innerHTML = `<label for="${c.id}">${c.label}</label><textarea id="${c.id}" rows="4">${c.value}</textarea>`;
+      container.appendChild(div);
+    });
+  }
+
+  function executeClauseEditorDownload() {
+    if (clauseEditorCallback) clauseEditorCallback();
+  }
+
+  // ===================================================
+  // PDF GENERATION - Improved and Fixed Functions
+  // ===================================================
+
+  function generateQuotePdf(quote, validityNote, notes) {
+    const client = clients.find(c => c.id === quote.clientId) || {};
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const primaryColor = '#6a11cb';
+
+    let { startY } = addModernDocLayout(doc, `ORÇAMENTO DE SERVIÇOS Nº ${quote.quoteNumber}`);
+
+    const drawInfoSection = (title, info, initialY) => {
+      let currentY = initialY;
+      doc.setFontSize(12); doc.setFont(undefined, 'bold');
+      doc.setTextColor(primaryColor); doc.text(title, 15, currentY); currentY += 7;
+      doc.setFontSize(10); doc.setFont(undefined, 'normal'); doc.setTextColor('#333333');
+      info.forEach(item => {
+        doc.setFont(undefined, 'bold'); doc.text(`${item.label}:`, 20, currentY);
+        doc.setFont(undefined, 'normal');
+        const valueLines = doc.splitTextToSize(String(item.value || 'N/A'), 130);
+        doc.text(valueLines, 55, currentY); currentY += (valueLines.length * 5) + 1;
+      });
+      return currentY + 6;
+    };
+
+    startY = drawInfoSection("DADOS DO CLIENTE", [
+      { label: 'Cliente', value: client.name || 'N/A' },
+      { label: 'Contato', value: `${client.phone || 'N/A'} | ${client.email || 'N/A'}` },
+    ], startY);
+
+    startY = drawInfoSection("DETALHES DO EVENTO", [
+      { label: 'Evento', value: quote.eventType },
+      { label: 'Data/Hora', value: `${formatDate(quote.eventDate)} - ${quote.eventTime || ''}` },
+      { label: 'Local', value: quote.eventLocation },
+    ], startY);
+
+    const tableData = (quote.services || []).map(s => [s.description, formatCurrency(s.value)]);
+    const totalValue = (quote.services || []).reduce((sum, s) => sum + s.value, 0);
+
+    doc.autoTable({
+      startY: startY,
+      head: [['Descrição do Serviço', 'Valor']],
+      body: tableData,
+      foot: [['TOTAL', formatCurrency(totalValue)]],
+      theme: 'grid',
+      headStyles: { fillColor: primaryColor, textColor: '#FFFFFF', fontStyle: 'bold' },
+      footStyles: { fillColor: '#F5F5F5', textColor: '#000000', fontStyle: 'bold', halign: 'right' },
+      margin: { left: 15, right: 15 },
+    });
+    startY = doc.lastAutoTable.finalY + 10;
+
+    doc.setFontSize(12); doc.setFont(undefined, 'bold');
+    doc.setTextColor(primaryColor); doc.text("CONDIÇÕES GERAIS", 15, startY);
+    startY += 6;
+    doc.setFontSize(10); doc.setFont(undefined, 'normal'); doc.setTextColor('#333333');
+    const condLines = doc.splitTextToSize(validityNote, doc.internal.pageSize.width - 30);
+    doc.text(condLines, 15, startY);
+    startY += condLines.length * 5 + 10;
+
+    if (notes) {
+      doc.setFontSize(10); doc.setFont(undefined, 'bold');
+      doc.text("Observações:", 15, startY); startY += 6;
+      doc.setFont(undefined, 'normal');
+      const noteLines = doc.splitTextToSize(notes, doc.internal.pageSize.width - 30);
+      doc.text(noteLines, 15, startY);
+    }
+
+    const clientNameSafe = (client.name || 'cliente').replace(/[^a-zA-Z0-9]/g, '_');
+    doc.save(`Orcamento_${quote.quoteNumber}_${clientNameSafe}.pdf`);
+  }
+
+  function downloadDJContractWithClauses(clauses) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'pt', 'a4');
+    const primaryColor = '#6a11cb';
+    const margin = 40;
+    const pageWidth = doc.internal.pageSize.width;
+    const pageHeight = doc.internal.pageSize.height;
+    const usableWidth = pageWidth - (margin * 2);
+    const baseFontSize = 9;
+    const titleFontSize = 10;
+    const lineSpacing = 14;
+
+    addModernDocLayout(doc, "");
+    let y = 75;
+
+    const checkPageBreak = (neededSpace = 60) => {
+      if (y + neededSpace > pageHeight - 80) {
+        doc.addPage();
+        addModernDocLayout(doc, "");
+        y = 75;
+      }
+    };
+
+    doc.setFont(undefined, 'bold'); doc.setFontSize(13);
+    doc.setTextColor('#333333');
+    doc.text("CONTRATO DE PRESTAÇÃO DE SERVIÇOS ARTÍSTICOS DE DJ", pageWidth / 2, y, { align: 'center' });
+    y += lineSpacing * 2;
+
+    // Use captured data from clauses object
+    const contractClientName = clauses.clientName || '';
+    const contractClientDoc = clauses.clientDoc || '';
+    const contractClientAddr = clauses.clientAddress || '';
+    const contractCompanyName = clauses.companyName || userInfo.name || 'Prestador de Serviços';
+    const contractCompanyCpf = clauses.companyCpf || userInfo.cpf || '';
+    
+    // Parties section
+    doc.setFont(undefined, 'bold'); doc.setFontSize(titleFontSize); doc.setTextColor(primaryColor);
+    doc.text("DAS PARTES", margin, y); y += lineSpacing;
+    doc.setFont(undefined, 'normal'); doc.setFontSize(baseFontSize); doc.setTextColor('#333333');
+    const partesContratante = `CONTRATANTE: ${contractClientName}${contractClientDoc ? ', CPF/CNPJ nº ' + contractClientDoc : ''}${contractClientAddr ? ', com endereço em ' + contractClientAddr : ''}.`;
+    const linesC = doc.splitTextToSize(partesContratante, usableWidth);
+    doc.text(linesC, margin, y); y += linesC.length * lineSpacing;
+    const partesContratado = `CONTRATADO: ${contractCompanyName}${contractCompanyCpf ? ', CPF/CNPJ nº ' + contractCompanyCpf : ''}, doravante denominado DJ.`;
+    const linesD = doc.splitTextToSize(partesContratado, usableWidth);
+    doc.text(linesD, margin, y); y += linesD.length * lineSpacing + lineSpacing;
+
+    // Clauses
+    const addClauseToDoc = (title, text) => {
+      checkPageBreak(60);
+      doc.setFont(undefined, 'bold'); doc.setFontSize(titleFontSize); doc.setTextColor(primaryColor);
+      doc.text(title, margin, y); y += lineSpacing * 1.3;
+      doc.setFont(undefined, 'normal'); doc.setFontSize(baseFontSize); doc.setTextColor('#333333');
+      const lines = doc.splitTextToSize(text, usableWidth);
+      lines.forEach(line => {
+        checkPageBreak(lineSpacing * 2);
+        doc.text(line, margin, y); y += lineSpacing;
+      });
+      y += lineSpacing * 0.5;
+    };
+
+    addClauseToDoc('CLÁUSULA 1ª - DO OBJETO', clauses.object);
+    addClauseToDoc('CLÁUSULA 2ª - OBRIGAÇÕES DO CONTRATADO', clauses.obligationsDJ);
+    addClauseToDoc('CLÁUSULA 3ª - OBRIGAÇÕES DO CONTRATANTE', clauses.obligationsClient);
+    addClauseToDoc('CLÁUSULA 4ª - DO VALOR E PAGAMENTO', clauses.payment);
+    addClauseToDoc('CLÁUSULA 5ª - DA RESCISÃO', clauses.rescission);
+    addClauseToDoc('CLÁUSULA 6ª - DO FORO', clauses.forum);
+
+    checkPageBreak(80);
+    y += lineSpacing;
+    const closingText = 'E, por estarem justos e contratados, assinam o presente em duas vias de igual teor e forma.';
+    doc.setFontSize(baseFontSize); doc.setFont(undefined, 'normal'); doc.setTextColor('#333333');
+    doc.text(doc.splitTextToSize(closingText, usableWidth), margin, y); y += lineSpacing * 4;
+
+    const signatureWidth = usableWidth / 2 - 20;
+    doc.line(margin, y, margin + signatureWidth, y);
+    doc.line(pageWidth - margin - signatureWidth, y, pageWidth - margin, y);
+    y += lineSpacing;
+    doc.text('CONTRATANTE', margin, y);
+    doc.text('CONTRATADO', pageWidth - margin, y, { align: 'right' });
+
+    doc.save(`Contrato_DJ_${(clauses.clientName || 'contrato').replace(/[^a-zA-Z0-9]/g, '_')}.pdf`);
+  }
+
+
   init();
 });
 
 </script>
+
+  <!-- Modal de Pacote -->
+  <div id="package-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" data-action="close-modal">&times;</span>
+      <h2 id="package-modal-title">Novo Pacote</h2>
+      <form id="package-form">
+        <input type="hidden" id="edit-package-id">
+        <div class="form-group">
+          <label for="package-name">Nome do Pacote</label>
+          <input type="text" id="package-name" placeholder="Ex: Pacote Premium Casamento" required>
+        </div>
+        <div class="form-group">
+          <label for="package-description">Descrição</label>
+          <textarea id="package-description" rows="2" placeholder="Descrição resumida do pacote"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Serviços Inclusos</label>
+          <div id="package-services-container"></div>
+          <button type="button" class="btn btn-xs" id="add-package-service-btn" style="margin-top:5px;"><i class="fas fa-plus"></i> Adicionar Serviço</button>
+        </div>
+        <div class="btn-container">
+          <button type="button" class="btn btn-danger" data-action="close-modal">Cancelar</button>
+          <button type="submit" class="btn">Salvar Pacote</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Editor de Cláusulas -->
+  <div id="clause-editor-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" id="close-clause-editor">&times;</span>
+      <h2><i class="fas fa-edit"></i> Revisar e Editar Documento</h2>
+      <div class="clause-editor-info">
+        <i class="fas fa-info-circle"></i> Revise e edite as cláusulas abaixo antes de gerar o PDF. As alterações são aplicadas apenas neste documento.
+      </div>
+      <div id="clause-editor-body"></div>
+      <div class="btn-container">
+        <button type="button" class="btn btn-danger" id="cancel-clause-editor">Cancelar</button>
+        <button type="button" class="btn" id="confirm-clause-editor"><i class="fas fa-file-pdf"></i> Gerar PDF</button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
