@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -654,7 +653,7 @@
   }
 
   /* ==========================================
-     DASHBOARD HERO
+     DASHBOARD HERO (simplificado)
   ========================================== */
   .dashboard-hero {
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
@@ -694,31 +693,25 @@
     margin-bottom: var(--space-md);
     letter-spacing: -0.02em;
   }
-  .hero-balance-label {
+  .hero-event-label {
     font-size: 0.78rem;
     opacity: 0.75;
     font-weight: 500;
     letter-spacing: 0.05em;
     text-transform: uppercase;
+    margin-bottom: 6px;
   }
-  .hero-balance-value {
+  .hero-event-value {
     font-family: var(--font-display);
-    font-size: 2rem;
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1.1;
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .hero-event-place {
+    font-size: 0.9rem;
+    opacity: 0.8;
     margin-top: 4px;
   }
-  .hero-stats {
-    display: flex;
-    gap: var(--space-md);
-    margin-top: var(--space-md);
-    padding-top: var(--space-md);
-    border-top: 1px solid rgba(255,255,255,0.15);
-  }
-  .hero-stat { flex: 1; }
-  .hero-stat-label { font-size: 0.72rem; opacity: 0.72; text-transform: uppercase; letter-spacing: 0.05em; }
-  .hero-stat-value { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; margin-top: 2px; }
 
   /* ==========================================
      SUMMARY CARDS (2-col grid mobile)
@@ -1449,26 +1442,13 @@
     
     <div class="tab-content active" id="dashboard-content">
 
-      <!-- Hero Card -->
+      <!-- Hero Card - Versão simplificada -->
       <div class="dashboard-hero">
         <div class="hero-greeting" id="hero-greeting">Bom dia 👋</div>
         <div class="hero-name" id="hero-username">FinancePro</div>
-        <div class="hero-balance-label">SALDO TOTAL</div>
-        <div class="hero-balance-value" id="hero-balance">R$ 0,00</div>
-        <div class="hero-stats">
-          <div class="hero-stat">
-            <div class="hero-stat-label">Receitas</div>
-            <div class="hero-stat-value" id="hero-receitas">R$ 0</div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-label">Despesas</div>
-            <div class="hero-stat-value" id="hero-despesas">R$ 0</div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-label">Balanço</div>
-            <div class="hero-stat-value" id="hero-balanco">R$ 0</div>
-          </div>
-        </div>
+        <div class="hero-event-label">Evento do dia</div>
+        <div class="hero-event-value" id="hero-today-event">Nenhum evento hoje</div>
+        <div class="hero-event-place" id="hero-today-event-location"></div>
       </div>
 
       <!-- Notifications -->
@@ -2539,6 +2519,10 @@ class="modal-content">
       <h2 id="event-order-modal-title">Gerar Pedido de Evento</h2>
       <form id="event-order-form">
         <input type="hidden" id="edit-order-id">
+        <div class="form-group">
+          <label for="order-client-search">Buscar Cliente</label>
+          <input type="text" id="order-client-search" placeholder="Digite para filtrar...">
+        </div>
         <div class="flex-group">
           <div class="form-group">
             <label for="order-client-select">Cliente</label>
@@ -2768,9 +2752,16 @@ document.addEventListener('DOMContentLoaded', () => {
     setupNavigation();
     setupEventListeners();
     updateUI();
-    updateDashboardHero();
+    updateDashboardHero(); // atualiza saudação e evento do dia
     updateDashboardRecent();
     updateDashboardUpcoming();
+
+    // Fechar modais ao clicar no overlay (fundo)
+    document.querySelectorAll('.modal').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('active');
+      });
+    });
   }
 
   // --- NAVEGAÇÃO ---
@@ -3104,6 +3095,22 @@ document.getElementById('add-client-from-contract-btn').addEventListener('click'
             'edit-package': () => openPackageModal('edit', id),
         };
         if(actions[action]) actions[action]();
+    });
+
+    // Busca de cliente no modal de pedido
+    document.getElementById('order-client-search')?.addEventListener('input', function(e) {
+      const term = e.target.value.toLowerCase();
+      const select = document.getElementById('order-client-select');
+      const filtered = clients.filter(c => 
+        c.name.toLowerCase().includes(term) || 
+        (c.phone && c.phone.toLowerCase().includes(term)) || 
+        (c.email && c.email.toLowerCase().includes(term))
+      );
+      populateSelect(select, filtered, 'name', 'id', 'Selecione um cliente');
+      // Restaura o valor selecionado se ainda estiver na lista filtrada
+      if (select.value && !filtered.some(f => f.id == select.value)) {
+        select.value = '';
+      }
     });
   }
 
@@ -6661,21 +6668,24 @@ function showCommitmentsForDay(dateString) {
     const greet = hour < 12 ? 'Bom dia 👋' : hour < 18 ? 'Boa tarde 👋' : 'Boa noite 🌙';
     const greetEl = document.getElementById('hero-greeting');
     const nameEl = document.getElementById('hero-username');
-    const balanceEl = document.getElementById('hero-balance');
-    const receitasEl = document.getElementById('hero-receitas');
-    const despesasEl = document.getElementById('hero-despesas');
-    const balancoEl = document.getElementById('hero-balanco');
+    const eventEl = document.getElementById('hero-today-event');
+    const locationEl = document.getElementById('hero-today-event-location');
     if (greetEl) greetEl.textContent = greet;
     if (nameEl) nameEl.textContent = userInfo.name || 'FinancePro';
-    const totalBalance = accounts.reduce((s, a) => s + (a.balance || 0), 0);
-    const now = new Date();
-    const monthTxs = transactions.filter(t => { const d = new Date(t.date + 'T00:00:00'); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && t.status === 'confirmada'; });
-    const monthReceitas = monthTxs.filter(t => t.type === 'receita').reduce((s,t) => s+t.amount, 0);
-    const monthDespesas = monthTxs.filter(t => t.type === 'despesa').reduce((s,t) => s+t.amount, 0);
-    if (balanceEl) balanceEl.textContent = formatCurrency(totalBalance);
-    if (receitasEl) receitasEl.textContent = formatCurrency(monthReceitas);
-    if (despesasEl) despesasEl.textContent = formatCurrency(monthDespesas);
-    if (balancoEl) balancoEl.textContent = formatCurrency(monthReceitas - monthDespesas);
+    
+    // Buscar evento do dia
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const todayStr = today.toISOString().split('T')[0];
+    const todayCommitments = commitments.filter(c => c.date.startsWith(todayStr) && c.status !== 'cancelado');
+    if (todayCommitments.length > 0) {
+      const ev = todayCommitments[0];
+      eventEl.textContent = ev.title;
+      if (locationEl) locationEl.textContent = ev.location || '';
+    } else {
+      eventEl.textContent = 'Nenhum evento hoje';
+      if (locationEl) locationEl.textContent = '';
+    }
   }
 
   function formatCurrencyShort(v) {
