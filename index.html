@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -653,7 +655,7 @@
   }
 
   /* ==========================================
-     DASHBOARD HERO (simplificado)
+     DASHBOARD HERO
   ========================================== */
   .dashboard-hero {
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
@@ -693,25 +695,31 @@
     margin-bottom: var(--space-md);
     letter-spacing: -0.02em;
   }
-  .hero-event-label {
+  .hero-balance-label {
     font-size: 0.78rem;
     opacity: 0.75;
     font-weight: 500;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    margin-bottom: 6px;
   }
-  .hero-event-value {
+  .hero-balance-value {
     font-family: var(--font-display);
-    font-size: 1.2rem;
-    font-weight: 700;
-    line-height: 1.3;
-  }
-  .hero-event-place {
-    font-size: 0.9rem;
-    opacity: 0.8;
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
     margin-top: 4px;
   }
+  .hero-stats {
+    display: flex;
+    gap: var(--space-md);
+    margin-top: var(--space-md);
+    padding-top: var(--space-md);
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+  .hero-stat { flex: 1; }
+  .hero-stat-label { font-size: 0.72rem; opacity: 0.72; text-transform: uppercase; letter-spacing: 0.05em; }
+  .hero-stat-value { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; margin-top: 2px; }
 
   /* ==========================================
      SUMMARY CARDS (2-col grid mobile)
@@ -1442,13 +1450,15 @@
     
     <div class="tab-content active" id="dashboard-content">
 
-      <!-- Hero Card - Versão simplificada -->
+      <!-- Hero Card -->
       <div class="dashboard-hero">
         <div class="hero-greeting" id="hero-greeting">Bom dia 👋</div>
         <div class="hero-name" id="hero-username">FinancePro</div>
-        <div class="hero-event-label">Evento do dia</div>
-        <div class="hero-event-value" id="hero-today-event">Nenhum evento hoje</div>
-        <div class="hero-event-place" id="hero-today-event-location"></div>
+        <div id="hero-today-event-section" style="margin-top:12px;">
+          <div style="font-size:0.75rem;opacity:0.75;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;font-weight:600;">📅 Evento de Hoje</div>
+          <div id="hero-today-event" style="font-size:0.95rem;font-weight:600;opacity:0.95;">Nenhum evento hoje</div>
+          <div id="hero-today-event-sub" style="font-size:0.78rem;opacity:0.72;margin-top:3px;"></div>
+        </div>
       </div>
 
       <!-- Notifications -->
@@ -1498,17 +1508,6 @@
             <h4>Nenhum evento próximo</h4>
             <p>Adicione compromissos para vê-los aqui</p>
           </div>
-        </div>
-      </div>
-
-      <!-- Resumo Financeiro (cards 2x2) -->
-      <div>
-        <p class="section-title">Resumo do Mês</p>
-        <div class="summary-cards">
-          <div class="summary-card receita" id="receita-card"><h3>Receitas</h3><div class="value" id="total-receitas"></div><div class="trend" id="receitas-trend"></div></div>
-          <div class="summary-card despesa" id="despesa-card"><h3>Despesas</h3><div class="value" id="total-despesas"></div><div class="trend" id="despesas-trend"></div></div>
-          <div class="summary-card saldo" id="saldo-card"><h3>Saldo Total</h3><div class="value" id="saldo-total"></div><div class="forecast" id="saldo-forecast"></div></div>
-          <div class="summary-card balanco" id="balanco-card"><h3>Balanço</h3><div class="value" id="balanco-mensal"></div></div>
         </div>
       </div>
 
@@ -1625,6 +1624,16 @@
     </div>
     
     <div class="tab-content" id="transacoes-content">
+      <!-- Resumo Financeiro (visível apenas no painel financeiro) -->
+      <div>
+        <p class="section-title">Resumo do Mês</p>
+        <div class="summary-cards">
+          <div class="summary-card receita" id="receita-card"><h3>Receitas</h3><div class="value" id="total-receitas"></div><div class="trend" id="receitas-trend"></div></div>
+          <div class="summary-card despesa" id="despesa-card"><h3>Despesas</h3><div class="value" id="total-despesas"></div><div class="trend" id="despesas-trend"></div></div>
+          <div class="summary-card saldo" id="saldo-card"><h3>Saldo Total</h3><div class="value" id="saldo-total"></div><div class="forecast" id="saldo-forecast"></div></div>
+          <div class="summary-card balanco" id="balanco-card"><h3>Balanço</h3><div class="value" id="balanco-mensal"></div></div>
+        </div>
+      </div>
       <div class="card">
         <h2>Transações</h2>
         <div class="filters-container">
@@ -2519,16 +2528,12 @@ class="modal-content">
       <h2 id="event-order-modal-title">Gerar Pedido de Evento</h2>
       <form id="event-order-form">
         <input type="hidden" id="edit-order-id">
-        <div class="form-group">
-          <label for="order-client-search">Buscar Cliente</label>
-          <input type="text" id="order-client-search" placeholder="Digite para filtrar...">
-        </div>
-        <div class="flex-group">
-          <div class="form-group">
-            <label for="order-client-select">Cliente</label>
-            <select id="order-client-select" required>
-              <option value="">Selecione um cliente</option>
-            </select>
+        <div class="flex-group" style="position:relative;">
+          <div class="form-group" style="flex:1;">
+            <label for="order-client-search">Cliente</label>
+            <input type="text" id="order-client-search" placeholder="Digite o nome do cliente..." autocomplete="off" style="width:100%;">
+            <input type="hidden" id="order-client-select">
+            <div id="order-client-dropdown" style="display:none;position:absolute;z-index:1000;background:var(--surface);border:1.5px solid var(--primary);border-radius:var(--r-sm);max-height:200px;overflow-y:auto;left:0;right:60px;box-shadow:var(--card-shadow);"></div>
           </div>
           <button type="button" class="btn" id="add-client-from-order-btn" style="width: auto;"><i class="fas fa-user-plus"></i></button>
         </div>
@@ -2752,16 +2757,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setupNavigation();
     setupEventListeners();
     updateUI();
-    updateDashboardHero(); // atualiza saudação e evento do dia
+    updateDashboardHero();
     updateDashboardRecent();
     updateDashboardUpcoming();
-
-    // Fechar modais ao clicar no overlay (fundo)
-    document.querySelectorAll('.modal').forEach(modal => {
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) modal.classList.remove('active');
-      });
-    });
   }
 
   // --- NAVEGAÇÃO ---
@@ -2859,16 +2857,13 @@ document.addEventListener('DOMContentLoaded', () => {
         openClientModal('new', null, (newClientId) => {
             
             // 4. Quando salvar o cliente, essa parte roda: Re-abre o modal de Pedido
-            // Passando os dados salvos (orderData) para não perder o que foi digitado
             openEventOrderModal('new', null, orderData); 
 
-            // 5. Atualiza a lista de clientes dentro do select
-            const clientSelect = document.getElementById('order-client-select');
-            populateSelect(clientSelect, clients, 'name', 'id', 'Selecione um cliente');
-
-            // 6. Já deixa o novo cliente selecionado automaticamente
+            // 5. Já deixa o novo cliente selecionado automaticamente
             if (newClientId) {
-                clientSelect.value = newClientId;
+                const cl = clients.find(c => c.id === newClientId);
+                document.getElementById('order-client-select').value = newClientId;
+                if (cl) document.getElementById('order-client-search').value = cl.name;
             }
         });
     });
@@ -3008,11 +3003,58 @@ document.getElementById('add-client-from-contract-btn').addEventListener('click'
       btn.addEventListener('click', () => btn.closest('.modal').classList.remove('active'));
     });
     
+    // Click outside to close modals
+    document.querySelectorAll('.modal').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+        }
+      });
+    });
+    
     document.getElementById('apply-filters-btn').addEventListener('click', applyFilters);
     document.getElementById('clear-filters-btn').addEventListener('click', clearFilters);
     document.getElementById('search-input').addEventListener('keypress', (e) => {
       if (e.key === 'Enter') applyFilters();
     });
+    
+    // Client search for order modal
+    const orderClientSearch = document.getElementById('order-client-search');
+    const orderClientDropdown = document.getElementById('order-client-dropdown');
+    if (orderClientSearch) {
+      orderClientSearch.addEventListener('input', () => {
+        const q = orderClientSearch.value.toLowerCase().trim();
+        document.getElementById('order-client-select').value = '';
+        if (!q) { orderClientDropdown.style.display = 'none'; return; }
+        const filtered = clients.filter(c => (c.name||'').toLowerCase().includes(q) || (c.phone||'').includes(q));
+        if (!filtered.length) {
+          orderClientDropdown.innerHTML = '<div style="padding:10px 14px;color:var(--text3);font-size:0.88rem;">Nenhum cliente encontrado</div>';
+          orderClientDropdown.style.display = 'block';
+          return;
+        }
+        orderClientDropdown.innerHTML = filtered.slice(0,8).map(c => 
+          `<div class="order-client-option" data-id="${c.id}" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border-soft);font-size:0.88rem;transition:var(--t-fast);">
+            <div style="font-weight:600;">${c.name}</div>
+            ${c.phone ? `<div style="color:var(--text3);font-size:0.78rem;">${c.phone}</div>` : ''}
+          </div>`
+        ).join('');
+        orderClientDropdown.style.display = 'block';
+        orderClientDropdown.querySelectorAll('.order-client-option').forEach(opt => {
+          opt.addEventListener('mouseenter', () => opt.style.background = 'var(--surface2)');
+          opt.addEventListener('mouseleave', () => opt.style.background = '');
+          opt.addEventListener('click', () => {
+            const cl = clients.find(c => c.id === parseFloat(opt.dataset.id));
+            if (cl) {
+              orderClientSearch.value = cl.name;
+              document.getElementById('order-client-select').value = cl.id;
+              orderClientDropdown.style.display = 'none';
+            }
+          });
+        });
+      });
+      orderClientSearch.addEventListener('blur', () => setTimeout(() => { orderClientDropdown.style.display = 'none'; }, 200));
+      orderClientSearch.addEventListener('focus', () => { if (orderClientSearch.value) orderClientSearch.dispatchEvent(new Event('input')); });
+    }
     document.getElementById('search-orders-input').addEventListener('input', applyOrdersFilter);
     document.getElementById('type-orders-filter').addEventListener('change', applyOrdersFilter);
     document.getElementById('apply-orders-filter-btn').addEventListener('click', applyOrdersFilter);
@@ -3095,22 +3137,6 @@ document.getElementById('add-client-from-contract-btn').addEventListener('click'
             'edit-package': () => openPackageModal('edit', id),
         };
         if(actions[action]) actions[action]();
-    });
-
-    // Busca de cliente no modal de pedido
-    document.getElementById('order-client-search')?.addEventListener('input', function(e) {
-      const term = e.target.value.toLowerCase();
-      const select = document.getElementById('order-client-select');
-      const filtered = clients.filter(c => 
-        c.name.toLowerCase().includes(term) || 
-        (c.phone && c.phone.toLowerCase().includes(term)) || 
-        (c.email && c.email.toLowerCase().includes(term))
-      );
-      populateSelect(select, filtered, 'name', 'id', 'Selecione um cliente');
-      // Restaura o valor selecionado se ainda estiver na lista filtrada
-      if (select.value && !filtered.some(f => f.id == select.value)) {
-        select.value = '';
-      }
     });
   }
 
@@ -3557,6 +3583,15 @@ if (typeof activeModalCallback === 'function') {
     e.preventDefault();
     const modal = document.getElementById('event-order-modal');
     const id = document.getElementById('edit-order-id').value;
+    
+    // Validate client selected via search
+    const clientId = parseFloat(document.getElementById('order-client-select').value);
+    if (!clientId) {
+      showToast('Por favor, selecione um cliente válido da lista.', 'warning');
+      document.getElementById('order-client-search').focus();
+      return;
+    }
+    
     const orderServices = [];
     let totalValue = 0;
     document.querySelectorAll('#order-services-container .order-service-item').forEach(item => {
@@ -3568,7 +3603,7 @@ if (typeof activeModalCallback === 'function') {
         }
     });
     const orderData = {
-        clientId: parseFloat(document.getElementById('order-client-select').value),
+        clientId: parseFloat(document.getElementById('order-client-select').value) || null,
         eventType: document.getElementById('order-event-type-input').value,
         eventDate: document.getElementById('order-event-date-input').value,
         eventTime: document.getElementById('order-event-time-input').value,
@@ -4085,9 +4120,9 @@ function openCommitmentModal(mode, id = null, date = null) {
   const form = modal.querySelector('form');
   form.reset();
   document.getElementById('edit-order-id').value = '';
-
-  const clientSelect = modal.querySelector('#order-client-select');
-  populateSelect(clientSelect, clients, 'name', 'id', 'Selecione um cliente');
+  document.getElementById('order-client-select').value = '';
+  document.getElementById('order-client-search').value = '';
+  document.getElementById('order-client-dropdown').style.display = 'none';
 
   const servicesContainer = document.getElementById('order-services-container');
   servicesContainer.innerHTML = '';
@@ -4098,7 +4133,9 @@ function openCommitmentModal(mode, id = null, date = null) {
       if (order) {
           modal.querySelector('#event-order-modal-title').textContent = 'Editar Pedido';
           document.getElementById('edit-order-id').value = order.id;
-          clientSelect.value = order.clientId;
+          document.getElementById('order-client-select').value = order.clientId;
+          const cl = clients.find(c => c.id === order.clientId);
+          document.getElementById('order-client-search').value = cl ? cl.name : '';
           modal.querySelector('#order-event-type-input').value = order.eventType;
           modal.querySelector('#order-event-date-input').value = order.eventDate;
           modal.querySelector('#order-event-time-input').value = order.eventTime;
@@ -4115,7 +4152,9 @@ function openCommitmentModal(mode, id = null, date = null) {
       modal.querySelector('#event-order-modal-title').textContent = 'Gerar Pedido de Evento';
       if (savedData) {
           // Restaura dados salvos
-          clientSelect.value = savedData.clientId;
+          document.getElementById('order-client-select').value = savedData.clientId;
+          const cl = clients.find(c => c.id == savedData.clientId);
+          document.getElementById('order-client-search').value = cl ? cl.name : (savedData.clientSearch || '');
           modal.querySelector('#order-event-type-input').value = savedData.eventType;
           modal.querySelector('#order-event-date-input').value = savedData.eventDate;
           modal.querySelector('#order-event-time-input').value = savedData.eventTime;
@@ -5421,6 +5460,7 @@ function getFormData(formId) {
     const data = {};
     if (formId === 'event-order-form') {
         data.clientId = document.getElementById('order-client-select').value;
+        data.clientSearch = document.getElementById('order-client-search') ? document.getElementById('order-client-search').value : '';
         data.eventType = document.getElementById('order-event-type-input').value;
         data.eventDate = document.getElementById('order-event-date-input').value;
         data.eventTime = document.getElementById('order-event-time-input').value;
@@ -5979,29 +6019,15 @@ function showCommitmentsForDay(dateString) {
   }
 // --- NOVA FUNÇÃO: Gerencia exclusão direto da Agenda ---
   function handleDeleteFromCalendar(id) {
-      const commitment = commitments.find(c => c.id === id);
-      if (!commitment) return;
-      
-      const dateString = commitment.date.split('T')[0]; // Guarda a data para atualizar a tela depois
-
-      // CASO 1: É vinculado a um Pedido?
-      if (commitment.linkedOrderId) {
-          // Usa a função que criamos antes (que já pede confirmação e apaga os dois)
-          // Nota: Como deleteOrderAndCommitment usa 'confirm', se o usuário cancelar, a execução para lá.
-          // Precisamos verificar se o item ainda existe para saber se atualizamos a tela.
-          deleteOrderAndCommitment(commitment.linkedOrderId);
-      } 
-      // CASO 2: É um agendamento avulso
-      else {
-          deleteItem(commitments, id, 'Compromisso');
-      }
-
-      // Atualiza a visualização do modal da agenda para o item sumir na hora
-      // (Verifica se o item foi realmente deletado antes de atualizar)
-      if (!commitments.find(c => c.id === id)) {
-          renderCalendar(calendarCurrentDate); // Atualiza as bolinhas no calendário de fundo
-          showCommitmentsForDay(dateString);   // Recarrega a lista do dia no modal
-      }
+    showConfirm('Tem certeza que deseja excluir este compromisso?', 'Excluir Compromisso', () => {
+        const index = commitments.findIndex(c => c.id === id);
+        if (index > -1) commitments.splice(index, 1);
+        saveData();
+        updateUI();
+        showToast('Compromisso excluído com sucesso!', 'success');
+        // Re-render calendar but don't close the day view if there are remaining events
+        renderCalendar(calendarCurrentDate);
+    });
   }
 // --- FUNÇÃO DE PROJEÇÃO DE FATURAMENTO (CORRIGIDA) ---
   function updateRevenueProjection() {
@@ -6668,24 +6694,48 @@ function showCommitmentsForDay(dateString) {
     const greet = hour < 12 ? 'Bom dia 👋' : hour < 18 ? 'Boa tarde 👋' : 'Boa noite 🌙';
     const greetEl = document.getElementById('hero-greeting');
     const nameEl = document.getElementById('hero-username');
-    const eventEl = document.getElementById('hero-today-event');
-    const locationEl = document.getElementById('hero-today-event-location');
     if (greetEl) greetEl.textContent = greet;
     if (nameEl) nameEl.textContent = userInfo.name || 'FinancePro';
     
-    // Buscar evento do dia
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    const todayStr = today.toISOString().split('T')[0];
-    const todayCommitments = commitments.filter(c => c.date.startsWith(todayStr) && c.status !== 'cancelado');
-    if (todayCommitments.length > 0) {
-      const ev = todayCommitments[0];
-      eventEl.textContent = ev.title;
-      if (locationEl) locationEl.textContent = ev.location || '';
-    } else {
-      eventEl.textContent = 'Nenhum evento hoje';
-      if (locationEl) locationEl.textContent = '';
+    // Show today's event in hero
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todayEvents = commitments.filter(c => {
+      const d = c.date ? c.date.split('T')[0] : '';
+      return d === todayStr && c.status !== 'cancelado';
+    }).sort((a,b) => new Date(a.date) - new Date(b.date));
+    
+    const eventEl = document.getElementById('hero-today-event');
+    const eventSubEl = document.getElementById('hero-today-event-sub');
+    if (eventEl) {
+      if (todayEvents.length > 0) {
+        const ev = todayEvents[0];
+        const d = new Date(ev.date);
+        const timeStr = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        eventEl.textContent = ev.title;
+        if (eventSubEl) {
+          const extras = todayEvents.length > 1 ? ` +${todayEvents.length - 1} mais` : '';
+          eventSubEl.textContent = `${timeStr}${ev.location ? ' · ' + ev.location : ''}${extras}`;
+        }
+      } else {
+        eventEl.textContent = 'Nenhum evento hoje';
+        if (eventSubEl) eventSubEl.textContent = '';
+      }
     }
+    
+    // Still update elements that exist in financial tab (hidden IDs still referenced)
+    const totalBalance = accounts.reduce((s, a) => s + (a.balance || 0), 0);
+    const now = new Date();
+    const monthTxs = transactions.filter(t => { const d = new Date(t.date + 'T00:00:00'); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && t.status === 'confirmada'; });
+    const monthReceitas = monthTxs.filter(t => t.type === 'receita').reduce((s,t) => s+t.amount, 0);
+    const monthDespesas = monthTxs.filter(t => t.type === 'despesa').reduce((s,t) => s+t.amount, 0);
+    const balanceEl = document.getElementById('hero-balance');
+    const receitasEl = document.getElementById('hero-receitas');
+    const despesasEl = document.getElementById('hero-despesas');
+    const balancoEl = document.getElementById('hero-balanco');
+    if (balanceEl) balanceEl.textContent = formatCurrency(totalBalance);
+    if (receitasEl) receitasEl.textContent = formatCurrency(monthReceitas);
+    if (despesasEl) despesasEl.textContent = formatCurrency(monthDespesas);
+    if (balancoEl) balancoEl.textContent = formatCurrency(monthReceitas - monthDespesas);
   }
 
   function formatCurrencyShort(v) {
@@ -6725,8 +6775,9 @@ function showCommitmentsForDay(dateString) {
     if (!el) return;
     const today = new Date();
     today.setHours(0,0,0,0);
+    // Show all upcoming events sorted by date - no artificial slice, show next 3
     const upcoming = commitments.filter(c => {
-      const d = new Date(c.date + 'T00:00:00');
+      const d = new Date(c.date + (c.date.includes('T') ? '' : 'T00:00:00'));
       return d >= today && c.status !== 'cancelado';
     }).sort((a,b) => new Date(a.date) - new Date(b.date)).slice(0, 3);
     if (!upcoming.length) {
@@ -6737,10 +6788,12 @@ function showCommitmentsForDay(dateString) {
     el.innerHTML = upcoming.map(c => {
       const d = new Date(c.date);
       const timeStr = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      const isToday = d.toISOString().split('T')[0] === new Date().toISOString().split('T')[0];
+      const dayLabel = isToday ? 'Hoje' : String(d.getDate());
       return `<div class="upcoming-event-item" onclick="showTab('Agenda')">
         <div class="upcoming-event-date-badge">
-          <span class="day">${d.getDate()}</span>
-          <span class="month">${months[d.getMonth()]}</span>
+          <span class="day">${dayLabel}</span>
+          <span class="month">${isToday ? '🎯' : months[d.getMonth()]}</span>
         </div>
         <div class="upcoming-event-info">
           <div class="upcoming-event-name">${c.title}</div>
