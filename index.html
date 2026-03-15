@@ -1,6 +1,3 @@
-
-
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1344,6 +1341,15 @@
   .notifications-banner.warning { background: linear-gradient(135deg, var(--warning), #ff9500); }
   .notifications-banner.info { background: linear-gradient(135deg, var(--ev-blue), var(--info)); }
   .notifications-banner i { font-size: 1.2rem; }
+
+  @keyframes bellRing {
+    0%, 100% { transform: rotate(0deg); }
+    10% { transform: rotate(14deg); }
+    20% { transform: rotate(-10deg); }
+    30% { transform: rotate(8deg); }
+    40% { transform: rotate(-6deg); }
+    50% { transform: rotate(0deg); }
+  }
 
   /* ==========================================
      LOGO PREVIEW
@@ -4545,6 +4551,59 @@ function openCommitmentModal(mode, id = null, date = null) {
           banner.innerHTML = `<i class="fas fa-birthday-cake"></i><div>${msg}</div>`;
           container.appendChild(banner);
       }
+
+      // Upcoming events notifications (next 7 days, individually clickable)
+      const in7days = new Date(today); in7days.setDate(in7days.getDate() + 7);
+      const upcomingEvts = commitments.filter(c => {
+          const d = new Date(c.date + (c.date.includes('T') ? '' : 'T00:00:00'));
+          return d >= today && d <= in7days && c.status !== 'cancelado';
+      }).sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 5);
+
+      if (upcomingEvts.length > 0) {
+          const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+          const eventsWrapper = document.createElement('div');
+          eventsWrapper.style.cssText = 'background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border-soft);overflow:hidden;box-shadow:var(--card-shadow);';
+          eventsWrapper.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;"><i class="fas fa-bell" style="animation:bellRing 2s ease-in-out infinite;"></i><div style="flex:1;"><span style="font-weight:700;font-size:0.88rem;display:block;">Próximos ${upcomingEvts.length > 1 ? upcomingEvts.length + ' eventos' : 'evento'} nos próximos 7 dias</span><span style="font-size:0.72rem;opacity:0.8;">Toque para ver detalhes</span></div></div>`;
+          upcomingEvts.forEach(c => {
+              const d = new Date(c.date + (c.date.includes('T') ? '' : 'T00:00:00'));
+              const isToday = d.toISOString().split('T')[0] === new Date().toISOString().split('T')[0];
+              const dayLabel = isToday ? '🎯 Hoje' : `${d.getDate()} ${months[d.getMonth()]}`;
+              const timeStr = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+              const statusColors = { agendado: 'var(--warning)', confirmado: 'var(--primary)', realizado: 'var(--success)', cancelado: 'var(--danger)' };
+              const statusLabels = { agendado: 'Agendado', confirmado: 'Confirmado', realizado: 'Realizado', cancelado: 'Cancelado' };
+              const dotColor = statusColors[c.status] || 'var(--text3)';
+              const statusLabel = statusLabels[c.status] || c.status;
+              const item = document.createElement('div');
+              item.style.cssText = 'display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--border-soft);cursor:pointer;transition:background 0.15s ease;-webkit-tap-highlight-color:transparent;user-select:none;';
+              item.innerHTML = `
+                <div style="width:40px;height:40px;border-radius:10px;background:${dotColor}22;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;">
+                  <i class="fas fa-calendar-check" style="color:${dotColor};font-size:0.9rem;"></i>
+                </div>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-weight:700;font-size:0.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);">${c.title}</div>
+                  <div style="font-size:0.75rem;color:var(--text3);margin-top:2px;display:flex;align-items:center;gap:6px;">
+                    <span>${dayLabel} · ${timeStr}</span>
+                    ${c.location ? `<span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">· ${c.location}</span>` : ''}
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
+                  <span style="font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:999px;background:${dotColor}22;color:${dotColor};">${statusLabel}</span>
+                  <i class="fas fa-chevron-right" style="font-size:0.7rem;color:var(--text3);"></i>
+                </div>`;
+              // Hover / touch feedback
+              item.addEventListener('mouseenter', () => item.style.background = 'var(--surface2)');
+              item.addEventListener('mouseleave', () => item.style.background = '');
+              item.addEventListener('touchstart', () => item.style.background = 'var(--surface2)', { passive: true });
+              item.addEventListener('touchend', () => { setTimeout(() => item.style.background = '', 200); }, { passive: true });
+              // Click opens event detail
+              item.addEventListener('click', () => openSingleCommitmentDetail(c.id));
+              eventsWrapper.appendChild(item);
+          });
+          // Remove last border
+          const items = eventsWrapper.querySelectorAll('div[style*="border-bottom"]');
+          if (items.length) items[items.length-1].style.borderBottom = 'none';
+          container.appendChild(eventsWrapper);
+      }
   }
 
   function updateTransactionsTable() {
@@ -6703,13 +6762,30 @@ function showCommitmentsForDay(dateString) {
     
     const eventsList = document.getElementById('hero-today-events-list');
     if (eventsList) {
+      eventsList.innerHTML = '';
       if (todayEvents.length > 0) {
-        eventsList.innerHTML = todayEvents.map(ev => {
+        todayEvents.forEach(ev => {
           const d = new Date(ev.date);
           const timeStr = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
           const statusColor = ev.status === 'confirmado' ? '#06d6a0' : ev.status === 'cancelado' ? '#ef476f' : '#ffc107';
-          return '<div onclick="openCommitmentFromHero(' + ev.id + ')" style="display:flex;align-items:center;gap:10px;padding:7px 10px;margin-bottom:5px;background:rgba(255,255,255,0.15);border-radius:10px;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background=\'rgba(255,255,255,0.25)\'" onmouseout="this.style.background=\'rgba(255,255,255,0.15)\'"><span style="width:8px;height:8px;border-radius:50%;background:' + statusColor + ';flex-shrink:0;"></span><div style="flex:1;min-width:0;"><div style="font-size:0.9rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + ev.title + '</div><div style="font-size:0.73rem;opacity:0.78;">' + timeStr + (ev.location ? ' · ' + ev.location : '') + '</div></div><i class="fas fa-chevron-right" style="font-size:0.7rem;opacity:0.6;flex-shrink:0;"></i></div>';
-        }).join('');
+          const statusLabel = ev.status === 'confirmado' ? 'Confirmado' : ev.status === 'cancelado' ? 'Cancelado' : 'Agendado';
+          const item = document.createElement('div');
+          item.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 10px;margin-bottom:5px;background:rgba(255,255,255,0.15);border-radius:10px;cursor:pointer;transition:background 0.15s;-webkit-tap-highlight-color:transparent;user-select:none;';
+          item.innerHTML = `
+            <span style="width:8px;height:8px;border-radius:50%;background:${statusColor};flex-shrink:0;box-shadow:0 0 6px ${statusColor}88;"></span>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:0.9rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${ev.title}</div>
+              <div style="font-size:0.73rem;opacity:0.78;">${timeStr}${ev.location ? ' · ' + ev.location : ''}</div>
+            </div>
+            <span style="font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(255,255,255,0.2);white-space:nowrap;">${statusLabel}</span>
+            <i class="fas fa-chevron-right" style="font-size:0.7rem;opacity:0.6;flex-shrink:0;"></i>`;
+          item.addEventListener('mouseenter', () => item.style.background = 'rgba(255,255,255,0.28)');
+          item.addEventListener('mouseleave', () => item.style.background = 'rgba(255,255,255,0.15)');
+          item.addEventListener('touchstart', () => item.style.background = 'rgba(255,255,255,0.28)', { passive: true });
+          item.addEventListener('touchend', () => { setTimeout(() => item.style.background = 'rgba(255,255,255,0.15)', 200); }, { passive: true });
+          item.addEventListener('click', () => openSingleCommitmentDetail(ev.id));
+          eventsList.appendChild(item);
+        });
       } else {
         eventsList.innerHTML = '<div style="font-size:0.9rem;font-weight:600;opacity:0.8;">Nenhum evento hoje</div>';
       }
@@ -6732,14 +6808,86 @@ function showCommitmentsForDay(dateString) {
   }
 
   function openCommitmentFromHero(commitmentId) {
-    // Navigate to the Agenda tab and open the day's commitments modal for that event
-    const commitment = commitments.find(c => c.id === commitmentId);
-    if (!commitment) return;
-    showTab('Agenda');
-    setTimeout(() => {
-      const dateStr = commitment.date ? commitment.date.split('T')[0] : '';
-      if (dateStr) showCommitmentsForDay(dateStr);
-    }, 150);
+    openSingleCommitmentDetail(commitmentId);
+  }
+
+  function openSingleCommitmentDetail(commitmentId) {
+    const c = commitments.find(ev => ev.id === commitmentId);
+    if (!c) return;
+
+    const modal = document.getElementById('single-commitment-detail-modal');
+    if (!modal) return;
+
+    const d = new Date(c.date);
+    const dateStr = d.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+    const timeStr = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+    const statusColors = { agendado: 'var(--warning)', confirmado: 'var(--primary)', realizado: 'var(--success)', cancelado: 'var(--danger)' };
+    const statusLabels = { agendado: 'Agendado', confirmado: 'Confirmado', realizado: 'Realizado', cancelado: 'Cancelado' };
+    const statusColor = statusColors[c.status] || 'var(--text3)';
+    const statusLabel = statusLabels[c.status] || c.status;
+
+    // Check linked order financial info
+    let financialHtml = '';
+    if (c.linkedOrderId) {
+      const order = eventOrders.find(o => o.id === c.linkedOrderId);
+      if (order) {
+        const paidReceipts = receipts.filter(r => r.orderId === order.id && r.status === 'pago');
+        const totalPaid = paidReceipts.reduce((s, r) => s + r.amount, 0);
+        const balanceDue = (order.totalValue || 0) - totalPaid;
+        financialHtml = `
+          <div style="background:var(--surface2);border-radius:var(--r-md);padding:14px;border-left:4px solid var(--primary);margin-top:4px;">
+            <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text3);font-weight:700;margin-bottom:10px;"><i class="fas fa-file-invoice-dollar" style="margin-right:6px;"></i>Resumo Financeiro do Pedido</div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:0.88rem;"><span style="color:var(--text2);">Valor Total</span><strong>${formatCurrency(order.totalValue)}</strong></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:0.88rem;"><span style="color:var(--text2);">Total Pago</span><strong style="color:var(--success);">${formatCurrency(totalPaid)}</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:0.88rem;"><span style="color:var(--text2);">Saldo Devedor</span><strong style="color:var(--danger);">${formatCurrency(balanceDue)}</strong></div>
+          </div>`;
+      }
+    }
+
+    document.getElementById('single-commitment-detail-body').innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+        <div style="width:48px;height:48px;border-radius:50%;background:${statusColor}22;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="fas fa-calendar-check" style="color:${statusColor};font-size:1.3rem;"></i>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-family:var(--font-display);font-size:1.15rem;font-weight:800;color:var(--text);line-height:1.2;">${c.title}</div>
+          <span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:var(--r-full);font-size:0.72rem;font-weight:700;background:${statusColor}22;color:${statusColor};margin-top:4px;">${statusLabel}</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;background:var(--surface2);border-radius:var(--r-md);">
+          <i class="fas fa-clock" style="color:var(--primary);margin-top:2px;flex-shrink:0;"></i>
+          <div>
+            <div style="font-size:0.75rem;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Data e Horário</div>
+            <div style="font-weight:600;font-size:0.9rem;margin-top:2px;">${dateStr}</div>
+            <div style="font-size:0.82rem;color:var(--text3);margin-top:1px;">${timeStr}</div>
+          </div>
+        </div>
+        ${c.location ? `
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;background:var(--surface2);border-radius:var(--r-md);">
+          <i class="fas fa-map-marker-alt" style="color:var(--ev-pink);margin-top:2px;flex-shrink:0;"></i>
+          <div>
+            <div style="font-size:0.75rem;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Local</div>
+            <div style="font-weight:600;font-size:0.9rem;margin-top:2px;">${c.location}</div>
+          </div>
+        </div>` : ''}
+        ${c.description ? `
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;background:var(--surface2);border-radius:var(--r-md);">
+          <i class="fas fa-align-left" style="color:var(--ev-blue);margin-top:2px;flex-shrink:0;"></i>
+          <div>
+            <div style="font-size:0.75rem;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Descrição</div>
+            <div style="font-size:0.88rem;color:var(--text2);margin-top:2px;line-height:1.5;">${c.description}</div>
+          </div>
+        </div>` : ''}
+        ${financialHtml}
+      </div>
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button class="btn btn-outline" style="flex:1;" onclick="document.getElementById('single-commitment-detail-modal').classList.remove('active'); openCommitmentModal('edit', ${c.id});"><i class="fas fa-edit"></i> Editar</button>
+        <button class="btn" style="flex:1;" onclick="document.getElementById('single-commitment-detail-modal').classList.remove('active'); showTab('Agenda'); setTimeout(()=>showCommitmentsForDay('${c.date ? c.date.split('T')[0] : ''}'),150);"><i class="fas fa-calendar-day"></i> Ver Dia</button>
+      </div>`;
+
+    modal.classList.add('active');
   }
 
   function formatCurrencyShort(v) {
@@ -6823,9 +6971,24 @@ function showCommitmentsForDay(dateString) {
 
 
   init();
+
+  // =====================================================
+  // EXPOSE FUNCTIONS GLOBALLY (needed for inline onclick)
+  // =====================================================
+  window.openCommitmentFromHero = openCommitmentFromHero;
+  window.openSingleCommitmentDetail = openSingleCommitmentDetail;
 });
 
 </script>
+
+  <!-- Modal Detalhe Individual do Compromisso -->
+  <div id="single-commitment-detail-modal" class="modal">
+    <div class="modal-content"><div class="modal-handle"></div>
+      <span class="close-button" data-action="close-modal">&times;</span>
+      <h2 style="margin-bottom:4px;"><i class="fas fa-calendar-check" style="color:var(--primary);"></i> Detalhes do Evento</h2>
+      <div id="single-commitment-detail-body" style="margin-top:16px;"></div>
+    </div>
+  </div>
 
   <!-- Modal de Pacote -->
   <div id="package-modal" class="modal">
