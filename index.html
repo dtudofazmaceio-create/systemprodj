@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1455,9 +1456,8 @@
         <div class="hero-greeting" id="hero-greeting">Bom dia 👋</div>
         <div class="hero-name" id="hero-username">FinancePro</div>
         <div id="hero-today-event-section" style="margin-top:12px;">
-          <div style="font-size:0.75rem;opacity:0.75;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;font-weight:600;">📅 Evento de Hoje</div>
-          <div id="hero-today-event" style="font-size:0.95rem;font-weight:600;opacity:0.95;">Nenhum evento hoje</div>
-          <div id="hero-today-event-sub" style="font-size:0.78rem;opacity:0.72;margin-top:3px;"></div>
+          <div style="font-size:0.75rem;opacity:0.75;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;font-weight:600;">📅 Eventos de Hoje</div>
+          <div id="hero-today-events-list"></div>
         </div>
       </div>
 
@@ -1484,9 +1484,6 @@
         <p class="section-title">Módulos</p>
         <div class="feature-grid">
           <div class="feature-item" data-tab-target="transacoes"><i class="fas fa-exchange-alt"></i><span>Transações</span></div>
-          <div class="feature-item" data-tab-target="contas"><i class="fas fa-piggy-bank"></i><span>Contas</span></div>
-          <div class="feature-item" data-tab-target="cartoes"><i class="fas fa-credit-card"></i><span>Cartões</span></div>
-          <div class="feature-item" data-tab-target="metas"><i class="fas fa-bullseye"></i><span>Metas</span></div>
           <div class="feature-item" data-tab-target="relatorios"><i class="fas fa-chart-bar"></i><span>Relatórios</span></div>
           <div class="feature-item" data-tab-target="recibos"><i class="fas fa-file-invoice"></i><span>Recibos</span></div>
           <div class="feature-item" data-tab-target="clientes"><i class="fas fa-users"></i><span>Clientes</span></div>
@@ -6697,28 +6694,24 @@ function showCommitmentsForDay(dateString) {
     if (greetEl) greetEl.textContent = greet;
     if (nameEl) nameEl.textContent = userInfo.name || 'FinancePro';
     
-    // Show today's event in hero
+    // Show today's events in hero (all, clickable)
     const todayStr = new Date().toISOString().split('T')[0];
     const todayEvents = commitments.filter(c => {
       const d = c.date ? c.date.split('T')[0] : '';
       return d === todayStr && c.status !== 'cancelado';
     }).sort((a,b) => new Date(a.date) - new Date(b.date));
     
-    const eventEl = document.getElementById('hero-today-event');
-    const eventSubEl = document.getElementById('hero-today-event-sub');
-    if (eventEl) {
+    const eventsList = document.getElementById('hero-today-events-list');
+    if (eventsList) {
       if (todayEvents.length > 0) {
-        const ev = todayEvents[0];
-        const d = new Date(ev.date);
-        const timeStr = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-        eventEl.textContent = ev.title;
-        if (eventSubEl) {
-          const extras = todayEvents.length > 1 ? ` +${todayEvents.length - 1} mais` : '';
-          eventSubEl.textContent = `${timeStr}${ev.location ? ' · ' + ev.location : ''}${extras}`;
-        }
+        eventsList.innerHTML = todayEvents.map(ev => {
+          const d = new Date(ev.date);
+          const timeStr = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+          const statusColor = ev.status === 'confirmado' ? '#06d6a0' : ev.status === 'cancelado' ? '#ef476f' : '#ffc107';
+          return '<div onclick="openCommitmentFromHero(' + ev.id + ')" style="display:flex;align-items:center;gap:10px;padding:7px 10px;margin-bottom:5px;background:rgba(255,255,255,0.15);border-radius:10px;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background=\'rgba(255,255,255,0.25)\'" onmouseout="this.style.background=\'rgba(255,255,255,0.15)\'"><span style="width:8px;height:8px;border-radius:50%;background:' + statusColor + ';flex-shrink:0;"></span><div style="flex:1;min-width:0;"><div style="font-size:0.9rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + ev.title + '</div><div style="font-size:0.73rem;opacity:0.78;">' + timeStr + (ev.location ? ' · ' + ev.location : '') + '</div></div><i class="fas fa-chevron-right" style="font-size:0.7rem;opacity:0.6;flex-shrink:0;"></i></div>';
+        }).join('');
       } else {
-        eventEl.textContent = 'Nenhum evento hoje';
-        if (eventSubEl) eventSubEl.textContent = '';
+        eventsList.innerHTML = '<div style="font-size:0.9rem;font-weight:600;opacity:0.8;">Nenhum evento hoje</div>';
       }
     }
     
@@ -6736,6 +6729,17 @@ function showCommitmentsForDay(dateString) {
     if (receitasEl) receitasEl.textContent = formatCurrency(monthReceitas);
     if (despesasEl) despesasEl.textContent = formatCurrency(monthDespesas);
     if (balancoEl) balancoEl.textContent = formatCurrency(monthReceitas - monthDespesas);
+  }
+
+  function openCommitmentFromHero(commitmentId) {
+    // Navigate to the Agenda tab and open the day's commitments modal for that event
+    const commitment = commitments.find(c => c.id === commitmentId);
+    if (!commitment) return;
+    showTab('Agenda');
+    setTimeout(() => {
+      const dateStr = commitment.date ? commitment.date.split('T')[0] : '';
+      if (dateStr) showCommitmentsForDay(dateStr);
+    }, 150);
   }
 
   function formatCurrencyShort(v) {
@@ -6790,7 +6794,7 @@ function showCommitmentsForDay(dateString) {
       const timeStr = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
       const isToday = d.toISOString().split('T')[0] === new Date().toISOString().split('T')[0];
       const dayLabel = isToday ? 'Hoje' : String(d.getDate());
-      return `<div class="upcoming-event-item" onclick="showTab('Agenda')">
+      return `<div class="upcoming-event-item" onclick="openCommitmentFromHero(${c.id})">
         <div class="upcoming-event-date-badge">
           <span class="day">${dayLabel}</span>
           <span class="month">${isToday ? '🎯' : months[d.getMonth()]}</span>
