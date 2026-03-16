@@ -847,6 +847,7 @@
   .quick-actions-grid .feature-item span { font-weight: 700; }
 
 
+  .main-cta-button {
     width: 100%; padding: 16px;
     font-family: var(--font-display);
     font-size: 0.95rem; font-weight: 700;
@@ -945,7 +946,8 @@
   .transaction-body { margin-bottom: 10px; }
   .transaction-favorecido { font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; color: var(--text); }
   .transaction-details { font-size: 0.78rem; color: var(--text3); margin-top: 3px; }
-  .transaction-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .transaction-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; flex-wrap: wrap; gap: 8px; }
+  .transaction-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; flex-shrink: 0; }
   .transaction-value { font-family: var(--font-display); font-size: 1.2rem; font-weight: 800; }
   .positive { color: var(--success); }
   .negative { color: var(--danger); }
@@ -1179,7 +1181,10 @@
     border-radius: var(--r-md);
     border: 1px solid var(--border-soft);
   }
-  .filters-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .filters-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  @media (min-width: 360px) {
+    .filters-grid { grid-template-columns: 1fr 1fr; }
+  }
   .filter-group { display: flex; flex-direction: column; gap: 4px; }
   .filter-group label { font-size: 0.78rem; font-weight: 600; color: var(--text2); }
   .filter-group input, .filter-group select {
@@ -1189,7 +1194,8 @@
     outline: none; transition: var(--t-fast);
   }
   .filter-group input:focus, .filter-group select:focus { border-color: var(--primary); }
-  .filter-actions { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; }
+  .filter-actions { display: flex; gap: 8px; margin-top: 12px; }
+  .filter-actions .btn { flex: 1; justify-content: center; }
 
   /* ==========================================
      TABLES (mobile-friendly)
@@ -1440,6 +1446,194 @@
     .modal-content { border-radius: var(--r-xl); max-height: 88vh; }
     .modal-handle { display: none; }
   }
+
+  /* ==========================================
+     MOBILE NATIVE APP EXPERIENCE
+  ========================================== */
+
+  /* Tiny screens: single column for everything tight */
+  @media (max-width: 359px) {
+    .filters-grid { grid-template-columns: 1fr; }
+    .summary-cards { grid-template-columns: 1fr 1fr; }
+    .btn { padding: 10px 14px; font-size: 0.85rem; }
+    .btn-xs { padding: 7px 10px; }
+    .transaction-value { font-size: 1rem; }
+    .hero-balance-value { font-size: 1.6rem; }
+    .main-content { padding-left: 12px; padding-right: 12px; }
+  }
+
+  /* Ensure buttons in pedidos/filter areas are always properly sized */
+  .filter-actions .btn,
+  .pedidos-cta-row .btn {
+    flex: 1;
+    justify-content: center;
+    min-height: 44px;
+  }
+
+  /* Transaction/order card improvements for native feel */
+  .transaction-card,
+  .order-card,
+  .quote-card,
+  .receipt-card,
+  .client-card,
+  .commitment-card,
+  .package-card {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  /* Prevent category badge overflow on small screens */
+  .transaction-header {
+    flex-wrap: wrap;
+  }
+  .category-badge {
+    max-width: calc(100% - 80px);
+    min-width: 0;
+  }
+
+  /* Ensure action buttons are always in a row */
+  .transaction-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+  }
+  .transaction-actions .btn-xs {
+    flex-shrink: 0;
+    min-width: 34px;
+    min-height: 34px;
+    padding: 7px 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Pedidos header buttons row */
+  .pedidos-cta-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+  }
+  .pedidos-cta-row .btn {
+    flex: 1;
+    min-width: 140px;
+    justify-content: center;
+  }
+
+  /* Summary cards min height for consistency */
+  .summary-card {
+    min-height: 80px;
+  }
+  .summary-card .value {
+    font-size: clamp(0.95rem, 3.5vw, 1.2rem);
+    word-break: break-word;
+  }
+
+  /* Feature grid on very small screens */
+  @media (max-width: 320px) {
+    .feature-grid { grid-template-columns: repeat(3, 1fr); }
+    .side-menu-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* Fix scrollable filter overflow */
+  .filters-container {
+    overflow: hidden;
+  }
+  .filter-group input,
+  .filter-group select {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  /* Upcoming events / recent tx items */
+  .upcoming-event-item,
+  .recent-tx-item {
+    gap: 10px;
+  }
+  .upcoming-event-name {
+    font-size: 0.85rem;
+  }
+
+  /* Card padding tweak for very small screens */
+  @media (max-width: 380px) {
+    .card { padding: var(--space-md); }
+    .modal-content { padding: 0 var(--space-md) calc(var(--space-md) + env(safe-area-inset-bottom, 0px)); }
+  }
+
+  /* Chart container responsive height */
+  @media (max-width: 380px) {
+    .chart-container { height: 200px; }
+  }
+
+  /* Native-feel active states */
+  .transaction-card:active,
+  .order-card:active,
+  .quote-card:active {
+    background: var(--surface2);
+  }
+
+  /* Prevent any horizontal scroll */
+  .tab-content,
+  .main-content {
+    overflow-x: hidden;
+  }
+  .card {
+    overflow: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* KPI card value sizing */
+  .kpi-card-value {
+    font-size: clamp(1rem, 4vw, 1.25rem);
+    word-break: break-word;
+  }
+
+  /* Bottom nav safe area improvements */
+  .bottom-nav {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+  .bottom-nav-item {
+    flex: 1;
+    padding: 8px 4px;
+    min-width: 0;
+  }
+  .bottom-nav-item span {
+    font-size: clamp(0.6rem, 2vw, 0.68rem);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  /* Transaction favorecido text ellipsis */
+  .transaction-favorecido {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+  .transaction-body {
+    overflow: hidden;
+  }
+
+  /* Balance value in hero */
+  .hero-balance-value {
+    font-size: clamp(1.5rem, 6vw, 2rem);
+  }
+
+  /* Fix flex-group for forms on mobile */
+  @media (max-width: 400px) {
+    .flex-group {
+      flex-direction: column;
+    }
+  }
+
 
   /* ==========================================
      OVERRIDE FONT ON MODAL  
@@ -1800,9 +1994,9 @@
     <div class="tab-content" id="pedidos-content">
       <div class="card">
         <h2><i class="fas fa-clipboard-check"></i> Meus Pedidos e Orçamentos</h2>
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <div class="pedidos-cta-row">
             <button class="btn" id="add-new-order-btn-aba"><i class="fas fa-plus"></i> Novo Pedido</button>
-            <button class="btn" id="add-new-quote-btn-aba" style="background: var(--event-blue);"><i class="fas fa-plus"></i> Novo Orçamento</button>
+            <button class="btn" id="add-new-quote-btn-aba" style="background: var(--ev-blue);"><i class="fas fa-plus"></i> Novo Orçamento</button>
         </div>
         <div class="filters-container">
             <div class="filters-grid">
@@ -4964,7 +5158,7 @@ function updateClientsList() {
         const cardType = item.type === 'order' ? 'order-card' : 'quote-card';
         const number = item.type === 'order' ? item.orderNumber : item.quoteNumber;
         const typeLabel = item.type === 'order' ? 'Pedido' : 'Orçamento';
-        const valueColor = item.type === 'order' ? 'var(--event-orange)' : 'var(--event-blue)';
+        const valueColor = item.type === 'order' ? 'var(--ev-orange)' : 'var(--ev-blue)';
         const date = item.type === 'order' ? item.eventDate : item.emissionDate;
 
         let statusBadge = '';
@@ -4989,10 +5183,6 @@ function updateClientsList() {
                 <div class="transaction-actions">
                     ${statusBadge}
                     <button class="btn btn-xs" data-action="view-${item.type}" data-id="${item.id}" title="Visualizar"><i class="fas fa-eye"></i></button>
-                   <div id="orcamentoParaPDF"> 
-                   <div class="modal-body-details">
-                  </div>
-                   </div>
                     <button class="btn btn-xs" data-action="edit-${item.type}" data-id="${item.id}" title="Editar"><i class="fas fa-edit"></i></button>
                     <button class="btn btn-xs btn-danger" data-action="delete-${item.type}" data-id="${item.id}" title="Excluir"><i class="fas fa-trash"></i></button>
                 </div>
@@ -6255,7 +6445,7 @@ function showCommitmentsForDay(dateString) {
       card.innerHTML = `
         <div class="transaction-header">
           <span class="category-badge"><i class="fas fa-box-open"></i> Pacote</span>
-          <span class="transaction-value" style="color:var(--event-teal);">${formatCurrency(pkg.totalValue)}</span>
+          <span class="transaction-value" style="color:var(--ev-teal);">${formatCurrency(pkg.totalValue)}</span>
         </div>
         <div class="transaction-body">
           <span class="transaction-favorecido">${pkg.name}</span>
