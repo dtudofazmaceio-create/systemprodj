@@ -129,7 +129,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
-    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: 0;
     transition: background var(--t-slow), color var(--t-slow);
   }
 
@@ -190,11 +190,10 @@
   ========================================== */
   .main-content {
     flex: 1;
-    padding: calc(56px + env(safe-area-inset-top, 0px) + 12px) var(--space-md) var(--space-xl);
+    padding: calc(56px + env(safe-area-inset-top, 0px) + 16px) var(--space-md) calc(var(--space-xl) + env(safe-area-inset-bottom, 0px));
     display: flex;
     flex-direction: column;
     gap: 16px;
-    min-height: 100vh;
   }
 
   /* ==========================================
@@ -1072,9 +1071,7 @@
   }
   .flex-group { display: flex; gap: 10px; align-items: flex-end; }
   .flex-group .form-group { flex: 1; }
-  .filter-checkbox { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
-  .filter-checkbox input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--primary); }
-  .filter-checkbox label { font-size: 0.88rem; color: var(--text2); }
+  /* filter-checkbox styles moved to FILTERS section */
 
   /* ==========================================
      BUTTONS
@@ -1180,22 +1177,62 @@
     background: var(--surface2);
     border-radius: var(--r-md);
     border: 1px solid var(--border-soft);
+    overflow: hidden;
   }
-  .filters-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
-  @media (min-width: 360px) {
-    .filters-grid { grid-template-columns: 1fr 1fr; }
+  .filters-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
   }
-  .filter-group { display: flex; flex-direction: column; gap: 4px; }
+  /* Checkbox filter group always spans full width */
+  .filters-grid .filter-group:has(.filter-checkbox),
+  .filters-grid .filter-group-full {
+    grid-column: 1 / -1;
+  }
+  .filter-group { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
   .filter-group label { font-size: 0.78rem; font-weight: 600; color: var(--text2); }
   .filter-group input, .filter-group select {
     padding: 9px 12px; border: 1.5px solid var(--input-border);
     border-radius: var(--r-sm); background: var(--input-bg);
     font-family: var(--font-body); color: var(--text); font-size: 0.88rem;
     outline: none; transition: var(--t-fast);
+    width: 100%; min-width: 0; box-sizing: border-box;
+    -webkit-appearance: none; appearance: none;
   }
-  .filter-group input:focus, .filter-group select:focus { border-color: var(--primary); }
+  .filter-group select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238888aa' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+  .filter-group input:focus, .filter-group select:focus { border-color: var(--primary); box-shadow: 0 0 0 2px var(--input-focus); }
+  .filter-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--input-bg);
+    border: 1.5px solid var(--input-border);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    margin-top: 2px;
+  }
+  .filter-checkbox input[type=checkbox] {
+    width: 18px; height: 18px; flex-shrink: 0;
+    accent-color: var(--primary);
+    cursor: pointer;
+  }
+  .filter-checkbox label {
+    font-size: 0.88rem; color: var(--text2); font-weight: 500;
+    cursor: pointer; line-height: 1.3;
+  }
   .filter-actions { display: flex; gap: 8px; margin-top: 12px; }
-  .filter-actions .btn { flex: 1; justify-content: center; }
+  .filter-actions .btn { flex: 1; justify-content: center; min-height: 44px; }
+
+  @media (max-width: 359px) {
+    .filters-grid { grid-template-columns: 1fr; }
+    .filters-grid .filter-group:has(.filter-checkbox) { grid-column: 1; }
+  }
 
   /* ==========================================
      TABLES (mobile-friendly)
@@ -1524,11 +1561,19 @@
 
   /* Summary cards min height for consistency */
   .summary-card {
-    min-height: 80px;
+    min-height: 88px;
   }
   .summary-card .value {
-    font-size: clamp(0.95rem, 3.5vw, 1.2rem);
+    font-size: clamp(0.85rem, 3.8vw, 1.15rem);
     word-break: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.2;
+  }
+  .summary-card h3 {
+    font-size: 0.68rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   /* Feature grid on very small screens */
@@ -1537,16 +1582,7 @@
     .side-menu-grid { grid-template-columns: repeat(2, 1fr); }
   }
 
-  /* Fix scrollable filter overflow */
-  .filters-container {
-    overflow: hidden;
-  }
-  .filter-group input,
-  .filter-group select {
-    width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
-  }
+  /* filter overflow handled in FILTERS section */
 
   /* Upcoming events / recent tx items */
   .upcoming-event-item,
@@ -1579,11 +1615,16 @@
   .tab-content,
   .main-content {
     overflow-x: hidden;
+    max-width: 100%;
   }
   .card {
-    overflow: hidden;
     word-wrap: break-word;
     overflow-wrap: break-word;
+    max-width: 100%;
+  }
+  /* Only clip overflow on cards that need it */
+  .card > .filters-container {
+    overflow: hidden;
   }
 
   /* KPI card value sizing */
@@ -1643,6 +1684,103 @@
   }
   h1, h2, h3, .modal h2, .card h2 {
     font-family: var(--font-display);
+  }
+
+  /* ==========================================
+     ADDITIONAL MOBILE FIXES
+  ========================================== */
+
+  /* Ensure transaction header doesn't overflow */
+  .transaction-header {
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: flex-start;
+  }
+
+  /* Status + category badges — prevent overflow */
+  .category-badge, .status-badge {
+    flex-shrink: 0;
+    max-width: 50%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Transaction footer - wrap on small screens */
+  .transaction-footer {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  /* Ensure the filters-container inside card has correct top margin */
+  .card .filters-container {
+    margin-top: 4px;
+  }
+
+  /* Fix date inputs on iOS */
+  input[type="date"] {
+    -webkit-appearance: none;
+    appearance: none;
+    min-height: 42px;
+    padding: 9px 12px;
+    width: 100%;
+    background: var(--input-bg);
+    border: 1.5px solid var(--input-border);
+    border-radius: var(--r-sm);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 0.88rem;
+  }
+  input[type="date"]::-webkit-date-and-time-value {
+    text-align: left;
+  }
+
+  /* Summary cards — prevent content from spilling */
+  .summary-cards {
+    align-items: stretch;
+  }
+  .summary-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 2px;
+    overflow: hidden;
+  }
+  .summary-card .forecast,
+  .summary-card .trend {
+    font-size: 0.68rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Fix filter grid on very small screens */
+  @media (max-width: 359px) {
+    .filters-grid { grid-template-columns: 1fr; }
+    .filters-grid .filter-group-full { grid-column: 1; }
+  }
+
+  /* Improve touch targets for all interactive elements */
+  .btn, .bottom-nav-item, .feature-item, .transaction-card,
+  .summary-card, .calendar-day:not(.empty-day) {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  /* Prevent zoom on input focus (iOS) */
+  @media (max-width: 768px) {
+    input, select, textarea {
+      font-size: 16px !important;
+    }
+    .filter-group input,
+    .filter-group select,
+    input[type="date"],
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    select {
+      font-size: 16px !important;
+    }
   }
 </style>
 </head>
@@ -1876,7 +2014,7 @@
               <label for="end-date-filter">Data Fim</label>
               <input type="date" id="end-date-filter">
             </div>
-            <div class="filter-group">
+            <div class="filter-group filter-group-full">
                <div class="filter-checkbox">
                 <input type="checkbox" id="expired-only">
                 <label for="expired-only">Mostrar apenas vencidas</label>
