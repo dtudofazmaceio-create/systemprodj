@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -834,8 +835,18 @@
   .shortcut-item i { font-size: 1.2rem; color: var(--primary); }
   .shortcut-item span { font-size: 0.72rem; font-weight: 600; color: var(--text2); line-height: 1.2; }
 
-  /* CTA Button */
-  .main-cta-button {
+  /* Quick Actions grid shares feature-grid layout, with distinct color cycle */
+  .quick-actions-grid .feature-item:nth-child(6n+1) i { color: var(--success); background: rgba(6,214,160,0.12); }
+  .quick-actions-grid .feature-item:nth-child(6n+2) i { color: var(--danger); background: rgba(239,71,111,0.12); }
+  .quick-actions-grid .feature-item:nth-child(6n+3) i { color: var(--info); background: rgba(76,201,240,0.12); }
+  .quick-actions-grid .feature-item:nth-child(6n+4) i { color: var(--ev-orange); background: rgba(247,127,0,0.12); }
+  .quick-actions-grid .feature-item:nth-child(6n+5) i { color: var(--ev-blue); background: rgba(72,149,239,0.12); }
+  .quick-actions-grid .feature-item:nth-child(6n+6) i { color: var(--ev-purple); background: rgba(155,93,229,0.12); }
+  .quick-actions-grid .feature-item:nth-child(7) i { color: var(--ev-teal); background: rgba(6,214,160,0.12); }
+  .quick-actions-grid .feature-item:nth-child(8) i { color: var(--ev-pink); background: rgba(247,37,133,0.12); }
+  .quick-actions-grid .feature-item span { font-weight: 700; }
+
+
     width: 100%; padding: 16px;
     font-family: var(--font-display);
     font-size: 0.95rem; font-weight: 700;
@@ -1470,18 +1481,18 @@
       <!-- Notifications -->
       <div class="notifications-container" id="notifications-container"></div>
 
-      <!-- Quick Actions -->
+      <!-- Ações Rápidas -->
       <div>
         <p class="section-title">Ações Rápidas</p>
-        <div class="shortcuts-container">
-          <div class="shortcut-item" data-action="add-new" data-type="receita"><i class="fas fa-arrow-down" style="color:var(--success)"></i><span>Receita</span></div>
-          <div class="shortcut-item" data-action="add-new" data-type="despesa"><i class="fas fa-arrow-up" style="color:var(--danger)"></i><span>Despesa</span></div>
-          <div class="shortcut-item" data-action="add-new" data-type="transferencia"><i class="fas fa-exchange-alt" style="color:var(--info)"></i><span>Transferência</span></div>
-          <div class="shortcut-item" id="add-new-receipt-btn"><i class="fas fa-file-invoice" style="color:var(--ev-orange)"></i><span>Recibo</span></div>
-          <div class="shortcut-item" id="add-new-client-btn"><i class="fas fa-user-plus" style="color:var(--ev-blue)"></i><span>Cliente</span></div>
-          <div class="shortcut-item" id="add-new-commitment-btn"><i class="fas fa-handshake" style="color:var(--ev-purple)"></i><span>Compromisso</span></div>
-          <a href="https://www.nfse.gov.br/EmissorNacional/Login?ReturnUrl=%2fEmissorNacional%2fDPS%2fNFSe%3fidr%3dQnVWeE9PVGFZRWc90&idr=QnVWeE9PVGFZRWc90" target="_blank" rel="noopener noreferrer" class="shortcut-item" style="text-decoration:none;color:inherit;"><i class="fas fa-receipt" style="color:var(--ev-teal)"></i><span>Nota Fiscal</span></a>
-          <div class="shortcut-item" data-tab-target="documentos"><i class="fas fa-file-alt" style="color:var(--ev-pink)"></i><span>Documentos</span></div>
+        <div class="feature-grid quick-actions-grid">
+          <div class="feature-item quick-action-item" data-action="add-new" data-type="receita"><i class="fas fa-arrow-down"></i><span>+ Receita</span></div>
+          <div class="feature-item quick-action-item" data-action="add-new" data-type="despesa"><i class="fas fa-arrow-up"></i><span>+ Despesa</span></div>
+          <div class="feature-item quick-action-item" data-action="add-new" data-type="transferencia"><i class="fas fa-exchange-alt"></i><span>Transferência</span></div>
+          <div class="feature-item quick-action-item" id="add-new-receipt-btn"><i class="fas fa-file-invoice"></i><span>+ Recibo</span></div>
+          <div class="feature-item quick-action-item" id="add-new-client-btn"><i class="fas fa-user-plus"></i><span>+ Cliente</span></div>
+          <div class="feature-item quick-action-item" id="add-new-commitment-btn"><i class="fas fa-handshake"></i><span>+ Compromisso</span></div>
+          <a href="https://www.nfse.gov.br/EmissorNacional/Login?ReturnUrl=%2fEmissorNacional%2fDPS%2fNFSe%3fidr%3dQnVWeE9PVGFZRWc90&idr=QnVWeE9PVGFZRWc90" target="_blank" rel="noopener noreferrer" class="feature-item quick-action-item" style="text-decoration:none;color:inherit;"><i class="fas fa-receipt"></i><span>Nota Fiscal</span></a>
+          <div class="feature-item quick-action-item" data-tab-target="documentos"><i class="fas fa-file-alt"></i><span>Documentos</span></div>
         </div>
       </div>
 
@@ -6882,12 +6893,67 @@ function showCommitmentsForDay(dateString) {
         </div>` : ''}
         ${financialHtml}
       </div>
-      <div style="display:flex;gap:10px;margin-top:20px;">
-        <button class="btn btn-outline" style="flex:1;" onclick="document.getElementById('single-commitment-detail-modal').classList.remove('active'); openCommitmentModal('edit', ${c.id});"><i class="fas fa-edit"></i> Editar</button>
-        <button class="btn" style="flex:1;" onclick="document.getElementById('single-commitment-detail-modal').classList.remove('active'); showTab('Agenda'); setTimeout(()=>showCommitmentsForDay('${c.date ? c.date.split('T')[0] : ''}'),150);"><i class="fas fa-calendar-day"></i> Ver Dia</button>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <button class="btn" style="background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;border:none;" onclick="document.getElementById('single-commitment-detail-modal').classList.remove('active'); openCommitmentModal('edit', ${c.id});"><i class="fas fa-edit"></i> Editar</button>
+          <button class="btn btn-outline" onclick="document.getElementById('single-commitment-detail-modal').classList.remove('active'); showTab('Agenda'); setTimeout(()=>showCommitmentsForDay('${c.date ? c.date.split('T')[0] : ''}'),150);"><i class="fas fa-calendar-day"></i> Ver Dia</button>
+        </div>
+        <div style="background:var(--surface2);border-radius:var(--r-md);padding:12px;">
+          <div style="font-size:0.72rem;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">Alterar Status</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+            <button onclick="updateCommitmentStatusFromDetail(${c.id},'confirmado')" style="padding:8px 4px;border-radius:var(--r-sm);border:1.5px solid var(--primary);background:${c.status==='confirmado'?'var(--primary)':'transparent'};color:${c.status==='confirmado'?'white':'var(--primary)'};font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:var(--font-body);" onmouseover="this.style.background='var(--primary)';this.style.color='white'" onmouseout="this.style.background='${c.status==='confirmado'?'var(--primary)':'transparent'}';this.style.color='${c.status==='confirmado'?'white':'var(--primary)'}'">
+              <i class="fas fa-check-circle" style="display:block;font-size:1.1rem;margin-bottom:3px;"></i>Confirmado
+            </button>
+            <button onclick="updateCommitmentStatusFromDetail(${c.id},'realizado')" style="padding:8px 4px;border-radius:var(--r-sm);border:1.5px solid var(--success);background:${c.status==='realizado'?'var(--success)':'transparent'};color:${c.status==='realizado'?'white':'var(--success)'};font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:var(--font-body);" onmouseover="this.style.background='var(--success)';this.style.color='white'" onmouseout="this.style.background='${c.status==='realizado'?'var(--success)':'transparent'}';this.style.color='${c.status==='realizado'?'white':'var(--success)'}'">
+              <i class="fas fa-flag-checkered" style="display:block;font-size:1.1rem;margin-bottom:3px;"></i>Realizado
+            </button>
+            <button onclick="updateCommitmentStatusFromDetail(${c.id},'cancelado')" style="padding:8px 4px;border-radius:var(--r-sm);border:1.5px solid var(--danger);background:${c.status==='cancelado'?'var(--danger)':'transparent'};color:${c.status==='cancelado'?'white':'var(--danger)'};font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:var(--font-body);" onmouseover="this.style.background='var(--danger)';this.style.color='white'" onmouseout="this.style.background='${c.status==='cancelado'?'var(--danger)':'transparent'}';this.style.color='${c.status==='cancelado'?'white':'var(--danger)'}'">
+              <i class="fas fa-times-circle" style="display:block;font-size:1.1rem;margin-bottom:3px;"></i>Cancelar
+            </button>
+          </div>
+        </div>
+        <button onclick="deleteCommitmentFromDetail(${c.id})" style="width:100%;padding:12px;border-radius:var(--r-md);border:1.5px solid var(--danger);background:transparent;color:var(--danger);font-size:0.88rem;font-weight:700;cursor:pointer;font-family:var(--font-body);display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.15s;" onmouseover="this.style.background='var(--danger)';this.style.color='white'" onmouseout="this.style.background='transparent';this.style.color='var(--danger)'">
+          <i class="fas fa-trash"></i> Excluir Compromisso
+        </button>
       </div>`;
 
     modal.classList.add('active');
+  }
+
+  function updateCommitmentStatusFromDetail(commitmentId, newStatus) {
+    const c = commitments.find(ev => ev.id === commitmentId);
+    if (!c) return;
+    const statusLabels = { agendado: 'Agendado', confirmado: 'Confirmado', realizado: 'Realizado', cancelado: 'Cancelado' };
+    c.status = newStatus;
+    saveData();
+    updateCommitmentsList();
+    renderCalendar(calendarCurrentDate);
+    updateDashboardHero();
+    updateNotificationsBanner();
+    updateDashboardUpcoming();
+    document.getElementById('single-commitment-detail-modal').classList.remove('active');
+    showToast(`Compromisso marcado como "${statusLabels[newStatus]}"`, 'success');
+  }
+
+  function deleteCommitmentFromDetail(commitmentId) {
+    const c = commitments.find(ev => ev.id === commitmentId);
+    if (!c) return;
+    document.getElementById('single-commitment-detail-modal').classList.remove('active');
+    showConfirm(
+      'Esta ação não pode ser desfeita.',
+      `Excluir "${c.title}"?`,
+      () => {
+        const idx = commitments.findIndex(ev => ev.id === commitmentId);
+        if (idx > -1) commitments.splice(idx, 1);
+        saveData();
+        updateCommitmentsList();
+        renderCalendar(calendarCurrentDate);
+        updateDashboardHero();
+        updateNotificationsBanner();
+        updateDashboardUpcoming();
+        showToast('Compromisso excluído.', 'success');
+      }
+    );
   }
 
   function formatCurrencyShort(v) {
@@ -6977,6 +7043,8 @@ function showCommitmentsForDay(dateString) {
   // =====================================================
   window.openCommitmentFromHero = openCommitmentFromHero;
   window.openSingleCommitmentDetail = openSingleCommitmentDetail;
+  window.updateCommitmentStatusFromDetail = updateCommitmentStatusFromDetail;
+  window.deleteCommitmentFromDetail = deleteCommitmentFromDetail;
 });
 
 </script>
