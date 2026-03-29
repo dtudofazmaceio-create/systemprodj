@@ -1781,6 +1781,341 @@
       font-size: 16px !important;
     }
   }
+
+  /* ============================================
+     FINANCES PANEL — KPI CARDS
+  ============================================ */
+  .fin-summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (min-width: 640px) {
+    .fin-summary-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  .fin-kpi-card {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border-soft);
+    padding: 16px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    transition: box-shadow var(--t-normal), transform var(--t-fast);
+    position: relative;
+    overflow: hidden;
+  }
+  .fin-kpi-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 0 0 var(--r-lg) var(--r-lg);
+  }
+  .fin-kpi-card:active { transform: scale(0.97); }
+
+  .fin-kpi-icon {
+    width: 42px; height: 42px;
+    border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .fin-kpi-body { flex: 1; min-width: 0; }
+  .fin-kpi-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text3);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .fin-kpi-value {
+    font-family: var(--font-display);
+    font-size: clamp(0.9rem, 3.5vw, 1.2rem);
+    font-weight: 800;
+    line-height: 1.1;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  .fin-kpi-trend {
+    font-size: 0.68rem;
+    color: var(--text3);
+    margin-top: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* KPI color variants */
+  .fin-kpi-receita .fin-kpi-icon { background: var(--success-bg); color: var(--success); }
+  .fin-kpi-receita .fin-kpi-value { color: var(--success); }
+  .fin-kpi-receita::after { background: var(--success); }
+
+  .fin-kpi-despesa .fin-kpi-icon { background: var(--danger-bg); color: var(--danger); }
+  .fin-kpi-despesa .fin-kpi-value { color: var(--danger); }
+  .fin-kpi-despesa::after { background: var(--danger); }
+
+  .fin-kpi-saldo .fin-kpi-icon { background: var(--primary-glow); color: var(--primary); }
+  .fin-kpi-saldo .fin-kpi-value { color: var(--primary); }
+  .fin-kpi-saldo::after { background: var(--primary); }
+
+  .fin-kpi-balanco .fin-kpi-icon { background: rgba(155,93,229,0.12); color: var(--ev-purple); }
+  .fin-kpi-balanco .fin-kpi-value { color: var(--ev-purple); }
+  .fin-kpi-balanco::after { background: var(--ev-purple); }
+
+  /* ============================================
+     SHARED PANEL ELEMENTS
+  ============================================ */
+  .fin-transactions-card,
+  .ped-main-card {
+    padding: var(--space-md);
+  }
+
+  .fin-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    gap: 10px;
+  }
+  .fin-card-header h2 { margin-bottom: 0; }
+
+  .fin-add-btn {
+    padding: 8px 16px;
+    font-size: 0.82rem;
+    flex-shrink: 0;
+  }
+
+  /* Search bar */
+  .fin-search-row {
+    margin-bottom: 12px;
+  }
+  .fin-search-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 10px 14px;
+    transition: border-color var(--t-fast);
+  }
+  .fin-search-wrap:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--input-focus);
+  }
+  .fin-search-icon { color: var(--text3); font-size: 0.9rem; flex-shrink: 0; }
+  .fin-search-input {
+    flex: 1; background: none; border: none; outline: none;
+    color: var(--text); font-family: var(--font-body);
+    font-size: 0.9rem; caret-color: var(--primary);
+  }
+  .fin-search-input::placeholder { color: var(--text3); }
+
+  /* Filter pills (type switcher) */
+  .fin-filter-pills {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    overflow-x: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+  .fin-filter-pills::-webkit-scrollbar { display: none; }
+  .fin-pill {
+    background: var(--surface2);
+    border: 1.5px solid var(--border-soft);
+    color: var(--text3);
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: var(--r-full);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: var(--t-fast);
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .fin-pill.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    box-shadow: 0 2px 10px var(--primary-glow);
+  }
+  .fin-pill:active { transform: scale(0.94); }
+
+  /* Collapsible advanced filters */
+  .fin-filter-details {
+    margin-bottom: 4px;
+  }
+  .fin-filter-details[open] { margin-bottom: 8px; }
+  .fin-filter-summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text3);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 8px 4px;
+    list-style: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: color var(--t-fast);
+  }
+  .fin-filter-summary::-webkit-details-marker { display: none; }
+  .fin-filter-summary::after {
+    content: '\f107';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    margin-left: auto;
+    transition: transform var(--t-fast);
+  }
+  .fin-filter-details[open] .fin-filter-summary::after { transform: rotate(180deg); }
+  .fin-filter-details[open] .fin-filter-summary { color: var(--primary); }
+  .fin-filters-body {
+    padding: 12px 0 4px;
+    animation: tabIn 0.2s ease both;
+  }
+  .fin-filters-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  @media (min-width: 480px) {
+    .fin-filters-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 640px) {
+    .fin-filters-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  .fin-filter-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 12px;
+  }
+
+  /* ============================================
+     ORDERS PANEL
+  ============================================ */
+  .ped-kpi-strip {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border-soft);
+    display: flex;
+    align-items: center;
+    padding: 0;
+    overflow: hidden;
+  }
+  .ped-kpi-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 14px 8px;
+    gap: 3px;
+  }
+  .ped-kpi-num {
+    font-family: var(--font-display);
+    font-size: clamp(1.1rem, 4vw, 1.6rem);
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+  }
+  .ped-kpi-num.ped-kpi-green { color: var(--success); }
+  .ped-kpi-num.ped-kpi-orange { color: var(--warning); }
+  .ped-kpi-num.ped-kpi-blue { color: var(--ev-blue); }
+  .ped-kpi-lbl {
+    font-size: clamp(0.58rem, 2vw, 0.68rem);
+    color: var(--text3);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  .ped-kpi-sep {
+    width: 1px;
+    height: 36px;
+    background: var(--border-soft);
+    flex-shrink: 0;
+  }
+
+  /* CTA row */
+  .ped-cta-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 359px) {
+    .ped-cta-row { grid-template-columns: 1fr; }
+  }
+
+  .ped-cta-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border: none;
+    border-radius: var(--r-md);
+    cursor: pointer;
+    transition: var(--t-fast);
+    text-align: left;
+    width: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .ped-cta-btn:active { transform: scale(0.97); opacity: 0.9; }
+
+  .ped-cta-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    box-shadow: 0 4px 14px var(--primary-glow);
+  }
+  .ped-cta-secondary {
+    background: linear-gradient(135deg, var(--ev-blue), var(--info));
+    box-shadow: 0 4px 14px rgba(72,149,239,0.25);
+  }
+  .ped-cta-icon {
+    width: 34px; height: 34px;
+    background: rgba(255,255,255,0.2);
+    border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    color: white;
+    flex-shrink: 0;
+  }
+  .ped-cta-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .ped-cta-text strong {
+    font-family: var(--font-display);
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: white;
+    line-height: 1.2;
+    display: block;
+  }
+  .ped-cta-text small {
+    font-size: 0.68rem;
+    color: rgba(255,255,255,0.75);
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 </style>
 </head>
 <body>
@@ -1969,64 +2304,120 @@
     </div>
     
     <div class="tab-content" id="transacoes-content">
-      <!-- Resumo Financeiro (visível apenas no painel financeiro) -->
-      <div>
-        <p class="section-title">Resumo do Mês</p>
-        <div class="summary-cards">
-          <div class="summary-card receita" id="receita-card"><h3>Receitas</h3><div class="value" id="total-receitas"></div><div class="trend" id="receitas-trend"></div></div>
-          <div class="summary-card despesa" id="despesa-card"><h3>Despesas</h3><div class="value" id="total-despesas"></div><div class="trend" id="despesas-trend"></div></div>
-          <div class="summary-card saldo" id="saldo-card"><h3>Saldo Total</h3><div class="value" id="saldo-total"></div><div class="forecast" id="saldo-forecast"></div></div>
-          <div class="summary-card balanco" id="balanco-card"><h3>Balanço</h3><div class="value" id="balanco-mensal"></div></div>
+
+      <!-- KPI Summary Cards -->
+      <div class="fin-summary-grid">
+        <div class="fin-kpi-card fin-kpi-receita" id="receita-card">
+          <div class="fin-kpi-icon"><i class="fas fa-arrow-trend-up"></i></div>
+          <div class="fin-kpi-body">
+            <span class="fin-kpi-label">Receitas</span>
+            <div class="fin-kpi-value" id="total-receitas">R$ 0,00</div>
+            <div class="fin-kpi-trend" id="receitas-trend"></div>
+          </div>
+        </div>
+        <div class="fin-kpi-card fin-kpi-despesa" id="despesa-card">
+          <div class="fin-kpi-icon"><i class="fas fa-arrow-trend-down"></i></div>
+          <div class="fin-kpi-body">
+            <span class="fin-kpi-label">Despesas</span>
+            <div class="fin-kpi-value" id="total-despesas">R$ 0,00</div>
+            <div class="fin-kpi-trend" id="despesas-trend"></div>
+          </div>
+        </div>
+        <div class="fin-kpi-card fin-kpi-saldo" id="saldo-card">
+          <div class="fin-kpi-icon"><i class="fas fa-wallet"></i></div>
+          <div class="fin-kpi-body">
+            <span class="fin-kpi-label">Saldo Total</span>
+            <div class="fin-kpi-value" id="saldo-total">R$ 0,00</div>
+            <div class="fin-kpi-trend" id="saldo-forecast"></div>
+          </div>
+        </div>
+        <div class="fin-kpi-card fin-kpi-balanco" id="balanco-card">
+          <div class="fin-kpi-icon"><i class="fas fa-scale-balanced"></i></div>
+          <div class="fin-kpi-body">
+            <span class="fin-kpi-label">Balanço do Mês</span>
+            <div class="fin-kpi-value" id="balanco-mensal">R$ 0,00</div>
+          </div>
         </div>
       </div>
-      <div class="card">
-        <h2>Transações</h2>
-        <div class="filters-container">
-          <div class="filters-grid">
-            <div class="filter-group">
-              <label for="search-input">Buscar</label>
-             <input type="text" id="search-input" placeholder="Descrição...">
-            </div>
-        <div class="filter-group">
-              <label for="type-filter">Tipo</label>
-              <select id="type-filter">
-                <option value="all">Todos</option>
-                <option value="receita">Receita</option>
-                <option value="despesa">Despesa</option>
-                <option value="transferencia">Transferência</option>
-              </select>
-            </div>
-            <div class="filter-group">
-              <label for="status-filter">Status</label>
-              <select id="status-filter">
-                <option value="all">Todos</option>
-                <option value="confirmada">Confirmada</option>
-                <option value="pendente">Pendente</option>
-              </select>
-            </div>
 
-            <div class="filter-group">
-              <label for="start-date-filter">Data Início</label>
-              <input type="date" id="start-date-filter">
-             </div>
-            <div class="filter-group">
-              <label for="end-date-filter">Data Fim</label>
-              <input type="date" id="end-date-filter">
+      <!-- Transactions Card -->
+      <div class="card fin-transactions-card">
+        <div class="fin-card-header">
+          <h2><i class="fas fa-list-ul"></i> Transações</h2>
+          <button class="btn fin-add-btn" data-action="add-new" data-type="receita">
+            <i class="fas fa-plus"></i> Nova
+          </button>
+        </div>
+
+        <!-- Search bar -->
+        <div class="fin-search-row">
+          <div class="fin-search-wrap">
+            <i class="fas fa-search fin-search-icon"></i>
+            <input type="text" id="search-input" class="fin-search-input" placeholder="Buscar por descrição...">
+          </div>
+        </div>
+
+        <!-- Filter pills -->
+        <div class="fin-filter-pills">
+          <button class="fin-pill active" data-fin-type="all">Todos</button>
+          <button class="fin-pill" data-fin-type="receita">Receitas</button>
+          <button class="fin-pill" data-fin-type="despesa">Despesas</button>
+          <button class="fin-pill" data-fin-type="transferencia">Transferências</button>
+        </div>
+
+        <!-- Expanded filters (collapsible) -->
+        <details class="fin-filter-details">
+          <summary class="fin-filter-summary">
+            <i class="fas fa-sliders"></i> Filtros avançados
+          </summary>
+          <div class="fin-filters-body">
+            <div class="fin-filters-grid">
+              <div class="filter-group">
+                <label for="type-filter">Tipo</label>
+                <select id="type-filter">
+                  <option value="all">Todos</option>
+                  <option value="receita">Receita</option>
+                  <option value="despesa">Despesa</option>
+                  <option value="transferencia">Transferência</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label for="status-filter">Status</label>
+                <select id="status-filter">
+                  <option value="all">Todos</option>
+                  <option value="confirmada">Confirmada</option>
+                  <option value="pendente">Pendente</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label for="start-date-filter">Data Início</label>
+                <input type="date" id="start-date-filter">
+              </div>
+              <div class="filter-group">
+                <label for="end-date-filter">Data Fim</label>
+                <input type="date" id="end-date-filter">
+              </div>
             </div>
-            <div class="filter-group filter-group-full">
-               <div class="filter-checkbox">
+            <div class="filter-group filter-group-full" style="margin-top:8px;">
+              <div class="filter-checkbox">
                 <input type="checkbox" id="expired-only">
                 <label for="expired-only">Mostrar apenas vencidas</label>
               </div>
             </div>
-        </div>
-          <div class="filter-actions">
-            <button class="btn" id="apply-filters-btn">Aplicar Filtros</button>
-            <button class="btn" id="clear-filters-btn">Limpar Filtros</button>
+            <div class="fin-filter-actions">
+              <button class="btn btn-ghost btn-sm" id="clear-filters-btn"><i class="fas fa-xmark"></i> Limpar</button>
+              <button class="btn btn-sm" id="apply-filters-btn"><i class="fas fa-check"></i> Aplicar</button>
+            </div>
+          </div>
+        </details>
+
+        <div id="all-transactions-list" class="transactions-list-container">
+          <div class="empty-state" data-empty-state>
+            <div class="empty-state-icon"><i class="fas fa-exchange-alt"></i></div>
+            <h4>Nenhuma transação encontrada</h4>
+            <p>Crie sua primeira transação usando o botão +</p>
           </div>
         </div>
-        
-        <div id="all-transactions-list" class="transactions-list-container"><div class="empty-state" data-empty-state><div class="empty-state-icon"><i class="fas fa-exchange-alt"></i></div><h4>Nenhuma transação encontrada</h4><p>Crie sua primeira transação usando o botão +</p></div></div>
       </div>
     </div>
    
@@ -2059,7 +2450,7 @@
       </div>
     </div>
 
-     <div class="tab-content" id="cartoes-content"><div class="card"><h2>Meus Cartões</h2><button class="btn" style="margin-bottom:15px;" data-action="add-new-creditcard">Adicionar Cartão</button><div class="table-wrapper"><table id="creditcards-list"><thead><tr><th>Cartão</th><th>Limite</th><th>Fechamento</th><th>Vencimento</th><th style="text-align:right">Ações</th></tr></thead><tbody></tbody></table></div></div></div>
+
     
     <div class="tab-content" id="relatorios-content">
         <div class="card"><div class="chart-container"><canvas id="overview-chart"></canvas></div></div>
@@ -2132,33 +2523,92 @@
     </div>
     
     <div class="tab-content" id="pedidos-content">
-      <div class="card">
-        <h2><i class="fas fa-clipboard-check"></i> Meus Pedidos e Orçamentos</h2>
-        <div class="pedidos-cta-row">
-            <button class="btn" id="add-new-order-btn-aba"><i class="fas fa-plus"></i> Novo Pedido</button>
-            <button class="btn" id="add-new-quote-btn-aba" style="background: var(--ev-blue);"><i class="fas fa-plus"></i> Novo Orçamento</button>
+
+      <!-- Orders KPI strip -->
+      <div class="ped-kpi-strip" id="orders-kpi-strip">
+        <div class="ped-kpi-item">
+          <span class="ped-kpi-num" id="ped-total-count">0</span>
+          <span class="ped-kpi-lbl">Total</span>
         </div>
-        <div class="filters-container">
-            <div class="filters-grid">
-               <div class="filter-group">
-                <label for="search-orders-input">Buscar</label>
-                <input type="text" id="search-orders-input" placeholder="Nome do cliente ou nº...">
-              </div>
+        <div class="ped-kpi-sep"></div>
+        <div class="ped-kpi-item">
+          <span class="ped-kpi-num ped-kpi-green" id="ped-confirmado-count">0</span>
+          <span class="ped-kpi-lbl">Confirmados</span>
+        </div>
+        <div class="ped-kpi-sep"></div>
+        <div class="ped-kpi-item">
+          <span class="ped-kpi-num ped-kpi-orange" id="ped-pendente-count">0</span>
+          <span class="ped-kpi-lbl">Pendentes</span>
+        </div>
+        <div class="ped-kpi-sep"></div>
+        <div class="ped-kpi-item">
+          <span class="ped-kpi-num ped-kpi-blue" id="ped-orcamento-count">0</span>
+          <span class="ped-kpi-lbl">Orçamentos</span>
+        </div>
+      </div>
+
+      <div class="card ped-main-card">
+        <div class="fin-card-header">
+          <h2><i class="fas fa-clipboard-check"></i> Pedidos &amp; Orçamentos</h2>
+        </div>
+
+        <!-- CTA Buttons -->
+        <div class="ped-cta-row">
+          <button class="ped-cta-btn ped-cta-primary" id="add-new-order-btn-aba">
+            <span class="ped-cta-icon"><i class="fas fa-plus"></i></span>
+            <span class="ped-cta-text">
+              <strong>Novo Pedido</strong>
+              <small>Pedido de serviço</small>
+            </span>
+          </button>
+          <button class="ped-cta-btn ped-cta-secondary" id="add-new-quote-btn-aba">
+            <span class="ped-cta-icon"><i class="fas fa-file-alt"></i></span>
+            <span class="ped-cta-text">
+              <strong>Novo Orçamento</strong>
+              <small>Proposta comercial</small>
+            </span>
+          </button>
+        </div>
+
+        <!-- Search -->
+        <div class="fin-search-row">
+          <div class="fin-search-wrap">
+            <i class="fas fa-search fin-search-icon"></i>
+            <input type="text" id="search-orders-input" class="fin-search-input" placeholder="Buscar por cliente ou número...">
+          </div>
+        </div>
+
+        <!-- Type filter pills -->
+        <div class="fin-filter-pills">
+          <button class="fin-pill active" data-ped-type="all">Todos</button>
+          <button class="fin-pill" data-ped-type="order">Pedidos</button>
+          <button class="fin-pill" data-ped-type="quote">Orçamentos</button>
+        </div>
+
+        <!-- Expanded filters -->
+        <details class="fin-filter-details">
+          <summary class="fin-filter-summary">
+            <i class="fas fa-sliders"></i> Filtros avançados
+          </summary>
+          <div class="fin-filters-body">
+            <div class="fin-filters-grid">
               <div class="filter-group">
                 <label for="type-orders-filter">Tipo</label>
                 <select id="type-orders-filter">
-                    <option value="all">Todos</option>
-                    <option value="order">Pedidos</option>
-                    <option value="quote">Orçamentos</option>
+                  <option value="all">Todos</option>
+                  <option value="order">Pedidos</option>
+                  <option value="quote">Orçamentos</option>
                 </select>
               </div>
             </div>
-            <div class="filter-actions" style="margin-top: 15px;">
-                <button class="btn" id="apply-orders-filter-btn">Aplicar Filtros</button>
-                <button class="btn" id="clear-orders-filter-btn">Limpar Filtros</button>
+            <div class="fin-filter-actions">
+              <button class="btn btn-ghost btn-sm" id="clear-orders-filter-btn"><i class="fas fa-xmark"></i> Limpar</button>
+              <button class="btn btn-sm" id="apply-orders-filter-btn"><i class="fas fa-check"></i> Aplicar</button>
             </div>
-        </div>
-        <div id="orders-list" class="transactions-list-container" style="margin-top: 20px;"></div>
+          </div>
+        </details>
+
+        <div id="orders-list" class="transactions-list-container" style="margin-top:16px;"></div>
       </div>
     </div>
 
@@ -2447,7 +2897,7 @@ fa-download"></i> Baixar Pedido</button>
       <div class="side-menu-item" data-tab-target="analise"><i class="fas fa-chart-pie" style="color:var(--ev-pink);background:rgba(247,37,133,0.12)"></i><span>Análise</span></div>
       <div class="side-menu-item" data-tab-target="contas"><i class="fas fa-piggy-bank" style="color:var(--success);background:rgba(6,214,160,0.12)"></i><span>Contas</span></div>
       <div class="side-menu-item" data-tab-target="metas"><i class="fas fa-bullseye" style="color:var(--ev-orange);background:rgba(247,127,0,0.12)"></i><span>Metas</span></div>
-      <div class="side-menu-item" data-tab-target="cartoes"><i class="fas fa-credit-card" style="color:var(--ev-blue);background:rgba(72,149,239,0.12)"></i><span>Cartões</span></div>
+
       <div class="side-menu-item" data-tab-target="pacotes"><i class="fas fa-box-open" style="color:var(--ev-teal);background:rgba(6,214,160,0.12)"></i><span>Pacotes</span></div>
       <div class="side-menu-item" data-tab-target="relatorios"><i class="fas fa-chart-bar" style="color:var(--ev-purple);background:rgba(155,93,229,0.12)"></i><span>Relatórios</span></div>
       <div class="side-menu-item" data-tab-target="backup"><i class="fas fa-database" style="color:var(--text3);background:var(--surface2)"></i><span>Backup</span></div>
@@ -3175,27 +3625,27 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- EVENT LISTENERS ---
   function setupEventListeners() {
     document.querySelectorAll('[data-action="add-new"]').forEach(btn => btn.addEventListener('click', () => openTransactionModal('new', btn.dataset.type)));
-    document.querySelector('[data-action="add-new-goal"]').addEventListener('click', () => openGoalModal('new'));
-    document.querySelector('[data-action="add-new-creditcard"]').addEventListener('click', () => openCreditCardModal('new'));
+    document.querySelector('[data-action="add-new-goal"]')?.addEventListener('click', () => openGoalModal('new'));
+    const _ccBtn = document.querySelector('[data-action="add-new-creditcard"]'); if (_ccBtn) _ccBtn.addEventListener('click', () => openCreditCardModal('new'));
     
-    document.getElementById('add-new-account-btn').addEventListener('click', () => openAccountModal('new'));
-    document.getElementById('add-new-receipt-btn').addEventListener('click', () => openReceiptModal('new'));
-    document.getElementById('add-new-client-btn').addEventListener('click', () => openClientModal('new'));
-    document.getElementById('add-new-commitment-btn').addEventListener('click', () => openCommitmentModal('new'));
-    document.getElementById('add-receipt-btn-aba').addEventListener('click', () => openReceiptModal('new'));
-    document.getElementById('add-client-btn-aba').addEventListener('click', () => openClientModal('new'));
-    document.getElementById('add-commitment-btn-aba').addEventListener('click', () => openCommitmentModal('new'));
-    document.getElementById('relatorio-eventos-btn').addEventListener('click', () => openRelatorioEventosModal());
-    document.getElementById('add-new-order-btn-aba').addEventListener('click', () => openEventOrderModal('new'));
-    document.getElementById('generate-dj-contract-doc-tab').addEventListener('click', () => openDJContractModal());
-    document.getElementById('generate-event-order-doc-tab').addEventListener('click', () => openEventOrderModal('new'));
+    document.getElementById('add-new-account-btn')?.addEventListener('click', () => openAccountModal('new'));
+    document.getElementById('add-new-receipt-btn')?.addEventListener('click', () => openReceiptModal('new'));
+    document.getElementById('add-new-client-btn')?.addEventListener('click', () => openClientModal('new'));
+    document.getElementById('add-new-commitment-btn')?.addEventListener('click', () => openCommitmentModal('new'));
+    document.getElementById('add-receipt-btn-aba')?.addEventListener('click', () => openReceiptModal('new'));
+    document.getElementById('add-client-btn-aba')?.addEventListener('click', () => openClientModal('new'));
+    document.getElementById('add-commitment-btn-aba')?.addEventListener('click', () => openCommitmentModal('new'));
+    document.getElementById('relatorio-eventos-btn')?.addEventListener('click', () => openRelatorioEventosModal());
+    document.getElementById('add-new-order-btn-aba')?.addEventListener('click', () => openEventOrderModal('new'));
+    document.getElementById('generate-dj-contract-doc-tab')?.addEventListener('click', () => openDJContractModal());
+    document.getElementById('generate-event-order-doc-tab')?.addEventListener('click', () => openEventOrderModal('new'));
     // NOVO RECURSO: Adiciona eventos para orçamentos
-    document.getElementById('add-new-quote-btn-aba').addEventListener('click', () => openEventQuoteModal('new'));
-    document.getElementById('generate-event-quote-doc-tab').addEventListener('click', () => openEventQuoteModal('new'));
+    document.getElementById('add-new-quote-btn-aba')?.addEventListener('click', () => openEventQuoteModal('new'));
+    document.getElementById('generate-event-quote-doc-tab')?.addEventListener('click', () => openEventQuoteModal('new'));
     
     // APRIMORADO - Botões de cadastro rápido de cliente nos modais
 // APRIMORADO - Botão de cadastro rápido de cliente dentro do Pedido
-    document.getElementById('add-client-from-order-btn').addEventListener('click', () => {
+    document.getElementById('add-client-from-order-btn')?.addEventListener('click', () => {
         // 1. Salva os dados que você já digitou no formulário de pedido
         const orderData = getFormData('event-order-form');
 
@@ -3217,7 +3667,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-document.getElementById('add-client-from-quote-btn').addEventListener('click', () => {
+document.getElementById('add-client-from-quote-btn')?.addEventListener('click', () => {
     // 1. Salva os dados do formulário de orçamento
     const quoteData = getFormData('event-quote-form');
 
@@ -3237,7 +3687,7 @@ document.getElementById('add-client-from-quote-btn').addEventListener('click', (
     });
 });
 
-document.getElementById('add-client-from-contract-btn').addEventListener('click', () => {
+document.getElementById('add-client-from-contract-btn')?.addEventListener('click', () => {
     // 1. Salva os dados do formulário de contrato
     const contractData = getFormData('dj-contract-form');
 
@@ -3257,34 +3707,35 @@ document.getElementById('add-client-from-contract-btn').addEventListener('click'
     });
 });
 
-    document.getElementById('download-dj-contract').addEventListener('click', () => openClauseEditor('contract', null));
-    document.getElementById('download-event-order').addEventListener('click', downloadEventOrderAsPDF);
-    document.getElementById('download-event-quote').addEventListener('click', downloadEventQuoteAsPDF);
+    document.getElementById('download-dj-contract')?.addEventListener('click', () => openClauseEditor('contract', null));
+    document.getElementById('download-event-order')?.addEventListener('click', downloadEventOrderAsPDF);
+    document.getElementById('download-event-quote')?.addEventListener('click', downloadEventQuoteAsPDF);
 
-    document.getElementById('transaction-form').addEventListener('submit', handleTransactionSubmit);
-    document.getElementById('account-form').addEventListener('submit', handleAccountSubmit);
-    document.getElementById('goal-form-modal').addEventListener('submit', handleGoalSubmit);
-    document.getElementById('creditcard-form').addEventListener('submit', handleCreditCardSubmit);
-    document.getElementById('user-info-form').addEventListener('submit', handleUserInfoSubmit);
+    document.getElementById('transaction-form')?.addEventListener('submit', handleTransactionSubmit);
+    document.getElementById('account-form')?.addEventListener('submit', handleAccountSubmit);
+    document.getElementById('goal-form-modal')?.addEventListener('submit', handleGoalSubmit);
+    const _ccForm = document.getElementById('creditcard-form');
+    if (_ccForm) _ccForm.addEventListener('submit', handleCreditCardSubmit);
+    document.getElementById('user-info-form')?.addEventListener('submit', handleUserInfoSubmit);
     
-    document.getElementById('receipt-form').addEventListener('submit', handleReceiptSubmit);
-    document.getElementById('client-form').addEventListener('submit', handleClientSubmit);
-    document.getElementById('commitment-form').addEventListener('submit', handleCommitmentSubmit);
+    document.getElementById('receipt-form')?.addEventListener('submit', handleReceiptSubmit);
+    document.getElementById('client-form')?.addEventListener('submit', handleClientSubmit);
+    document.getElementById('commitment-form')?.addEventListener('submit', handleCommitmentSubmit);
     
-    document.getElementById('dj-contract-form').addEventListener('submit', handleDJContractSubmit);
-    document.getElementById('event-order-form').addEventListener('submit', handleEventOrderSubmit);
-    document.getElementById('add-service-btn').addEventListener('click', () => addServiceItem('order'));
+    document.getElementById('dj-contract-form')?.addEventListener('submit', handleDJContractSubmit);
+    document.getElementById('event-order-form')?.addEventListener('submit', handleEventOrderSubmit);
+    document.getElementById('add-service-btn')?.addEventListener('click', () => addServiceItem('order'));
     // NOVO RECURSO: Adiciona evento para o form de Orçamento
-    document.getElementById('event-quote-form').addEventListener('submit', handleEventQuoteSubmit);
-    document.getElementById('add-service-quote-btn').addEventListener('click', () => addServiceItem('quote'));
+    document.getElementById('event-quote-form')?.addEventListener('submit', handleEventQuoteSubmit);
+    document.getElementById('add-service-quote-btn')?.addEventListener('click', () => addServiceItem('quote'));
 
-    document.getElementById('contract-client-select').addEventListener('change', (e) => {
+    document.getElementById('contract-client-select')?.addEventListener('change', (e) => {
         updateContractOrderSelector(e.target.value);
     });
-    document.getElementById('contract-order-select').addEventListener('change', (e) => {
+    document.getElementById('contract-order-select')?.addEventListener('change', (e) => {
         populateContractFormFromOrder(e.target.value);
     });
-    document.getElementById('user-logo').addEventListener('change', function(event) {
+    document.getElementById('user-logo')?.addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
@@ -3300,38 +3751,38 @@ document.getElementById('add-client-from-contract-btn').addEventListener('click'
         }
     });
     // Package listeners
-    document.getElementById('add-new-package-btn').addEventListener('click', () => openPackageModal('new'));
-    document.getElementById('package-form').addEventListener('submit', handlePackageSubmit);
-    document.getElementById('add-package-service-btn').addEventListener('click', () => addPackageServiceItem());
-    document.getElementById('order-load-package').addEventListener('change', (e) => loadPackageToForm('order', e.target.value));
-    document.getElementById('quote-load-package').addEventListener('change', (e) => loadPackageToForm('quote', e.target.value));
+    document.getElementById('add-new-package-btn')?.addEventListener('click', () => openPackageModal('new'));
+    document.getElementById('package-form')?.addEventListener('submit', handlePackageSubmit);
+    document.getElementById('add-package-service-btn')?.addEventListener('click', () => addPackageServiceItem());
+    document.getElementById('order-load-package')?.addEventListener('change', (e) => loadPackageToForm('order', e.target.value));
+    document.getElementById('quote-load-package')?.addEventListener('change', (e) => loadPackageToForm('quote', e.target.value));
     // Clause editor listeners
-    document.getElementById('close-clause-editor').addEventListener('click', () => document.getElementById('clause-editor-modal').classList.remove('active'));
-    document.getElementById('cancel-clause-editor').addEventListener('click', () => document.getElementById('clause-editor-modal').classList.remove('active'));
-    document.getElementById('confirm-clause-editor').addEventListener('click', executeClauseEditorDownload);
-        document.getElementById('export-backup-btn').addEventListener('click', exportBackup);
-    document.getElementById('import-trigger-btn').addEventListener('click', () => document.getElementById('import-backup-input').click());
-    document.getElementById('import-backup-input').addEventListener('change', importBackup);
+    document.getElementById('close-clause-editor')?.addEventListener('click', () => document.getElementById('clause-editor-modal').classList.remove('active'));
+    document.getElementById('cancel-clause-editor')?.addEventListener('click', () => document.getElementById('clause-editor-modal').classList.remove('active'));
+    document.getElementById('confirm-clause-editor')?.addEventListener('click', executeClauseEditorDownload);
+        document.getElementById('export-backup-btn')?.addEventListener('click', exportBackup);
+    document.getElementById('import-trigger-btn')?.addEventListener('click', () => document.getElementById('import-backup-input').click());
+    document.getElementById('import-backup-input')?.addEventListener('change', importBackup);
     
-    document.getElementById('view-order-modal-download-btn').addEventListener('click', (e) => {
+    document.getElementById('view-order-modal-download-btn')?.addEventListener('click', (e) => {
       const orderId = e.target.dataset.id;
       if (orderId) openClauseEditor('order', parseFloat(orderId));
     });
     // NOVO RECURSO: Botões de ação no modal de visualização de orçamento
-    document.getElementById('view-quote-modal-download-btn').addEventListener('click', (e) => {
+    document.getElementById('view-quote-modal-download-btn')?.addEventListener('click', (e) => {
         const quoteId = e.target.dataset.id;
         if (quoteId) openClauseEditor('quote', parseFloat(quoteId));
     });
-    document.getElementById('view-quote-modal-approve-btn').addEventListener('click', (e) => {
+    document.getElementById('view-quote-modal-approve-btn')?.addEventListener('click', (e) => {
         const quoteId = e.target.dataset.id;
         if (quoteId) convertQuoteToOrder(parseFloat(quoteId));
     });
-    document.getElementById('view-quote-modal-reject-btn').addEventListener('click', (e) => {
+    document.getElementById('view-quote-modal-reject-btn')?.addEventListener('click', (e) => {
         const quoteId = e.target.dataset.id;
         if (quoteId) rejectQuote(parseFloat(quoteId));
     });
 
-    document.getElementById('notifications-container').addEventListener('click', function(e) {
+    document.getElementById('notifications-container')?.addEventListener('click', function(e) {
       const target = e.target.closest('.notifications-banner[data-type="pending-transactions"]');
       if (target) {
         document.getElementById('type-filter').value = 'all';
@@ -3341,10 +3792,10 @@ document.getElementById('add-client-from-contract-btn').addEventListener('click'
         showTab('transacoes');
       }
     });
-    document.getElementById('receita-card').addEventListener('click', () => { applyFilterAndSwitchTab({ type: 'receita' }); });
-    document.getElementById('despesa-card').addEventListener('click', () => { applyFilterAndSwitchTab({ type: 'despesa' }); });
-    document.getElementById('saldo-card').addEventListener('click', () => showTab('contas'));
-    document.getElementById('balanco-card').addEventListener('click', () => {
+    document.getElementById('receita-card')?.addEventListener('click', () => { applyFilterAndSwitchTab({ type: 'receita' }); });
+    document.getElementById('despesa-card')?.addEventListener('click', () => { applyFilterAndSwitchTab({ type: 'despesa' }); });
+    document.getElementById('saldo-card')?.addEventListener('click', () => showTab('contas'));
+    document.getElementById('balanco-card')?.addEventListener('click', () => {
       updateBalanceDetailModal();
       document.getElementById('balance-detail-modal').classList.add('active');
     });
@@ -3361,9 +3812,9 @@ document.getElementById('add-client-from-contract-btn').addEventListener('click'
       });
     });
     
-    document.getElementById('apply-filters-btn').addEventListener('click', applyFilters);
-    document.getElementById('clear-filters-btn').addEventListener('click', clearFilters);
-    document.getElementById('search-input').addEventListener('keypress', (e) => {
+    document.getElementById('apply-filters-btn')?.addEventListener('click', applyFilters);
+    document.getElementById('clear-filters-btn')?.addEventListener('click', clearFilters);
+    document.getElementById('search-input')?.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') applyFilters();
     });
     
@@ -3404,17 +3855,17 @@ document.getElementById('add-client-from-contract-btn').addEventListener('click'
       orderClientSearch.addEventListener('blur', () => setTimeout(() => { orderClientDropdown.style.display = 'none'; }, 200));
       orderClientSearch.addEventListener('focus', () => { if (orderClientSearch.value) orderClientSearch.dispatchEvent(new Event('input')); });
     }
-    document.getElementById('search-orders-input').addEventListener('input', applyOrdersFilter);
-    document.getElementById('type-orders-filter').addEventListener('change', applyOrdersFilter);
-    document.getElementById('apply-orders-filter-btn').addEventListener('click', applyOrdersFilter);
-    document.getElementById('clear-orders-filter-btn').addEventListener('click', clearOrdersFilter);
-    document.getElementById('search-clients-input').addEventListener('input', updateClientsList);
+    document.getElementById('search-orders-input')?.addEventListener('input', applyOrdersFilter);
+    document.getElementById('type-orders-filter')?.addEventListener('change', applyOrdersFilter);
+    document.getElementById('apply-orders-filter-btn')?.addEventListener('click', applyOrdersFilter);
+    document.getElementById('clear-orders-filter-btn')?.addEventListener('click', clearOrdersFilter);
+    document.getElementById('search-clients-input')?.addEventListener('input', updateClientsList);
     // NOVO - Listener para popular pedidos no modal de compromisso
-    document.getElementById('commitment-client').addEventListener('change', (e) => {
+    document.getElementById('commitment-client')?.addEventListener('change', (e) => {
     updateCommitmentOrderSelector(e.target.value);
      });
     
-    document.getElementById('transaction-type').addEventListener('change', function() {
+    document.getElementById('transaction-type')?.addEventListener('change', function() {
       const type = this.value;
       const transferTargetGroup = document.getElementById('transfer-target-type-group');
       const fromAccountGroup = document.getElementById('from-account-group');
@@ -3424,9 +3875,9 @@ document.getElementById('add-client-from-contract-btn').addEventListener('click'
       
       updateAccountOptions();
     });
-    document.getElementById('transfer-target-type').addEventListener('change', updateAccountOptions);
+    document.getElementById('transfer-target-type')?.addEventListener('change', updateAccountOptions);
     
-    document.getElementById('calendar-commitments-modal').addEventListener('change', (e) => {
+    document.getElementById('calendar-commitments-modal')?.addEventListener('change', (e) => {
         if (e.target.matches('.commitment-status-select')) {
             const commitmentId = parseFloat(e.target.dataset.id);
             const newStatus = e.target.value;
@@ -3560,6 +4011,7 @@ document.getElementById('add-client-from-contract-btn').addEventListener('click'
         localStorage.setItem('eventQuotes', JSON.stringify(eventQuotes));
         localStorage.setItem('packages', JSON.stringify(packages));
         localStorage.setItem('userLogo', JSON.stringify(userLogo));
+        if (typeof updateOrdersKPI === 'function') updateOrdersKPI();
     } catch (e) {
         if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
             showToast("Erro: Armazenamento local cheio. Limpe dados e tente novamente.", 'warning');
@@ -5054,6 +5506,7 @@ function openCommitmentModal(mode, id = null, date = null) {
 
   function updateCreditCardsTable() {
     const tbody = document.querySelector('#creditcards-list tbody');
+    if (!tbody) return;
     tbody.innerHTML = '';
     creditcards.forEach(card => {
       tbody.innerHTML += `
@@ -6155,17 +6608,17 @@ function updateCommitmentOrderSelector(clientId) {
     html += `</div>`;
     container.innerHTML = html;
 
-    document.getElementById('prev-month-btn').addEventListener('click', () => {
+    document.getElementById('prev-month-btn')?.addEventListener('click', () => {
         calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() - 1);
         renderCalendar(calendarCurrentDate);
         updateCommitmentsList();
     });
-    document.getElementById('next-month-btn').addEventListener('click', () => {
+    document.getElementById('next-month-btn')?.addEventListener('click', () => {
         calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + 1);
         renderCalendar(calendarCurrentDate);
         updateCommitmentsList();
     });
-    document.querySelector('.calendar-grid').addEventListener('click', (e) => {
+    document.querySelector('.calendar-grid')?.addEventListener('click', (e) => {
         const dayEl = e.target.closest('.calendar-day:not(.empty-day)');
         if (dayEl) {
            showCommitmentsForDay(dayEl.dataset.date);
@@ -6951,12 +7404,12 @@ function showCommitmentsForDay(dateString) {
     document.getElementById('confirm-sheet').classList.remove('open');
     _confirmCallback = null;
   }
-  document.getElementById('confirm-sheet-cancel').addEventListener('click', hideConfirm);
-  document.getElementById('confirm-sheet-ok').addEventListener('click', () => {
+  document.getElementById('confirm-sheet-cancel')?.addEventListener('click', hideConfirm);
+  document.getElementById('confirm-sheet-ok')?.addEventListener('click', () => {
     if (_confirmCallback) _confirmCallback();
     hideConfirm();
   });
-  document.getElementById('confirm-sheet-overlay').addEventListener('click', hideConfirm);
+  document.getElementById('confirm-sheet-overlay')?.addEventListener('click', hideConfirm);
 
   // =====================================================
   // DARK MODE
@@ -6980,7 +7433,7 @@ function showCommitmentsForDay(dateString) {
     const btn = document.getElementById('theme-toggle-btn');
     if (btn) btn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
   }
-  document.getElementById('theme-toggle-btn').addEventListener('click', toggleTheme);
+  document.getElementById('theme-toggle-btn')?.addEventListener('click', toggleTheme);
 
   // =====================================================
   // FAB BUTTON
@@ -6996,9 +7449,9 @@ function showCommitmentsForDay(dateString) {
   }
   fabBtn.addEventListener('click', () => toggleFab());
   fabOverlay.addEventListener('click', () => toggleFab(false));
-  document.getElementById('fab-new-order').addEventListener('click', () => { toggleFab(false); openEventOrderModal(); });
-  document.getElementById('fab-new-client').addEventListener('click', () => { toggleFab(false); openClientModal(); });
-  document.getElementById('fab-new-commitment').addEventListener('click', () => { toggleFab(false); openCommitmentModal(); });
+  document.getElementById('fab-new-order')?.addEventListener('click', () => { toggleFab(false); openEventOrderModal(); });
+  document.getElementById('fab-new-client')?.addEventListener('click', () => { toggleFab(false); openClientModal(); });
+  document.getElementById('fab-new-commitment')?.addEventListener('click', () => { toggleFab(false); openCommitmentModal(); });
 
   // =====================================================
   // SIDE MENU (Mais)
@@ -7010,7 +7463,7 @@ function showCommitmentsForDay(dateString) {
     sideMenu.classList.toggle('open', isOpen);
     sideOverlay.classList.toggle('open', isOpen);
   }
-  document.getElementById('more-menu-btn').addEventListener('click', () => toggleSideMenu());
+  document.getElementById('more-menu-btn')?.addEventListener('click', () => toggleSideMenu());
   sideOverlay.addEventListener('click', () => toggleSideMenu(false));
   document.querySelectorAll('.side-menu-item[data-tab-target]').forEach(item => {
     item.addEventListener('click', () => {
@@ -7034,8 +7487,8 @@ function showCommitmentsForDay(dateString) {
     searchInput.value = '';
     searchResults.innerHTML = '<div class="search-empty"><i class="fas fa-search"></i><p>Digite para buscar</p></div>';
   }
-  document.getElementById('search-toggle-btn').addEventListener('click', openSearch);
-  document.getElementById('search-cancel-btn').addEventListener('click', closeSearch);
+  document.getElementById('search-toggle-btn')?.addEventListener('click', openSearch);
+  document.getElementById('search-cancel-btn')?.addEventListener('click', closeSearch);
   let searchDebounce;
   searchInput.addEventListener('input', () => {
     clearTimeout(searchDebounce);
@@ -7589,6 +8042,50 @@ function showCommitmentsForDay(dateString) {
 
   init();
 
+  // ── Finance pill filter wiring ──────────────────────────
+  document.querySelectorAll('.fin-pill[data-fin-type]').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.fin-pill[data-fin-type]').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      const val = pill.dataset.finType;
+      const typeSelect = document.getElementById('type-filter');
+      if (typeSelect) { typeSelect.value = val; }
+      const applyBtn = document.getElementById('apply-filters-btn');
+      if (applyBtn) applyBtn.click();
+    });
+  });
+
+  // ── Orders pill filter wiring ──────────────────────────
+  document.querySelectorAll('.fin-pill[data-ped-type]').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.fin-pill[data-ped-type]').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      const val = pill.dataset.pedType;
+      const typeSelect = document.getElementById('type-orders-filter');
+      if (typeSelect) { typeSelect.value = val; }
+      const applyBtn = document.getElementById('apply-orders-filter-btn');
+      if (applyBtn) applyBtn.click();
+    });
+  });
+
+  // ── Update orders KPI strip ─────────────────────────────
+  function updateOrdersKPI() {
+    const el = id => document.getElementById(id);
+    if (!el('ped-total-count')) return; // panel not yet in DOM
+    const allItems = [...(eventOrders || []), ...(eventQuotes || [])];
+    const orders = eventOrders || [];
+    const quotes = eventQuotes || [];
+    if (el('ped-total-count'))       el('ped-total-count').textContent       = allItems.length;
+    if (el('ped-confirmado-count'))  el('ped-confirmado-count').textContent  = orders.filter(o => (o.status||'').toLowerCase() === 'confirmado').length;
+    if (el('ped-pendente-count'))    el('ped-pendente-count').textContent    = orders.filter(o => !o.status || (o.status||'').toLowerCase() === 'pendente').length;
+    if (el('ped-orcamento-count'))   el('ped-orcamento-count').textContent   = quotes.length;
+  }
+  updateOrdersKPI();
+  // Refresh KPI when orders tab is activated
+  document.querySelectorAll('[data-tab-target="pedidos"]').forEach(btn => {
+    btn.addEventListener('click', () => setTimeout(updateOrdersKPI, 200));
+  });
+
   // =====================================================
   // EXPOSE FUNCTIONS GLOBALLY (needed for inline onclick)
   // =====================================================
@@ -7596,6 +8093,7 @@ function showCommitmentsForDay(dateString) {
   window.openSingleCommitmentDetail = openSingleCommitmentDetail;
   window.updateCommitmentStatusFromDetail = updateCommitmentStatusFromDetail;
   window.deleteCommitmentFromDetail = deleteCommitmentFromDetail;
+  window.updateOrdersKPI = updateOrdersKPI;
 });
 
 </script>
