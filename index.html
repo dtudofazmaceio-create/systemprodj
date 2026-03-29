@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -2124,7 +2123,10 @@
 
       <div>
         <h2 class="section-title">Lista de Agenda do Mês</h2>
-        <button class="btn" style="margin-bottom:15px;" id="add-commitment-btn-aba"><i class="fas fa-plus"></i> Novo Compromisso</button>
+        <div style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap;">
+          <button class="btn" id="add-commitment-btn-aba"><i class="fas fa-plus"></i> Novo Compromisso</button>
+          <button class="btn" id="relatorio-eventos-btn" style="background:linear-gradient(135deg,#06d6a0,#059c75);"><i class="fas fa-file-pdf"></i> Relatório PDF</button>
+        </div>
         <div id="commitments-list" class="transactions-list-container"><div class="empty-state" data-empty-state><div class="empty-state-icon"><i class="fas fa-calendar-alt"></i></div><h4>Nenhum compromisso este mês</h4><p>Adicione compromissos para organizar sua agenda</p></div></div>
       </div>
     </div>
@@ -3183,6 +3185,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('add-receipt-btn-aba').addEventListener('click', () => openReceiptModal('new'));
     document.getElementById('add-client-btn-aba').addEventListener('click', () => openClientModal('new'));
     document.getElementById('add-commitment-btn-aba').addEventListener('click', () => openCommitmentModal('new'));
+    document.getElementById('relatorio-eventos-btn').addEventListener('click', () => openRelatorioEventosModal());
     document.getElementById('add-new-order-btn-aba').addEventListener('click', () => openEventOrderModal('new'));
     document.getElementById('generate-dj-contract-doc-tab').addEventListener('click', () => openDJContractModal());
     document.getElementById('generate-event-order-doc-tab').addEventListener('click', () => openEventOrderModal('new'));
@@ -7364,6 +7367,226 @@ function showCommitmentsForDay(dateString) {
 
 
 
+  // =====================================================
+  // RELATÓRIO DE EVENTOS PDF
+  // =====================================================
+  function openRelatorioEventosModal() {
+    const modal = document.getElementById('relatorio-eventos-modal');
+    const today = new Date();
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+    document.getElementById('relatorio-data-inicio').value = firstDay.toISOString().split('T')[0];
+    document.getElementById('relatorio-data-fim').value = today.toISOString().split('T')[0];
+    document.getElementById('relatorio-status-filter').value = 'all';
+    document.getElementById('relatorio-preview-count').style.display = 'none';
+    modal.classList.add('active');
+
+    document.getElementById('relatorio-preview-btn').onclick = () => previewRelatorio();
+    document.getElementById('relatorio-gerar-btn').onclick = () => gerarRelatorioEventosPDF();
+  }
+
+  function getRelatorioData() {
+    const inicio = document.getElementById('relatorio-data-inicio').value;
+    const fim = document.getElementById('relatorio-data-fim').value;
+    const statusFilter = document.getElementById('relatorio-status-filter').value;
+
+    const dtInicio = inicio ? new Date(inicio + 'T00:00:00') : null;
+    const dtFim = fim ? new Date(fim + 'T23:59:59') : null;
+
+    const filtered = commitments.filter(c => {
+      const dtEvento = new Date(c.date.includes('T') ? c.date : c.date + 'T00:00:00');
+      if (dtInicio && dtEvento < dtInicio) return false;
+      if (dtFim && dtEvento > dtFim) return false;
+      if (statusFilter !== 'all' && c.status !== statusFilter) return false;
+      return true;
+    }).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    return { filtered, inicio, fim };
+  }
+
+  function previewRelatorio() {
+    const { filtered, inicio, fim } = getRelatorioData();
+    const previewEl = document.getElementById('relatorio-preview-count');
+    const countText = document.getElementById('relatorio-count-text');
+    const periodo = (inicio && fim) ? `de ${formatDate(inicio)} a ${formatDate(fim)}` : 'período selecionado';
+    countText.textContent = `${filtered.length} evento(s) encontrado(s) no ${periodo}.`;
+    previewEl.style.display = 'block';
+    if (filtered.length === 0) {
+      showToast('Nenhum evento encontrado no período.', 'warning');
+    }
+  }
+
+  function gerarRelatorioEventosPDF() {
+    const { filtered, inicio, fim } = getRelatorioData();
+
+    if (filtered.length === 0) {
+      showToast('Nenhum evento encontrado no período.', 'warning');
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const marginX = 14;
+
+    // ── Cabeçalho
+    doc.setFillColor(108, 99, 255);
+    doc.rect(0, 0, pageW, 28, 'F');
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.text(userInfo.name || 'FinancePro', marginX, 12);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.text('RELATÓRIO DE EVENTOS AGENDADOS', marginX, 20);
+
+    // Período no canto direito
+    const periodoStr = (inicio && fim)
+      ? `Período: ${formatDate(inicio)} a ${formatDate(fim)}`
+      : 'Período: Todos';
+    doc.setFontSize(8);
+    doc.text(periodoStr, pageW - marginX, 12, { align: 'right' });
+    doc.text(`Emitido em: ${new Date().toLocaleDateString('pt-BR')}`, pageW - marginX, 19, { align: 'right' });
+
+    // ── Totalizadores
+    let totalValor = 0;
+    let totalRecebido = 0;
+
+    const rows = filtered.map(c => {
+      const client = clients.find(cl => cl.id === c.clientId);
+      const clientName = client ? client.name : '—';
+      const clientPhone = client ? (client.phone || '—') : '—';
+
+      const dtEvento = new Date(c.date.includes('T') ? c.date : c.date + 'T00:00:00');
+      const dataStr = dtEvento.toLocaleDateString('pt-BR') + ' ' + dtEvento.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+      // Valor do pedido vinculado
+      let valor = 0;
+      if (c.linkedOrderId) {
+        const order = eventOrders.find(o => o.id === c.linkedOrderId);
+        if (order) valor = order.totalValue || 0;
+      }
+
+      // Recebido = soma de recibos pagos do pedido vinculado
+      let recebido = 0;
+      if (c.linkedOrderId) {
+        recebido = receipts
+          .filter(r => r.orderId === c.linkedOrderId && r.status === 'pago')
+          .reduce((sum, r) => sum + r.amount, 0);
+      }
+
+      totalValor += valor;
+      totalRecebido += recebido;
+
+      const saldo = valor - recebido;
+      const statusLabels = { agendado: 'Agendado', confirmado: 'Confirmado', realizado: 'Realizado', cancelado: 'Cancelado' };
+
+      return [
+        clientName,
+        clientPhone,
+        c.title || '—',
+        dataStr,
+        statusLabels[c.status] || c.status,
+        valor > 0 ? formatCurrency(valor) : '—',
+        recebido > 0 ? formatCurrency(recebido) : '—',
+        valor > 0 ? formatCurrency(saldo) : '—',
+      ];
+    });
+
+    // ── Tabela
+    doc.autoTable({
+      startY: 34,
+      head: [['Cliente', 'Telefone', 'Evento', 'Data/Hora', 'Status', 'Valor', 'Recebido', 'Saldo']],
+      body: rows,
+      margin: { left: marginX, right: marginX },
+      styles: {
+        font: 'helvetica',
+        fontSize: 7.5,
+        cellPadding: 3,
+        valign: 'middle',
+        overflow: 'linebreak',
+      },
+      headStyles: {
+        fillColor: [108, 99, 255],
+        textColor: 255,
+        fontStyle: 'bold',
+        fontSize: 8,
+      },
+      alternateRowStyles: {
+        fillColor: [247, 248, 255],
+      },
+      columnStyles: {
+        0: { cellWidth: 32 },
+        1: { cellWidth: 26 },
+        2: { cellWidth: 30 },
+        3: { cellWidth: 28 },
+        4: { cellWidth: 20 },
+        5: { cellWidth: 20, halign: 'right' },
+        6: { cellWidth: 20, halign: 'right' },
+        7: { cellWidth: 20, halign: 'right' },
+      },
+      didParseCell: function(data) {
+        if (data.section === 'body' && data.column.index === 4) {
+          const statusColors = {
+            'Agendado':   [76, 201, 240],
+            'Confirmado': [6, 214, 160],
+            'Realizado':  [108, 99, 255],
+            'Cancelado':  [239, 71, 111],
+          };
+          const color = statusColors[data.cell.text[0]];
+          if (color) data.cell.styles.textColor = color;
+        }
+        if (data.section === 'body' && data.column.index === 7) {
+          const val = parseFloat(data.cell.text[0].replace(/[^\d,]/g, '').replace(',', '.'));
+          if (!isNaN(val) && val > 0) data.cell.styles.textColor = [239, 71, 111];
+          else if (!isNaN(val) && val <= 0) data.cell.styles.textColor = [6, 214, 160];
+        }
+      },
+    });
+
+    const finalY = doc.lastAutoTable.finalY || 34;
+
+    // ── Rodapé de totais
+    const totaisY = finalY + 6;
+    doc.setFillColor(240, 242, 255);
+    doc.roundedRect(marginX, totaisY, pageW - marginX * 2, 22, 3, 3, 'F');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8.5);
+    doc.setTextColor(26, 26, 46);
+
+    const col1 = marginX + 4;
+    const col2 = pageW / 2 - 15;
+    const col3 = pageW - marginX - 4;
+
+    doc.text(`Total de Eventos: ${filtered.length}`, col1, totaisY + 8);
+    doc.text(`Total em Valor: ${formatCurrency(totalValor)}`, col2, totaisY + 8, { align: 'center' });
+    doc.text(`Total Recebido: ${formatCurrency(totalRecebido)}`, col3, totaisY + 8, { align: 'right' });
+
+    const saldoGeral = totalValor - totalRecebido;
+    doc.setTextColor(saldoGeral > 0 ? 239 : 6, saldoGeral > 0 ? 71 : 214, saldoGeral > 0 ? 111 : 160);
+    doc.text(`Saldo a Receber: ${formatCurrency(saldoGeral)}`, col3, totaisY + 16, { align: 'right' });
+
+    // ── Rodapé de página
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(150, 150, 180);
+    doc.text('Gerado pelo FinancePro', marginX, pageH - 8);
+    doc.text(`${new Date().toLocaleString('pt-BR')}`, pageW - marginX, pageH - 8, { align: 'right' });
+
+    // ── Salvar
+    const periodo = (inicio && fim)
+      ? `${inicio}_a_${fim}`
+      : new Date().toISOString().split('T')[0];
+    doc.save(`relatorio_eventos_${periodo}.pdf`);
+
+    document.getElementById('relatorio-eventos-modal').classList.remove('active');
+    showToast(`PDF gerado com ${filtered.length} evento(s)!`, 'success');
+  }
+
   init();
 
   // =====================================================
@@ -7376,6 +7599,41 @@ function showCommitmentsForDay(dateString) {
 });
 
 </script>
+
+  <!-- Modal Relatório de Eventos PDF -->
+  <div id="relatorio-eventos-modal" class="modal">
+    <div class="modal-content"><div class="modal-handle"></div>
+      <span class="close-button" data-action="close-modal">&times;</span>
+      <h2 style="margin-bottom:16px;"><i class="fas fa-file-pdf" style="color:var(--success);"></i> Relatório de Eventos</h2>
+      <p style="color:var(--text2);font-size:0.9rem;margin-bottom:20px;">Filtre por período e gere um PDF com todos os eventos agendados.</p>
+      <div class="form-group">
+        <label for="relatorio-data-inicio">Data Início</label>
+        <input type="date" id="relatorio-data-inicio">
+      </div>
+      <div class="form-group">
+        <label for="relatorio-data-fim">Data Fim</label>
+        <input type="date" id="relatorio-data-fim">
+      </div>
+      <div class="form-group">
+        <label for="relatorio-status-filter">Status</label>
+        <select id="relatorio-status-filter">
+          <option value="all">Todos</option>
+          <option value="agendado">Agendado</option>
+          <option value="confirmado">Confirmado</option>
+          <option value="realizado">Realizado</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+      </div>
+      <div id="relatorio-preview-count" style="background:var(--surface2);border-radius:var(--r-md);padding:12px 16px;margin-bottom:20px;font-size:0.88rem;color:var(--text2);display:none;">
+        <i class="fas fa-info-circle" style="color:var(--primary);"></i> <span id="relatorio-count-text"></span>
+      </div>
+      <div class="btn-container">
+        <button type="button" class="btn btn-danger" data-action="close-modal">Cancelar</button>
+        <button type="button" id="relatorio-preview-btn" class="btn" style="background:var(--info);"><i class="fas fa-eye"></i> Pré-visualizar</button>
+        <button type="button" id="relatorio-gerar-btn" class="btn" style="background:var(--success);"><i class="fas fa-download"></i> Gerar PDF</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Modal Detalhe Individual do Compromisso -->
   <div id="single-commitment-detail-modal" class="modal">
