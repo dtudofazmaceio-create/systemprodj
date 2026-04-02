@@ -347,6 +347,7 @@
   .fab-menu.open .fab-menu-item:nth-child(3) { transition-delay: 0.15s; }
   .fab-menu.open .fab-menu-item:nth-child(4) { transition-delay: 0.2s; }
   .fab-menu.open .fab-menu-item:nth-child(5) { transition-delay: 0.25s; }
+  .fab-menu.open .fab-menu-item:nth-child(6) { transition-delay: 0.3s; }
   .fab-menu-item:active { transform: scale(0.95); }
   .fab-menu-item .fab-icon {
     width: 36px; height: 36px;
@@ -996,6 +997,51 @@
   .order-card { border-left-color: var(--ev-orange); }
   .quote-card { border-left-color: var(--ev-blue); }
   .package-card { border-left-color: var(--ev-teal); }
+  .maintenance-card { border-left-color: var(--danger); }
+  .maintenance-card.resolvida { border-left-color: var(--success); }
+  .equipment-item-check {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border-radius: var(--r-sm);
+    border: 1px solid var(--border-soft);
+    margin-bottom: 8px;
+    transition: var(--t-fast);
+    cursor: pointer;
+  }
+  .equipment-item-check.checked { background: var(--success-bg); border-color: rgba(6,214,160,0.3); }
+  .equipment-item-check label { flex: 1; font-size: 0.9rem; font-weight: 500; cursor: pointer; margin: 0; color: var(--text); }
+  .equipment-item-check.checked label { text-decoration: line-through; color: var(--text3); }
+  .equip-checkbox { width: 20px; height: 20px; accent-color: var(--success); cursor: pointer; flex-shrink: 0; }
+  .checklist-progress {
+    background: var(--surface2); border-radius: var(--r-full);
+    height: 8px; margin-bottom: 16px; overflow: hidden;
+  }
+  .checklist-progress-bar {
+    height: 100%; background: linear-gradient(90deg, var(--success), var(--ev-teal));
+    border-radius: var(--r-full); transition: width 0.4s ease;
+  }
+  .checklist-summary {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 8px; font-size: 0.82rem; color: var(--text3);
+  }
+  .checklist-summary strong { color: var(--success); font-family: var(--font-display); }
+  .equip-add-row {
+    display: flex; gap: 8px; margin-top: 12px;
+  }
+  .equip-add-row input { flex: 1; }
+  .maint-severity {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: var(--r-full);
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+  }
+  .maint-severity.alta { background: var(--danger-bg); color: var(--danger); }
+  .maint-severity.media { background: var(--warning-bg); color: var(--warning); }
+  .maint-severity.baixa { background: var(--info-bg); color: var(--info); }
+  .maint-status-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: var(--r-full); font-size: 0.72rem; font-weight: 600; }
+  .maint-status-badge.pendente { background: var(--warning-bg); color: var(--warning); }
+  .maint-status-badge.em-andamento { background: var(--info-bg); color: var(--info); }
+  .maint-status-badge.resolvida { background: var(--success-bg); color: var(--success); }
 
   /* ==========================================
      EMPTY STATES
@@ -2174,6 +2220,8 @@
           <div class="feature-item" data-tab-target="pedidos"><i class="fas fa-clipboard-check"></i><span>Pedidos</span></div>
           <div class="feature-item" data-tab-target="pacotes"><i class="fas fa-box-open"></i><span>Pacotes</span></div>
           <div class="feature-item" data-tab-target="analise"><i class="fas fa-chart-pie"></i><span>Análise</span></div>
+          <div class="feature-item" data-tab-target="manutencao"><i class="fas fa-tools"></i><span>Manutenção</span></div>
+          <div class="feature-item" data-tab-target="checklist"><i class="fas fa-clipboard-list"></i><span>Checklist</span></div>
           <div class="feature-item" data-tab-target="backup"><i class="fas fa-database"></i><span>Backup</span></div>
         </div>
       </div>
@@ -2870,6 +2918,7 @@ fa-download"></i> Baixar Pedido</button>
     <button class="fab-menu-item" id="fab-new-order"><span class="fab-icon" style="background:rgba(247,127,0,0.15);color:var(--ev-orange)"><i class="fas fa-clipboard-check"></i></span>Novo Pedido</button>
     <button class="fab-menu-item" id="fab-new-client"><span class="fab-icon" style="background:rgba(72,149,239,0.15);color:var(--ev-blue)"><i class="fas fa-user-plus"></i></span>Novo Cliente</button>
     <button class="fab-menu-item" id="fab-new-commitment"><span class="fab-icon" style="background:rgba(155,93,229,0.15);color:var(--ev-purple)"><i class="fas fa-calendar-plus"></i></span>Novo Compromisso</button>
+    <button class="fab-menu-item" id="fab-new-maintenance"><span class="fab-icon" style="background:rgba(239,71,111,0.15);color:var(--danger)"><i class="fas fa-tools"></i></span>Nota de Manutenção</button>
   </div>
 
   <!-- Search Overlay -->
@@ -3504,6 +3553,92 @@ class="modal-content">
     </div>
   </div>
 
+    <!-- Aba Manutenção -->
+    <div class="tab-content" id="manutencao-content">
+      <div class="card">
+        <div class="card-accent-top" style="background: linear-gradient(90deg, var(--danger), #ff6b9d);"></div>
+        <h2><i class="fas fa-tools" style="color:var(--danger);"></i> Notas de Manutenção</h2>
+        <p style="color:var(--text3);font-size:0.88rem;margin-bottom:16px;">Registre problemas identificados nos equipamentos durante ou após os eventos.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+          <button class="btn" id="add-maintenance-btn" style="background:linear-gradient(135deg,var(--danger),#ff6b9d);"><i class="fas fa-plus"></i> Nova Nota de Manutenção</button>
+        </div>
+        <div class="ped-kpi-strip" style="margin-bottom:16px;">
+          <div class="ped-kpi-item"><span class="ped-kpi-num" id="maint-total-count">0</span><span class="ped-kpi-lbl">Total</span></div>
+          <div class="ped-kpi-sep"></div>
+          <div class="ped-kpi-item"><span class="ped-kpi-num ped-kpi-orange" id="maint-pendente-count">0</span><span class="ped-kpi-lbl">Pendentes</span></div>
+          <div class="ped-kpi-sep"></div>
+          <div class="ped-kpi-item"><span class="ped-kpi-num ped-kpi-blue" id="maint-andamento-count">0</span><span class="ped-kpi-lbl">Em Andamento</span></div>
+          <div class="ped-kpi-sep"></div>
+          <div class="ped-kpi-item"><span class="ped-kpi-num ped-kpi-green" id="maint-resolvida-count">0</span><span class="ped-kpi-lbl">Resolvidas</span></div>
+        </div>
+        <div class="fin-filter-pills" style="margin-bottom:16px;">
+          <button class="fin-pill active" data-maint-filter="all">Todas</button>
+          <button class="fin-pill" data-maint-filter="pendente">Pendentes</button>
+          <button class="fin-pill" data-maint-filter="em-andamento">Em Andamento</button>
+          <button class="fin-pill" data-maint-filter="resolvida">Resolvidas</button>
+        </div>
+        <div id="maintenance-list" class="transactions-list-container">
+          <div class="empty-state">
+            <div class="empty-state-icon"><i class="fas fa-tools"></i></div>
+            <h4>Nenhuma nota de manutenção</h4>
+            <p>Adicione notas para rastrear problemas nos seus equipamentos</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aba Checklist de Equipamentos -->
+    <div class="tab-content" id="checklist-content">
+      <div class="card">
+        <div class="card-accent-top" style="background: linear-gradient(90deg, var(--ev-teal), var(--info));"></div>
+        <h2><i class="fas fa-clipboard-list" style="color:var(--ev-teal);"></i> Checklist de Equipamentos</h2>
+        <p style="color:var(--text3);font-size:0.88rem;margin-bottom:16px;">Selecione um evento e gerencie os equipamentos que você deve levar.</p>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label for="checklist-event-select">Selecionar Evento</label>
+          <select id="checklist-event-select">
+            <option value="">-- Selecione um evento --</option>
+          </select>
+        </div>
+        <div id="checklist-panel" style="display:none;">
+          <div class="checklist-summary">
+            <span id="checklist-count-label">0 de 0 itens marcados</span>
+            <strong id="checklist-percent-label">0%</strong>
+          </div>
+          <div class="checklist-progress"><div class="checklist-progress-bar" id="checklist-progress-bar" style="width:0%"></div></div>
+          <div id="checklist-items-list"></div>
+          <div class="equip-add-row" style="margin-top:12px;">
+            <input type="text" id="new-equip-input" placeholder="Adicionar equipamento a este evento..." style="flex:1;padding:12px 14px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.95rem;outline:none;">
+            <button class="btn" id="add-equip-btn" style="flex-shrink:0;"><i class="fas fa-plus"></i> Adicionar</button>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
+            <button class="btn btn-xs" id="checklist-clear-btn" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border);">
+              <i class="fas fa-times"></i> Desmarcar Todos
+            </button>
+            <button class="btn btn-xs" id="checklist-check-all-btn" style="background:var(--success);">
+              <i class="fas fa-check-double"></i> Marcar Todos
+            </button>
+            <button class="btn btn-xs btn-danger" id="checklist-delete-event-items-btn" style="margin-left:auto;">
+              <i class="fas fa-trash"></i> Limpar Lista
+            </button>
+          </div>
+        </div>
+        <div id="checklist-empty-state" class="empty-state" style="padding:30px 0;">
+          <div class="empty-state-icon"><i class="fas fa-calendar-check"></i></div>
+          <h4>Selecione um evento</h4>
+          <p>Escolha um evento acima para gerenciar o checklist de equipamentos</p>
+        </div>
+      </div>
+      <div class="card">
+        <h2><i class="fas fa-box-open" style="color:var(--ev-orange);"></i> Equipamentos Cadastrados</h2>
+        <p style="color:var(--text3);font-size:0.88rem;margin-bottom:16px;">Catálogo de equipamentos disponíveis para adicionar ao checklist de qualquer evento.</p>
+        <div class="equip-add-row" style="margin-bottom:16px;">
+          <input type="text" id="new-global-equip-input" placeholder="Nome do equipamento..." style="flex:1;padding:12px 14px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.95rem;outline:none;">
+          <button class="btn" id="add-global-equip-btn" style="flex-shrink:0;background:var(--ev-orange);"><i class="fas fa-plus"></i> Cadastrar</button>
+        </div>
+        <div id="global-equipment-list" class="transactions-list-container"></div>
+      </div>
+    </div>
+
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -3527,13 +3662,23 @@ document.addEventListener('DOMContentLoaded', () => {
   let activeModalCallback = null; // NOVO - Variável para guardar o callback
 
   let chartInstances = {};
+  // NOVO RECURSO: Notas de Manutenção e Equipamentos
+  let maintenanceNotes = parseLocalStorage('maintenanceNotes', []);
+  let globalEquipments = parseLocalStorage('globalEquipments', [
+    'Caixa de Som Principal', 'Subwoofer', 'Mesa de Som', 'Amplificador',
+    'Notebook DJ', 'Controladora DJ', 'Cabos XLR', 'Cabos RCA',
+    'Extensão Elétrica', 'Iluminação LED', 'Microfone', 'Suporte de Caixa'
+  ]);
+  let eventChecklists = parseLocalStorage('eventChecklists', {}); // { eventId: [{name, checked}] }
+  let activeMaintenanceFilter = 'all';
+
   const pageTitles = {
     dashboard: 'Início', transacoes: 'Transações', contas: 'Contas',
     metas: 'Metas', cartoes: 'Cartões', relatorios: 'Relatórios',
     usuario: 'Perfil', backup: 'Backup',
     recibos: 'Recibos', clientes: 'Clientes', Agenda: 'Agenda',
     documentos: 'Gerar Documentos', analise: 'Análise de Negócio', pedidos: 'Pedidos e Orçamentos',
-    pacotes: 'Pacotes de Serviços'
+    pacotes: 'Pacotes de Serviços', manutencao: 'Notas de Manutenção', checklist: 'Checklist de Equipamentos'
   };
   let activeFilters = {
     search: '',
@@ -3593,6 +3738,8 @@ document.addEventListener('DOMContentLoaded', () => {
       updateRevenueProjection();
     }
     if (tabId === 'Agenda') renderCalendar(calendarCurrentDate);
+    if (tabId === 'manutencao') updateMaintenanceList();
+    if (tabId === 'checklist') updateChecklistTab();
     if (tabId === 'dashboard') {
       updateDashboardHero();
       updateDashboardRecent();
@@ -3763,6 +3910,47 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
         document.getElementById('export-backup-btn')?.addEventListener('click', exportBackup);
     document.getElementById('import-trigger-btn')?.addEventListener('click', () => document.getElementById('import-backup-input').click());
     document.getElementById('import-backup-input')?.addEventListener('change', importBackup);
+    
+    // NOVO RECURSO: Manutenção
+    document.getElementById('add-maintenance-btn')?.addEventListener('click', () => openMaintenanceModal('new'));
+    document.getElementById('maintenance-form')?.addEventListener('submit', handleMaintenanceSubmit);
+    document.querySelectorAll('[data-maint-filter]').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('[data-maint-filter]').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        activeMaintenanceFilter = pill.dataset.maintFilter;
+        updateMaintenanceList();
+      });
+    });
+
+    // NOVO RECURSO: Checklist
+    document.getElementById('checklist-event-select')?.addEventListener('change', (e) => {
+      renderChecklistForEvent(e.target.value);
+    });
+    document.getElementById('add-equip-btn')?.addEventListener('click', addEquipmentToChecklist);
+    document.getElementById('new-equip-input')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addEquipmentToChecklist(); } });
+    document.getElementById('checklist-clear-btn')?.addEventListener('click', () => {
+      const eventId = document.getElementById('checklist-event-select').value;
+      if (!eventId || !eventChecklists[eventId]) return;
+      eventChecklists[eventId].forEach(i => i.checked = false);
+      saveData(); renderChecklistForEvent(eventId);
+    });
+    document.getElementById('checklist-check-all-btn')?.addEventListener('click', () => {
+      const eventId = document.getElementById('checklist-event-select').value;
+      if (!eventId || !eventChecklists[eventId]) return;
+      eventChecklists[eventId].forEach(i => i.checked = true);
+      saveData(); renderChecklistForEvent(eventId);
+    });
+    document.getElementById('checklist-delete-event-items-btn')?.addEventListener('click', () => {
+      const eventId = document.getElementById('checklist-event-select').value;
+      if (!eventId) return;
+      showConfirm('Limpar toda a lista de equipamentos deste evento?', 'Limpar Checklist', () => {
+        eventChecklists[eventId] = [];
+        saveData(); renderChecklistForEvent(eventId);
+      });
+    });
+    document.getElementById('add-global-equip-btn')?.addEventListener('click', addGlobalEquipment);
+    document.getElementById('new-global-equip-input')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addGlobalEquipment(); } });
     
     document.getElementById('view-order-modal-download-btn')?.addEventListener('click', (e) => {
       const orderId = e.target.dataset.id;
@@ -3935,6 +4123,21 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
             'approve-quote': () => convertQuoteToOrder(id),
             'delete-package': () => deleteItem(packages, id, 'Pacote'),
             'edit-package': () => openPackageModal('edit', id),
+            // NOVO RECURSO: Manutenção
+            'delete-maintenance': () => {
+                showConfirm('Excluir esta nota de manutenção?', 'Excluir Nota', () => {
+                    const idx = maintenanceNotes.findIndex(n => n.id === id);
+                    if (idx > -1) maintenanceNotes.splice(idx, 1);
+                    saveData(); updateMaintenanceList();
+                    showToast('Nota excluída.', 'success');
+                });
+            },
+            'edit-maintenance': () => openMaintenanceModal('edit', id),
+            'resolve-maintenance': () => {
+                const note = maintenanceNotes.find(n => n.id === id);
+                if (note) { note.status = 'resolvida'; saveData(); updateMaintenanceList(); showToast('✓ Equipamento marcado como resolvido!', 'success'); }
+            },
+            // NOVO RECURSO: Equipamentos Globais (handled inline via addEventListener)
         };
         if(actions[action]) actions[action]();
     });
@@ -4011,6 +4214,10 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
         localStorage.setItem('eventQuotes', JSON.stringify(eventQuotes));
         localStorage.setItem('packages', JSON.stringify(packages));
         localStorage.setItem('userLogo', JSON.stringify(userLogo));
+        // NOVO RECURSO: Manutenção e Checklist
+        localStorage.setItem('maintenanceNotes', JSON.stringify(maintenanceNotes));
+        localStorage.setItem('globalEquipments', JSON.stringify(globalEquipments));
+        localStorage.setItem('eventChecklists', JSON.stringify(eventChecklists));
         if (typeof updateOrdersKPI === 'function') updateOrdersKPI();
     } catch (e) {
         if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
@@ -5361,7 +5568,23 @@ function openCommitmentModal(mode, id = null, date = null) {
           const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
           const eventsWrapper = document.createElement('div');
           eventsWrapper.style.cssText = 'background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border-soft);overflow:hidden;box-shadow:var(--card-shadow);';
-          eventsWrapper.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;"><i class="fas fa-bell" style="animation:bellRing 2s ease-in-out infinite;"></i><div style="flex:1;"><span style="font-weight:700;font-size:0.88rem;display:block;">Próximos ${upcomingEvts.length > 1 ? upcomingEvts.length + ' eventos' : 'evento'} nos próximos 7 dias</span><span style="font-size:0.72rem;opacity:0.8;">Toque para ver detalhes</span></div></div>`;
+
+          // Verifica se há algum evento hoje
+          const todayStr = new Date().toISOString().split('T')[0];
+          const hasEventToday = upcomingEvts.some(c => c.date.split('T')[0] === todayStr);
+
+          // Alerta de checklist para eventos de hoje
+          const checklistAlertHTML = hasEventToday ? `
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:linear-gradient(135deg,#f77f00,#ffd93d);cursor:pointer;" id="notif-checklist-alert">
+              <i class="fas fa-clipboard-list" style="font-size:1.1rem;color:#fff;flex-shrink:0;"></i>
+              <div style="flex:1;">
+                <span style="font-weight:700;font-size:0.83rem;display:block;color:#fff;">✅ Confira a lista de equipamentos!</span>
+                <span style="font-size:0.72rem;color:rgba(255,255,255,0.9);">Você tem evento hoje — toque para ver o checklist</span>
+              </div>
+              <i class="fas fa-chevron-right" style="font-size:0.75rem;color:rgba(255,255,255,0.8);flex-shrink:0;"></i>
+            </div>` : '';
+
+          eventsWrapper.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;"><i class="fas fa-bell" style="animation:bellRing 2s ease-in-out infinite;"></i><div style="flex:1;"><span style="font-weight:700;font-size:0.88rem;display:block;">Próximos ${upcomingEvts.length > 1 ? upcomingEvts.length + ' eventos' : 'evento'} nos próximos 7 dias</span><span style="font-size:0.72rem;opacity:0.8;">Toque para ver detalhes</span></div></div>${checklistAlertHTML}`;
           upcomingEvts.forEach(c => {
               const d = new Date(c.date + (c.date.includes('T') ? '' : 'T00:00:00'));
               const isToday = d.toISOString().split('T')[0] === new Date().toISOString().split('T')[0];
@@ -5401,6 +5624,14 @@ function openCommitmentModal(mode, id = null, date = null) {
           const items = eventsWrapper.querySelectorAll('div[style*="border-bottom"]');
           if (items.length) items[items.length-1].style.borderBottom = 'none';
           container.appendChild(eventsWrapper);
+
+          // Wires checklist alert click → abre aba de checklist
+          const alertEl = document.getElementById('notif-checklist-alert');
+          if (alertEl) {
+              alertEl.addEventListener('mouseenter', () => alertEl.style.filter = 'brightness(1.08)');
+              alertEl.addEventListener('mouseleave', () => alertEl.style.filter = '');
+              alertEl.addEventListener('click', () => showTab('checklist'));
+          }
       }
   }
 
@@ -7452,6 +7683,7 @@ function showCommitmentsForDay(dateString) {
   document.getElementById('fab-new-order')?.addEventListener('click', () => { toggleFab(false); openEventOrderModal(); });
   document.getElementById('fab-new-client')?.addEventListener('click', () => { toggleFab(false); openClientModal(); });
   document.getElementById('fab-new-commitment')?.addEventListener('click', () => { toggleFab(false); openCommitmentModal(); });
+  document.getElementById('fab-new-maintenance')?.addEventListener('click', () => { toggleFab(false); openMaintenanceModal('new'); });
 
   // =====================================================
   // SIDE MENU (Mais)
@@ -8040,6 +8272,294 @@ function showCommitmentsForDay(dateString) {
     showToast(`PDF gerado com ${filtered.length} evento(s)!`, 'success');
   }
 
+  // =====================================================
+  // MANUTENÇÃO DE EQUIPAMENTOS
+  // =====================================================
+
+  function openMaintenanceModal(mode, id = null) {
+    const modal = document.getElementById('maintenance-modal');
+    const form = document.getElementById('maintenance-form');
+    form.reset();
+    document.getElementById('edit-maintenance-id').value = '';
+    document.getElementById('maintenance-modal-title').innerHTML = '<i class="fas fa-tools" style="color:var(--danger);"></i> Nova Nota de Manutenção';
+
+    // Popula datalist com equipamentos cadastrados
+    const dl = document.getElementById('maint-equipment-datalist');
+    if (dl) dl.innerHTML = globalEquipments.map(e => `<option value="${e}">`).join('');
+
+    // Popula seletor de evento
+    const evSelect = document.getElementById('maint-event-link');
+    evSelect.innerHTML = '<option value="">Nenhum evento específico</option>';
+    const allEvents = [
+      ...commitments.map(c => ({ id: 'c_' + c.id, label: `${c.title} — ${formatDate(c.date ? c.date.split('T')[0] : '')}` })),
+      ...eventOrders.map(o => { const cl = clients.find(c => c.id === o.clientId); return { id: 'o_' + o.id, label: `${o.eventType} — ${cl?.name || ''} (${formatDate(o.eventDate)})` }; })
+    ];
+    allEvents.forEach(ev => evSelect.add(new Option(ev.label, ev.id)));
+
+    document.getElementById('maint-date').valueAsDate = new Date();
+
+    if (mode === 'edit' && id) {
+      const note = maintenanceNotes.find(n => n.id === id);
+      if (note) {
+        document.getElementById('maintenance-modal-title').innerHTML = '<i class="fas fa-tools" style="color:var(--danger);"></i> Editar Nota de Manutenção';
+        document.getElementById('edit-maintenance-id').value = note.id;
+        document.getElementById('maint-equipment').value = note.equipment;
+        document.getElementById('maint-description').value = note.description;
+        document.getElementById('maint-severity').value = note.severity;
+        document.getElementById('maint-event-link').value = note.eventLink || '';
+        document.getElementById('maint-date').value = note.date;
+        document.getElementById('maint-status').value = note.status;
+        document.getElementById('maint-notes').value = note.notes || '';
+      }
+    }
+    modal.classList.add('active');
+  }
+
+  function handleMaintenanceSubmit(e) {
+    e.preventDefault();
+    const id = document.getElementById('edit-maintenance-id').value;
+    const data = {
+      equipment: document.getElementById('maint-equipment').value,
+      description: document.getElementById('maint-description').value,
+      severity: document.getElementById('maint-severity').value,
+      eventLink: document.getElementById('maint-event-link').value,
+      date: document.getElementById('maint-date').value,
+      status: document.getElementById('maint-status').value,
+      notes: document.getElementById('maint-notes').value,
+    };
+    if (id) {
+      const idx = maintenanceNotes.findIndex(n => n.id === parseFloat(id));
+      if (idx > -1) maintenanceNotes[idx] = { ...maintenanceNotes[idx], ...data };
+    } else {
+      maintenanceNotes.push({ ...data, id: Date.now(), createdAt: new Date().toISOString() });
+    }
+    saveData();
+    updateMaintenanceList();
+    document.getElementById('maintenance-modal').classList.remove('active');
+    showToast('Nota de manutenção salva!', 'success');
+  }
+
+  function updateMaintenanceList() {
+    const list = document.getElementById('maintenance-list');
+    if (!list) return;
+
+    const el = id => document.getElementById(id);
+    const total = maintenanceNotes.length;
+    const pendente = maintenanceNotes.filter(n => n.status === 'pendente').length;
+    const andamento = maintenanceNotes.filter(n => n.status === 'em-andamento').length;
+    const resolvida = maintenanceNotes.filter(n => n.status === 'resolvida').length;
+    if (el('maint-total-count')) el('maint-total-count').textContent = total;
+    if (el('maint-pendente-count')) el('maint-pendente-count').textContent = pendente;
+    if (el('maint-andamento-count')) el('maint-andamento-count').textContent = andamento;
+    if (el('maint-resolvida-count')) el('maint-resolvida-count').textContent = resolvida;
+
+    const filtered = activeMaintenanceFilter === 'all'
+      ? maintenanceNotes
+      : maintenanceNotes.filter(n => n.status === activeMaintenanceFilter);
+
+    if (filtered.length === 0) {
+      list.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-tools"></i></div><h4>${activeMaintenanceFilter === 'all' ? 'Nenhuma nota de manutenção' : 'Nenhum item neste status'}</h4><p>Adicione notas para rastrear problemas nos seus equipamentos</p></div>`;
+      return;
+    }
+
+    const severityLabels = { alta: '🔴 Alta', media: '🟡 Média', baixa: '🟢 Baixa' };
+    const statusLabels = { pendente: 'Pendente', 'em-andamento': 'Em Andamento', resolvida: 'Resolvida' };
+
+    list.innerHTML = '';
+    [...filtered].sort((a, b) => {
+      const sOrder = { pendente: 0, 'em-andamento': 1, resolvida: 2 };
+      const sevOrder = { alta: 0, media: 1, baixa: 2 };
+      if (sOrder[a.status] !== sOrder[b.status]) return sOrder[a.status] - sOrder[b.status];
+      if (sevOrder[a.severity] !== sevOrder[b.severity]) return sevOrder[a.severity] - sevOrder[b.severity];
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    }).forEach(note => {
+      const card = document.createElement('div');
+      card.className = `maintenance-card transaction-card ${note.status === 'resolvida' ? 'resolvida' : ''}`;
+      card.style.borderLeftColor = note.status === 'resolvida' ? 'var(--success)' : note.severity === 'alta' ? 'var(--danger)' : note.severity === 'media' ? 'var(--warning)' : 'var(--info)';
+      card.innerHTML = `
+        <div class="transaction-header">
+          <span class="category-badge" style="background:rgba(239,71,111,0.1);color:var(--danger);max-width:none;">
+            <i class="fas fa-tools" style="margin-right:4px;"></i>${note.equipment}
+          </span>
+          <span class="maint-severity ${note.severity}">${severityLabels[note.severity]}</span>
+        </div>
+        <div class="transaction-body" style="margin:8px 0;">
+          <div style="font-size:0.88rem;color:var(--text2);margin-bottom:4px;">${note.description}</div>
+          ${note.notes ? `<div style="font-size:0.78rem;color:var(--text3);font-style:italic;margin-top:4px;"><i class="fas fa-note-sticky"></i> ${note.notes}</div>` : ''}
+        </div>
+        <div class="transaction-footer">
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <span class="maint-status-badge ${note.status}">${statusLabels[note.status]}</span>
+            <span style="font-size:0.75rem;color:var(--text3);"><i class="fas fa-calendar" style="margin-right:4px;"></i>${formatDate(note.date)}</span>
+          </div>
+          <div class="transaction-actions">
+            ${note.status !== 'resolvida' ? `<button class="btn btn-xs" style="background:var(--success);" data-action="resolve-maintenance" data-id="${note.id}"><i class="fas fa-check"></i> Resolver</button>` : ''}
+            <button class="btn btn-xs" data-action="edit-maintenance" data-id="${note.id}"><i class="fas fa-edit"></i></button>
+            <button class="btn btn-xs btn-danger" data-action="delete-maintenance" data-id="${note.id}"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>`;
+      list.appendChild(card);
+    });
+  }
+
+  // =====================================================
+  // CHECKLIST DE EQUIPAMENTOS
+  // =====================================================
+
+  function updateChecklistTab() {
+    const sel = document.getElementById('checklist-event-select');
+    if (!sel) return;
+    const currentVal = sel.value;
+    sel.innerHTML = '<option value="">-- Selecione um evento --</option>';
+
+    const allEvents = [
+      ...commitments.map(c => ({ id: 'c_' + c.id, label: `📅 ${c.title} — ${formatDate(c.date ? c.date.split('T')[0] : '')}` })),
+      ...eventOrders.map(o => {
+        const cl = clients.find(c => c.id === o.clientId);
+        return { id: 'o_' + o.id, label: `🎵 ${o.eventType} — ${cl?.name || ''} (${formatDate(o.eventDate)})` };
+      })
+    ];
+    allEvents.sort((a, b) => a.label.localeCompare(b.label)).forEach(ev => sel.add(new Option(ev.label, ev.id)));
+
+    if (currentVal) sel.value = currentVal;
+    updateGlobalEquipmentList();
+    renderChecklistForEvent(sel.value);
+  }
+
+  function renderChecklistForEvent(eventId) {
+    const panel = document.getElementById('checklist-panel');
+    const emptyState = document.getElementById('checklist-empty-state');
+    if (!panel || !emptyState) return;
+
+    if (!eventId) {
+      panel.style.display = 'none';
+      emptyState.style.display = 'flex';
+      return;
+    }
+
+    panel.style.display = 'block';
+    emptyState.style.display = 'none';
+
+    if (!eventChecklists[eventId]) {
+      // Auto-populate with global equipment suggestions
+      eventChecklists[eventId] = globalEquipments.map(name => ({ name, checked: false }));
+      saveData();
+    }
+
+    const items = eventChecklists[eventId];
+    const checkedCount = items.filter(i => i.checked).length;
+    const total = items.length;
+    const pct = total > 0 ? Math.round((checkedCount / total) * 100) : 0;
+
+    document.getElementById('checklist-count-label').textContent = `${checkedCount} de ${total} itens marcados`;
+    document.getElementById('checklist-percent-label').textContent = `${pct}%`;
+    document.getElementById('checklist-progress-bar').style.width = `${pct}%`;
+
+    const container = document.getElementById('checklist-items-list');
+    container.innerHTML = '';
+
+    if (items.length === 0) {
+      container.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text3);font-size:0.88rem;"><i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:8px;"></i>Nenhum item na lista. Adicione equipamentos abaixo.</div>`;
+      return;
+    }
+
+    items.forEach((item, idx) => {
+      const row = document.createElement('div');
+      row.className = `equipment-item-check${item.checked ? ' checked' : ''}`;
+      const uid = `equip_${eventId}_${idx}`;
+      row.innerHTML = `
+        <input type="checkbox" class="equip-checkbox" id="${uid}" ${item.checked ? 'checked' : ''} data-event="${eventId}" data-idx="${idx}">
+        <label for="${uid}">${item.name}</label>
+        <button type="button" style="background:none;border:none;color:var(--text3);cursor:pointer;padding:4px;font-size:0.85rem;" data-event="${eventId}" data-idx="${idx}" data-action="delete-equip-item" title="Remover">
+          <i class="fas fa-times"></i>
+        </button>`;
+      row.querySelector('input[type=checkbox]').addEventListener('change', (e) => {
+        eventChecklists[e.target.dataset.event][parseInt(e.target.dataset.idx)].checked = e.target.checked;
+        saveData();
+        renderChecklistForEvent(eventId);
+      });
+      row.querySelector('[data-action="delete-equip-item"]').addEventListener('click', (e) => {
+        const evId = e.currentTarget.dataset.event;
+        const i = parseInt(e.currentTarget.dataset.idx);
+        eventChecklists[evId].splice(i, 1);
+        saveData();
+        renderChecklistForEvent(evId);
+      });
+      container.appendChild(row);
+    });
+  }
+
+  function addEquipmentToChecklist() {
+    const eventId = document.getElementById('checklist-event-select').value;
+    const input = document.getElementById('new-equip-input');
+    const name = (input?.value || '').trim();
+    if (!name) { showToast('Digite o nome do equipamento.', 'warning'); return; }
+    if (!eventId) { showToast('Selecione um evento primeiro.', 'warning'); return; }
+    if (!eventChecklists[eventId]) eventChecklists[eventId] = [];
+    if (eventChecklists[eventId].find(i => i.name.toLowerCase() === name.toLowerCase())) {
+      showToast('Este equipamento já está na lista.', 'warning'); return;
+    }
+    eventChecklists[eventId].push({ name, checked: false });
+    saveData();
+    input.value = '';
+    renderChecklistForEvent(eventId);
+    showToast(`"${name}" adicionado ao checklist!`, 'success');
+  }
+
+  function addGlobalEquipment() {
+    const input = document.getElementById('new-global-equip-input');
+    const name = (input?.value || '').trim();
+    if (!name) { showToast('Digite o nome do equipamento.', 'warning'); return; }
+    if (globalEquipments.includes(name)) { showToast('Equipamento já cadastrado.', 'warning'); return; }
+    globalEquipments.push(name);
+    saveData();
+    input.value = '';
+    updateGlobalEquipmentList();
+    showToast(`"${name}" cadastrado!`, 'success');
+  }
+
+  function updateGlobalEquipmentList() {
+    const list = document.getElementById('global-equipment-list');
+    if (!list) return;
+    if (globalEquipments.length === 0) {
+      list.innerHTML = `<div class="empty-state" style="padding:20px 0;"><div class="empty-state-icon"><i class="fas fa-box"></i></div><h4>Nenhum equipamento cadastrado</h4></div>`;
+      return;
+    }
+    list.innerHTML = '';
+    globalEquipments.forEach(name => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border-soft);margin-bottom:8px;';
+      row.innerHTML = `
+        <i class="fas fa-plug" style="color:var(--primary);flex-shrink:0;"></i>
+        <span style="flex:1;font-size:0.9rem;font-weight:500;">${name}</span>
+        <button class="btn btn-xs" style="background:var(--ev-teal);" data-action="add-global-to-checklist" data-name="${name}" title="Adicionar ao checklist atual">
+          <i class="fas fa-plus"></i>
+        </button>
+        <button class="btn btn-xs btn-danger" data-action="delete-global-equip" data-name="${name}" title="Remover do catálogo">
+          <i class="fas fa-trash"></i>
+        </button>`;
+      row.querySelector('[data-action="add-global-to-checklist"]').addEventListener('click', () => {
+        const eventId = document.getElementById('checklist-event-select').value;
+        if (!eventId) { showToast('Selecione um evento no checklist primeiro.', 'warning'); return; }
+        if (!eventChecklists[eventId]) eventChecklists[eventId] = [];
+        if (eventChecklists[eventId].find(i => i.name.toLowerCase() === name.toLowerCase())) {
+          showToast('Já está no checklist deste evento.', 'warning'); return;
+        }
+        eventChecklists[eventId].push({ name, checked: false });
+        saveData();
+        renderChecklistForEvent(eventId);
+        showToast(`"${name}" adicionado ao checklist!`, 'success');
+      });
+      row.querySelector('[data-action="delete-global-equip"]').addEventListener('click', () => {
+        showConfirm(`Remover "${name}" do catálogo?`, 'Remover Equipamento', () => {
+          const idx = globalEquipments.indexOf(name);
+          if (idx > -1) { globalEquipments.splice(idx, 1); saveData(); updateGlobalEquipmentList(); }
+        });
+      });
+      list.appendChild(row);
+    });
+  }
+
   init();
 
   // ── Finance pill filter wiring ──────────────────────────
@@ -8183,6 +8703,60 @@ function showCommitmentsForDay(dateString) {
         <button type="button" class="btn btn-danger" id="cancel-clause-editor">Cancelar</button>
         <button type="button" class="btn" id="confirm-clause-editor"><i class="fas fa-file-pdf"></i> Gerar PDF</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal Nota de Manutenção -->
+  <div id="maintenance-modal" class="modal">
+    <div class="modal-content"><div class="modal-handle"></div>
+      <span class="close-button" data-action="close-modal">&times;</span>
+      <h2 id="maintenance-modal-title"><i class="fas fa-tools" style="color:var(--danger);"></i> Nova Nota de Manutenção</h2>
+      <form id="maintenance-form">
+        <input type="hidden" id="edit-maintenance-id">
+        <div class="form-group">
+          <label for="maint-equipment">Equipamento com Problema</label>
+          <input type="text" id="maint-equipment" placeholder="Ex: Caixa de Som JBL, Mesa de Som, Notebook..." required list="maint-equipment-datalist">
+          <datalist id="maint-equipment-datalist"></datalist>
+        </div>
+        <div class="form-group">
+          <label for="maint-description">Descrição do Problema</label>
+          <textarea id="maint-description" rows="3" placeholder="Descreva o problema identificado com detalhes..." required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="maint-severity">Gravidade</label>
+          <select id="maint-severity" required>
+            <option value="alta">🔴 Alta — Equipamento fora de uso</option>
+            <option value="media" selected>🟡 Média — Funciona com limitação</option>
+            <option value="baixa">🟢 Baixa — Problema cosmético/menor</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="maint-event-link">Evento Relacionado (Opcional)</label>
+          <select id="maint-event-link">
+            <option value="">Nenhum evento específico</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="maint-date">Data da Identificação</label>
+          <input type="date" id="maint-date" required>
+        </div>
+        <div class="form-group">
+          <label for="maint-status">Status</label>
+          <select id="maint-status" required>
+            <option value="pendente">Pendente</option>
+            <option value="em-andamento">Em Andamento</option>
+            <option value="resolvida">Resolvida</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="maint-notes">Observações / Solução (Opcional)</label>
+          <textarea id="maint-notes" rows="2" placeholder="Ações tomadas, orçamentos, notas adicionais..."></textarea>
+        </div>
+        <div class="btn-container">
+          <button type="button" class="btn btn-danger" data-action="close-modal">Cancelar</button>
+          <button type="submit" class="btn" style="background:linear-gradient(135deg,var(--danger),#ff6b9d);">Salvar Nota</button>
+        </div>
+      </form>
     </div>
   </div>
 
