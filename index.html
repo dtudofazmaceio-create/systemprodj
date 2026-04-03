@@ -2508,7 +2508,7 @@
         <div class="feature-grid quick-actions-grid">
           <div class="feature-item quick-action-item" data-action="add-new" data-type="receita"><i class="fas fa-arrow-down"></i><span>+ Receita</span></div>
           <div class="feature-item quick-action-item" data-action="add-new" data-type="despesa"><i class="fas fa-arrow-up"></i><span>+ Despesa</span></div>
-          <div class="feature-item quick-action-item" data-action="add-new" data-type="transferencia"><i class="fas fa-exchange-alt"></i><span>Transferência</span></div>
+
           <div class="feature-item quick-action-item" id="add-new-receipt-btn"><i class="fas fa-file-invoice"></i><span>+ Recibo</span></div>
           <div class="feature-item quick-action-item" id="add-new-client-btn"><i class="fas fa-user-plus"></i><span>+ Cliente</span></div>
           <div class="feature-item quick-action-item" id="add-new-commitment-btn"><i class="fas fa-handshake"></i><span>+ Compromisso</span></div>
@@ -2718,7 +2718,7 @@
           <button class="fin-pill active" data-fin-type="all">Todos</button>
           <button class="fin-pill" data-fin-type="receita">Receitas</button>
           <button class="fin-pill" data-fin-type="despesa">Despesas</button>
-          <button class="fin-pill" data-fin-type="transferencia">Transferências</button>
+
         </div>
 
         <!-- Expanded filters (collapsible) -->
@@ -2734,7 +2734,6 @@
                   <option value="all">Todos</option>
                   <option value="receita">Receita</option>
                   <option value="despesa">Despesa</option>
-                  <option value="transferencia">Transferência</option>
                 </select>
               </div>
               <div class="filter-group">
@@ -3348,7 +3347,6 @@ fa-download"></i> Baixar Pedido</button>
           <select id="transaction-type" required>
             <option value="receita">Receita</option>
             <option value="despesa">Despesa</option>
-            <option value="transferencia">Transferência</option>
           </select>
         </div>
   
@@ -4987,10 +4985,26 @@ if (typeof activeModalCallback === 'function') {
         notes: document.getElementById('order-notes-input').value,
     };
     if (id) {
-        const index = eventOrders.findIndex(o => o.id === parseFloat(id));
+        const orderId = parseFloat(id);
+        const index = eventOrders.findIndex(o => o.id === orderId);
         if (index > -1) {
             eventOrders[index] = { ...eventOrders[index], ...orderData };
+
+            // Sincroniza o compromisso vinculado na agenda
+            const commIndex = commitments.findIndex(c => c.linkedOrderId === orderId);
+            if (commIndex > -1) {
+                const client = clients.find(c => c.id === orderData.clientId);
+                commitments[commIndex] = {
+                    ...commitments[commIndex],
+                    title: `Evento: ${orderData.eventType} - ${client?.name || 'Cliente'}`,
+                    clientId: orderData.clientId,
+                    date: `${orderData.eventDate}T${orderData.eventTime.split(' ')[0]}`,
+                    location: orderData.eventLocation,
+                    description: `Compromisso gerado do Pedido Nº ${eventOrders[index].orderNumber}. Valor: ${formatCurrency(orderData.totalValue)}.`,
+                };
+            }
         }
+        showToast('Pedido atualizado! Agenda sincronizada.', 'success');
     } else {
         const newOrder = {
             ...orderData,
