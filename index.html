@@ -21,7 +21,6 @@
     --primary: #6c63ff;
     --primary-dark: #5a52e0;
     --primary-light: #8b85ff;
-    --primary-glow: rgba(108, 99, 255, 0.25);
     --accent: #ff6b6b;
     --accent2: #ffd93d;
 
@@ -111,6 +110,7 @@
     --input-bg: #1a1a30;
     --input-border: #2a2a50;
     --scrollbar: rgba(108,99,255,0.3);
+    --primary-dark: #3d2fa0;
   }
 
   /* ==========================================
@@ -139,6 +139,7 @@
   /* ==========================================
      APP CONTAINER
   ========================================== */
+  /* app-container base layout — gradient bg defined under MAIN CONTENT section */
   .app-container { display: flex; flex-direction: column; min-height: 100vh; }
 
   /* ==========================================
@@ -147,8 +148,8 @@
   .top-bar {
     background: var(--header-bg);
     padding: 0 var(--space-md);
-    height: calc(56px + env(safe-area-inset-top, 0px));
-    padding-top: env(safe-area-inset-top, 0px);
+    height: 56px;
+    padding-top: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -187,12 +188,18 @@
   /* ==========================================
      MAIN CONTENT
   ========================================== */
+
+  /* ==========================================
+     MAIN CONTENT
+  ========================================== */
+
   .main-content {
     flex: 1;
-    padding: calc(56px + env(safe-area-inset-top, 0px) + 16px) var(--space-md) calc(var(--space-xl) + env(safe-area-inset-bottom, 0px));
+    margin-top: 56px;
+    padding: 8px var(--space-md) calc(var(--space-xl) + env(safe-area-inset-bottom, 0px));
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
   }
 
   /* ==========================================
@@ -367,7 +374,7 @@
     backdrop-filter: blur(8px);
     display: flex;
     flex-direction: column;
-    padding: calc(env(safe-area-inset-top, 0px) + 12px) var(--space-md) var(--space-md);
+    padding: 12px var(--space-md) var(--space-md);
     gap: var(--space-md);
     opacity: 0;
     pointer-events: none;
@@ -507,7 +514,7 @@
   ========================================== */
   .toast-container {
     position: fixed;
-    top: calc(64px + env(safe-area-inset-top, 0px));
+    top: 64px;
     left: var(--space-md);
     right: var(--space-md);
     z-index: 9999;
@@ -997,8 +1004,6 @@
   .order-card { border-left-color: var(--ev-orange); }
   .quote-card { border-left-color: var(--ev-blue); }
   .package-card { border-left-color: var(--ev-teal); }
-  .maintenance-card { border-left-color: var(--danger); }
-  .maintenance-card.resolvida { border-left-color: var(--success); }
   .equipment-item-check {
     display: flex; align-items: center; gap: 12px;
     padding: 10px 14px;
@@ -1030,18 +1035,131 @@
     display: flex; gap: 8px; margin-top: 12px;
   }
   .equip-add-row input { flex: 1; }
-  .maint-severity {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 2px 8px; border-radius: var(--r-full);
-    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+
+  
+
+  /* ==========================================
+     MODULE HERO BANNERS (Checklist)
+  ========================================== */
+  .module-hero {
+    border-radius: var(--r-lg);
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
   }
-  .maint-severity.alta { background: var(--danger-bg); color: var(--danger); }
-  .maint-severity.media { background: var(--warning-bg); color: var(--warning); }
-  .maint-severity.baixa { background: var(--info-bg); color: var(--info); }
-  .maint-status-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: var(--r-full); font-size: 0.72rem; font-weight: 600; }
-  .maint-status-badge.pendente { background: var(--warning-bg); color: var(--warning); }
-  .maint-status-badge.em-andamento { background: var(--info-bg); color: var(--info); }
-  .maint-status-badge.resolvida { background: var(--success-bg); color: var(--success); }
+  .module-hero::before {
+    content: '';
+    position: absolute;
+    top: -20px; right: -20px;
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+  }
+  .module-hero-danger {
+    background: linear-gradient(135deg, var(--danger) 0%, #ff6b9d 100%);
+    box-shadow: 0 4px 20px rgba(239,71,111,0.3);
+  }
+  .module-hero-teal {
+    background: linear-gradient(135deg, #06b88a 0%, var(--info) 100%);
+    box-shadow: 0 4px 20px rgba(6,214,160,0.25);
+  }
+  .module-hero-icon {
+    width: 46px; height: 46px;
+    background: rgba(255,255,255,0.2);
+    border-radius: var(--r-md);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+  .module-hero-text { flex: 1; min-width: 0; }
+  .module-hero-text h3 {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-weight: 800;
+    margin: 0 0 2px;
+    color: white;
+  }
+  .module-hero-text p {
+    font-size: 0.75rem;
+    opacity: 0.82;
+    margin: 0;
+    color: white;
+  }
+  .module-hero-btn {
+    background: rgba(255,255,255,0.22) !important;
+    border: 1.5px solid rgba(255,255,255,0.3) !important;
+    color: white !important;
+    font-size: 0.78rem !important;
+    padding: 8px 14px !important;
+    flex-shrink: 0;
+    white-space: nowrap;
+    backdrop-filter: blur(4px);
+  }
+  .module-hero-btn:hover { background: rgba(255,255,255,0.32) !important; }
+
+  /* ==========================================
+     CHECKLIST SEARCH / EVENT INFO
+  ========================================== */
+  .checklist-search-block { position: relative; }
+  .checklist-client-dropdown {
+    position: absolute;
+    top: calc(100% - 8px);
+    left: 0; right: 0;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-md);
+    z-index: 50;
+    box-shadow: var(--card-shadow-hover);
+    max-height: 220px;
+    overflow-y: auto;
+  }
+  .checklist-client-option {
+    padding: 11px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-soft);
+    transition: var(--t-fast);
+    font-size: 0.88rem;
+  }
+  .checklist-client-option:last-child { border-bottom: none; }
+  .checklist-client-option:hover { background: var(--surface2); }
+  .checklist-client-option .cco-name { font-weight: 600; color: var(--text); }
+  .checklist-client-option .cco-events { font-size: 0.75rem; color: var(--text3); margin-top: 2px; }
+  .checklist-event-info {
+    background: var(--surface2);
+    border-radius: var(--r-md);
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    border-left: 3px solid var(--ev-teal);
+    font-size: 0.85rem;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .checklist-event-info i { color: var(--ev-teal); font-size: 1rem; flex-shrink: 0; }
+
+  /* btn-checklist on order cards */
+  .btn-checklist-order {
+    background: linear-gradient(135deg, #06b88a, var(--info)) !important;
+    color: white !important;
+    border: none !important;
+    font-size: 0.72rem !important;
+    padding: 5px 10px !important;
+    border-radius: var(--r-sm) !important;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+    transition: var(--t-fast);
+    white-space: nowrap;
+  }
+  .btn-checklist-order:hover { opacity: 0.88; transform: scale(1.04); }
 
   /* ==========================================
      EMPTY STATES
@@ -1722,6 +1840,196 @@
 
 
   /* ==========================================
+     MAINTENANCE NOTES PANEL
+  ========================================== */
+  .maint-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  @media (min-width: 540px) {
+    .maint-kpi-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  .maint-kpi-card {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border-soft);
+    padding: 14px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+    transition: transform var(--t-fast), box-shadow var(--t-normal);
+  }
+  .maint-kpi-card:active { transform: scale(0.97); }
+  .maint-kpi-icon {
+    width: 40px; height: 40px;
+    border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
+  }
+  .maint-kpi-body { flex: 1; min-width: 0; }
+  .maint-kpi-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text3);
+    display: block;
+    margin-bottom: 2px;
+  }
+  .maint-kpi-value {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  /* Filter pills */
+  .maint-filter-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .maint-pill {
+    padding: 6px 14px;
+    border-radius: var(--r-full);
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text2);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--t-fast);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .maint-pill:active { transform: scale(0.95); }
+  .maint-pill.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    box-shadow: 0 2px 10px rgba(108,99,255,0.3);
+  }
+
+  /* Maintenance note card */
+  .maint-card {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border-soft);
+    padding: 14px 16px;
+    transition: box-shadow var(--t-normal), transform var(--t-fast);
+    position: relative;
+    overflow: hidden;
+  }
+  .maint-card:active { transform: scale(0.99); }
+  .maint-card-accent {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    border-radius: 4px 0 0 4px;
+  }
+  .maint-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+    padding-left: 10px;
+  }
+  .maint-card-icon {
+    width: 38px; height: 38px;
+    border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .maint-card-main { flex: 1; min-width: 0; }
+  .maint-card-equipment {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .maint-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+    align-items: center;
+  }
+  .maint-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px;
+    border-radius: var(--r-full);
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+  .maint-card-description {
+    padding-left: 10px;
+    font-size: 0.85rem;
+    color: var(--text2);
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+  .maint-card-footer {
+    padding-left: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border-soft);
+  }
+  .maint-card-date {
+    font-size: 0.75rem;
+    color: var(--text3);
+    display: flex; align-items: center; gap: 5px;
+  }
+  .maint-card-actions {
+    display: flex; gap: 6px;
+  }
+  .maint-btn-sm {
+    padding: 6px 12px;
+    border-radius: var(--r-full);
+    border: none;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--t-fast);
+    display: flex; align-items: center; gap: 5px;
+    font-family: var(--font-body);
+  }
+  .maint-btn-sm:active { transform: scale(0.92); }
+
+  .maint-notes-snippet {
+    padding-left: 10px;
+    font-size: 0.78rem;
+    color: var(--text3);
+    font-style: italic;
+    margin-bottom: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .maint-event-link {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 0.72rem; color: var(--primary); font-weight: 600;
+    background: rgba(108,99,255,0.08);
+    padding: 2px 8px; border-radius: var(--r-full);
+    max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  /* ==========================================
      OVERRIDE FONT ON MODAL  
   ========================================== */
   body, input, select, textarea, button {
@@ -2163,6 +2471,7 @@
     text-overflow: ellipsis;
   }
 </style>
+
 </head>
 <body>
 <div class="app-container">
@@ -2220,7 +2529,6 @@
           <div class="feature-item" data-tab-target="pedidos"><i class="fas fa-clipboard-check"></i><span>Pedidos</span></div>
           <div class="feature-item" data-tab-target="pacotes"><i class="fas fa-box-open"></i><span>Pacotes</span></div>
           <div class="feature-item" data-tab-target="analise"><i class="fas fa-chart-pie"></i><span>Análise</span></div>
-          <div class="feature-item" data-tab-target="manutencao"><i class="fas fa-tools"></i><span>Manutenção</span></div>
           <div class="feature-item" data-tab-target="checklist"><i class="fas fa-clipboard-list"></i><span>Checklist</span></div>
           <div class="feature-item" data-tab-target="backup"><i class="fas fa-database"></i><span>Backup</span></div>
         </div>
@@ -2898,6 +3206,61 @@ fa-download"></i> Baixar Pedido</button>
       </div>
     </div>
 
+    <!-- ══════════════════════════════════════════
+         ABA: NOTAS DE MANUTENÇÃO
+    ══════════════════════════════════════════ -->
+    <div class="tab-content" id="manutencao-content">
+
+      <!-- Hero banner -->
+      <div class="module-hero" style="background:linear-gradient(135deg,#ef476f 0%,#ff6b9d 100%);">
+        <div class="module-hero-icon"><i class="fas fa-tools"></i></div>
+        <div class="module-hero-text">
+          <h3>Notas de Manutenção</h3>
+          <p>Registre e acompanhe problemas nos equipamentos</p>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="maint-kpi-grid">
+        <div class="maint-kpi-card">
+          <div class="maint-kpi-icon" style="background:rgba(108,99,255,0.12);color:var(--primary);"><i class="fas fa-list"></i></div>
+          <div class="maint-kpi-body"><span class="maint-kpi-label">Total</span><div class="maint-kpi-value" id="maint-kpi-total">0</div></div>
+        </div>
+        <div class="maint-kpi-card">
+          <div class="maint-kpi-icon" style="background:rgba(239,71,111,0.12);color:var(--danger);"><i class="fas fa-exclamation-circle"></i></div>
+          <div class="maint-kpi-body"><span class="maint-kpi-label">Pendentes</span><div class="maint-kpi-value" id="maint-kpi-pendente" style="color:var(--danger);">0</div></div>
+        </div>
+        <div class="maint-kpi-card">
+          <div class="maint-kpi-icon" style="background:rgba(255,193,7,0.12);color:var(--warning);"><i class="fas fa-spinner"></i></div>
+          <div class="maint-kpi-body"><span class="maint-kpi-label">Em Andamento</span><div class="maint-kpi-value" id="maint-kpi-andamento" style="color:var(--warning);">0</div></div>
+        </div>
+        <div class="maint-kpi-card">
+          <div class="maint-kpi-icon" style="background:rgba(6,214,160,0.12);color:var(--success);"><i class="fas fa-check-circle"></i></div>
+          <div class="maint-kpi-body"><span class="maint-kpi-label">Resolvidas</span><div class="maint-kpi-value" id="maint-kpi-resolvida" style="color:var(--success);">0</div></div>
+        </div>
+      </div>
+
+      <!-- Action + Filter row -->
+      <div class="card" style="padding:14px 16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;">
+          <h2 style="font-size:1rem;margin:0;"><i class="fas fa-tools" style="color:var(--danger);"></i> Registros</h2>
+          <button class="btn" id="add-new-maint-btn" style="background:linear-gradient(135deg,var(--danger),#ff6b9d);flex-shrink:0;padding:9px 16px;font-size:0.82rem;">
+            <i class="fas fa-plus"></i> Nova Nota
+          </button>
+        </div>
+        <div class="maint-filter-row" id="maint-filter-row">
+          <button class="maint-pill active" data-maint-filter="todas">Todas</button>
+          <button class="maint-pill" data-maint-filter="pendente">🔴 Pendentes</button>
+          <button class="maint-pill" data-maint-filter="em-andamento">🟡 Em Andamento</button>
+          <button class="maint-pill" data-maint-filter="resolvida">🟢 Resolvidas</button>
+        </div>
+      </div>
+
+      <!-- Notes list -->
+      <div id="maintenance-notes-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+
+    </div>
+
   </main>
   
   <nav class="bottom-nav">
@@ -2919,6 +3282,7 @@ fa-download"></i> Baixar Pedido</button>
     <button class="fab-menu-item" id="fab-new-client"><span class="fab-icon" style="background:rgba(72,149,239,0.15);color:var(--ev-blue)"><i class="fas fa-user-plus"></i></span>Novo Cliente</button>
     <button class="fab-menu-item" id="fab-new-commitment"><span class="fab-icon" style="background:rgba(155,93,229,0.15);color:var(--ev-purple)"><i class="fas fa-calendar-plus"></i></span>Novo Compromisso</button>
     <button class="fab-menu-item" id="fab-new-maintenance"><span class="fab-icon" style="background:rgba(239,71,111,0.15);color:var(--danger)"><i class="fas fa-tools"></i></span>Nota de Manutenção</button>
+
   </div>
 
   <!-- Search Overlay -->
@@ -2948,6 +3312,7 @@ fa-download"></i> Baixar Pedido</button>
       <div class="side-menu-item" data-tab-target="metas"><i class="fas fa-bullseye" style="color:var(--ev-orange);background:rgba(247,127,0,0.12)"></i><span>Metas</span></div>
 
       <div class="side-menu-item" data-tab-target="pacotes"><i class="fas fa-box-open" style="color:var(--ev-teal);background:rgba(6,214,160,0.12)"></i><span>Pacotes</span></div>
+      <div class="side-menu-item" data-tab-target="manutencao"><i class="fas fa-tools" style="color:var(--danger);background:rgba(239,71,111,0.12)"></i><span>Manutenção</span></div>
       <div class="side-menu-item" data-tab-target="relatorios"><i class="fas fa-chart-bar" style="color:var(--ev-purple);background:rgba(155,93,229,0.12)"></i><span>Relatórios</span></div>
       <div class="side-menu-item" data-tab-target="backup"><i class="fas fa-database" style="color:var(--text3);background:var(--surface2)"></i><span>Backup</span></div>
       <div class="side-menu-item" data-tab-target="usuario"><i class="fas fa-user-circle" style="color:var(--primary);background:var(--primary-glow)"></i><span>Perfil</span></div>
@@ -3552,54 +3917,41 @@ class="modal-content">
       </div>
     </div>
   </div>
-
-    <!-- Aba Manutenção -->
-    <div class="tab-content" id="manutencao-content">
-      <div class="card">
-        <div class="card-accent-top" style="background: linear-gradient(90deg, var(--danger), #ff6b9d);"></div>
-        <h2><i class="fas fa-tools" style="color:var(--danger);"></i> Notas de Manutenção</h2>
-        <p style="color:var(--text3);font-size:0.88rem;margin-bottom:16px;">Registre problemas identificados nos equipamentos durante ou após os eventos.</p>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
-          <button class="btn" id="add-maintenance-btn" style="background:linear-gradient(135deg,var(--danger),#ff6b9d);"><i class="fas fa-plus"></i> Nova Nota de Manutenção</button>
-        </div>
-        <div class="ped-kpi-strip" style="margin-bottom:16px;">
-          <div class="ped-kpi-item"><span class="ped-kpi-num" id="maint-total-count">0</span><span class="ped-kpi-lbl">Total</span></div>
-          <div class="ped-kpi-sep"></div>
-          <div class="ped-kpi-item"><span class="ped-kpi-num ped-kpi-orange" id="maint-pendente-count">0</span><span class="ped-kpi-lbl">Pendentes</span></div>
-          <div class="ped-kpi-sep"></div>
-          <div class="ped-kpi-item"><span class="ped-kpi-num ped-kpi-blue" id="maint-andamento-count">0</span><span class="ped-kpi-lbl">Em Andamento</span></div>
-          <div class="ped-kpi-sep"></div>
-          <div class="ped-kpi-item"><span class="ped-kpi-num ped-kpi-green" id="maint-resolvida-count">0</span><span class="ped-kpi-lbl">Resolvidas</span></div>
-        </div>
-        <div class="fin-filter-pills" style="margin-bottom:16px;">
-          <button class="fin-pill active" data-maint-filter="all">Todas</button>
-          <button class="fin-pill" data-maint-filter="pendente">Pendentes</button>
-          <button class="fin-pill" data-maint-filter="em-andamento">Em Andamento</button>
-          <button class="fin-pill" data-maint-filter="resolvida">Resolvidas</button>
-        </div>
-        <div id="maintenance-list" class="transactions-list-container">
-          <div class="empty-state">
-            <div class="empty-state-icon"><i class="fas fa-tools"></i></div>
-            <h4>Nenhuma nota de manutenção</h4>
-            <p>Adicione notas para rastrear problemas nos seus equipamentos</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Aba Checklist de Equipamentos -->
     <div class="tab-content" id="checklist-content">
+
+      <!-- Mini hero banner -->
+      <div class="module-hero module-hero-teal">
+        <div class="module-hero-icon"><i class="fas fa-clipboard-list"></i></div>
+        <div class="module-hero-text">
+          <h3>Checklist de Equipamentos</h3>
+          <p>Gerencie o que levar para cada evento</p>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-accent-top" style="background: linear-gradient(90deg, var(--ev-teal), var(--info));"></div>
-        <h2><i class="fas fa-clipboard-list" style="color:var(--ev-teal);"></i> Checklist de Equipamentos</h2>
-        <p style="color:var(--text3);font-size:0.88rem;margin-bottom:16px;">Selecione um evento e gerencie os equipamentos que você deve levar.</p>
-        <div class="form-group" style="margin-bottom:16px;">
-          <label for="checklist-event-select">Selecionar Evento</label>
-          <select id="checklist-event-select">
-            <option value="">-- Selecione um evento --</option>
-          </select>
+        <h2 style="margin-bottom:14px;"><i class="fas fa-calendar-check" style="color:var(--ev-teal);"></i> Selecionar Evento</h2>
+
+        <!-- Busca por cliente + dropdown de eventos -->
+        <div class="checklist-search-block">
+          <div class="fin-search-wrap" style="margin-bottom:10px;">
+            <i class="fas fa-search fin-search-icon"></i>
+            <input type="text" id="checklist-client-search" class="fin-search-input" placeholder="Buscar por nome do cliente...">
+            <button type="button" id="checklist-search-clear" style="background:none;border:none;color:var(--text3);cursor:pointer;padding:2px 6px;font-size:0.85rem;display:none;" title="Limpar busca"><i class="fas fa-times"></i></button>
+          </div>
+          <div id="checklist-client-results" class="checklist-client-dropdown" style="display:none;"></div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="checklist-event-select" style="font-size:0.78rem;color:var(--text3);margin-bottom:6px;display:block;">ou selecione diretamente:</label>
+            <select id="checklist-event-select">
+              <option value="">-- Selecione um evento --</option>
+            </select>
+          </div>
         </div>
-        <div id="checklist-panel" style="display:none;">
+
+        <!-- Painel do checklist (visível quando evento selecionado) -->
+        <div id="checklist-panel" style="display:none;margin-top:16px;">
+          <div class="checklist-event-info" id="checklist-event-info"></div>
           <div class="checklist-summary">
             <span id="checklist-count-label">0 de 0 itens marcados</span>
             <strong id="checklist-percent-label">0%</strong>
@@ -3610,7 +3962,7 @@ class="modal-content">
             <input type="text" id="new-equip-input" placeholder="Adicionar equipamento a este evento..." style="flex:1;padding:12px 14px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.95rem;outline:none;">
             <button class="btn" id="add-equip-btn" style="flex-shrink:0;"><i class="fas fa-plus"></i> Adicionar</button>
           </div>
-          <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
+          <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
             <button class="btn btn-xs" id="checklist-clear-btn" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border);">
               <i class="fas fa-times"></i> Desmarcar Todos
             </button>
@@ -3622,13 +3974,18 @@ class="modal-content">
             </button>
           </div>
         </div>
+
+        <!-- Empty state -->
         <div id="checklist-empty-state" class="empty-state" style="padding:30px 0;">
           <div class="empty-state-icon"><i class="fas fa-calendar-check"></i></div>
           <h4>Selecione um evento</h4>
-          <p>Escolha um evento acima para gerenciar o checklist de equipamentos</p>
+          <p>Busque pelo nome do cliente ou escolha<br>um evento acima para gerenciar o checklist</p>
         </div>
       </div>
+
+      <!-- Equipamentos do catálogo global -->
       <div class="card">
+        <div class="card-accent-top" style="background: linear-gradient(90deg, var(--ev-orange), var(--warning));"></div>
         <h2><i class="fas fa-box-open" style="color:var(--ev-orange);"></i> Equipamentos Cadastrados</h2>
         <p style="color:var(--text3);font-size:0.88rem;margin-bottom:16px;">Catálogo de equipamentos disponíveis para adicionar ao checklist de qualquer evento.</p>
         <div class="equip-add-row" style="margin-bottom:16px;">
@@ -3670,7 +4027,6 @@ document.addEventListener('DOMContentLoaded', () => {
     'Extensão Elétrica', 'Iluminação LED', 'Microfone', 'Suporte de Caixa'
   ]);
   let eventChecklists = parseLocalStorage('eventChecklists', {}); // { eventId: [{name, checked}] }
-  let activeMaintenanceFilter = 'all';
 
   const pageTitles = {
     dashboard: 'Início', transacoes: 'Transações', contas: 'Contas',
@@ -3678,7 +4034,7 @@ document.addEventListener('DOMContentLoaded', () => {
     usuario: 'Perfil', backup: 'Backup',
     recibos: 'Recibos', clientes: 'Clientes', Agenda: 'Agenda',
     documentos: 'Gerar Documentos', analise: 'Análise de Negócio', pedidos: 'Pedidos e Orçamentos',
-    pacotes: 'Pacotes de Serviços', manutencao: 'Notas de Manutenção', checklist: 'Checklist de Equipamentos'
+    pacotes: 'Pacotes de Serviços', checklist: 'Checklist de Equipamentos', manutencao: 'Notas de Manutenção'
   };
   let activeFilters = {
     search: '',
@@ -3738,8 +4094,9 @@ document.addEventListener('DOMContentLoaded', () => {
       updateRevenueProjection();
     }
     if (tabId === 'Agenda') renderCalendar(calendarCurrentDate);
-    if (tabId === 'manutencao') updateMaintenanceList();
+    
     if (tabId === 'checklist') updateChecklistTab();
+    if (tabId === 'manutencao') updateMaintenanceTab();
     if (tabId === 'dashboard') {
       updateDashboardHero();
       updateDashboardRecent();
@@ -3911,18 +4268,6 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
     document.getElementById('import-trigger-btn')?.addEventListener('click', () => document.getElementById('import-backup-input').click());
     document.getElementById('import-backup-input')?.addEventListener('change', importBackup);
     
-    // NOVO RECURSO: Manutenção
-    document.getElementById('add-maintenance-btn')?.addEventListener('click', () => openMaintenanceModal('new'));
-    document.getElementById('maintenance-form')?.addEventListener('submit', handleMaintenanceSubmit);
-    document.querySelectorAll('[data-maint-filter]').forEach(pill => {
-      pill.addEventListener('click', () => {
-        document.querySelectorAll('[data-maint-filter]').forEach(p => p.classList.remove('active'));
-        pill.classList.add('active');
-        activeMaintenanceFilter = pill.dataset.maintFilter;
-        updateMaintenanceList();
-      });
-    });
-
     // NOVO RECURSO: Checklist
     document.getElementById('checklist-event-select')?.addEventListener('change', (e) => {
       renderChecklistForEvent(e.target.value);
@@ -3948,6 +4293,16 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
         eventChecklists[eventId] = [];
         saveData(); renderChecklistForEvent(eventId);
       });
+    });
+    document.getElementById('add-new-maint-btn')?.addEventListener('click', () => openMaintenanceModal('new'));
+    document.getElementById('fab-new-maintenance')?.addEventListener('click', () => { toggleFab(false); openMaintenanceModal('new'); });
+    document.getElementById('maintenance-form')?.addEventListener('submit', handleMaintenanceSubmit);
+    document.getElementById('maint-filter-row')?.addEventListener('click', (e) => {
+      const pill = e.target.closest('.maint-pill');
+      if (!pill) return;
+      document.querySelectorAll('.maint-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      renderMaintenanceNotes(pill.dataset.maintFilter);
     });
     document.getElementById('add-global-equip-btn')?.addEventListener('click', addGlobalEquipment);
     document.getElementById('new-global-equip-input')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addGlobalEquipment(); } });
@@ -4123,21 +4478,29 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
             'approve-quote': () => convertQuoteToOrder(id),
             'delete-package': () => deleteItem(packages, id, 'Pacote'),
             'edit-package': () => openPackageModal('edit', id),
-            // NOVO RECURSO: Manutenção
-            'delete-maintenance': () => {
-                showConfirm('Excluir esta nota de manutenção?', 'Excluir Nota', () => {
-                    const idx = maintenanceNotes.findIndex(n => n.id === id);
-                    if (idx > -1) maintenanceNotes.splice(idx, 1);
-                    saveData(); updateMaintenanceList();
-                    showToast('Nota excluída.', 'success');
-                });
+            // Abrir checklist direto de um pedido
+            'open-checklist-from-order': () => {
+                const order = eventOrders.find(o => o.id === id);
+                if (!order) return;
+                showTab('checklist');
+                setTimeout(() => {
+                    const sel = document.getElementById('checklist-event-select');
+                    if (sel) {
+                        sel.value = 'o_' + id;
+                        renderChecklistForEvent('o_' + id);
+                        const cl = clients.find(c => c.id === order.clientId);
+                        const searchInput = document.getElementById('checklist-client-search');
+                        if (searchInput && cl) {
+                            searchInput.value = cl.name;
+                            document.getElementById('checklist-search-clear').style.display = 'inline';
+                        }
+                    }
+                }, 200);
             },
+            // Manutenção
             'edit-maintenance': () => openMaintenanceModal('edit', id),
-            'resolve-maintenance': () => {
-                const note = maintenanceNotes.find(n => n.id === id);
-                if (note) { note.status = 'resolvida'; saveData(); updateMaintenanceList(); showToast('✓ Equipamento marcado como resolvido!', 'success'); }
-            },
-            // NOVO RECURSO: Equipamentos Globais (handled inline via addEventListener)
+            'delete-maintenance': () => deleteItem(maintenanceNotes, id, 'Nota de Manutenção', null, null),
+            'resolve-maintenance': () => resolveMaintenanceNote(id),
         };
         if(actions[action]) actions[action]();
     });
@@ -4236,6 +4599,7 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
         if (index > -1) array.splice(index, 1);
         saveData();
         updateUI();
+        if (name === 'Nota de Manutenção') updateMaintenanceTab();
         showToast(`${name} excluído com sucesso!`, 'success');
     });
   }
@@ -6007,6 +6371,7 @@ function updateClientsList() {
                 <span class="transaction-value" style="color: ${valueColor};">${formatCurrency(item.totalValue)}</span>
                 <div class="transaction-actions">
                     ${statusBadge}
+                    ${item.type === 'order' ? `<button class="btn-checklist-order" data-action="open-checklist-from-order" data-id="${item.id}" title="Abrir Checklist"><i class="fas fa-clipboard-list"></i> Checklist</button>` : ''}
                     <button class="btn btn-xs" data-action="view-${item.type}" data-id="${item.id}" title="Visualizar"><i class="fas fa-eye"></i></button>
                     <button class="btn btn-xs" data-action="edit-${item.type}" data-id="${item.id}" title="Editar"><i class="fas fa-edit"></i></button>
                     <button class="btn btn-xs btn-danger" data-action="delete-${item.type}" data-id="${item.id}" title="Excluir"><i class="fas fa-trash"></i></button>
@@ -7683,7 +8048,7 @@ function showCommitmentsForDay(dateString) {
   document.getElementById('fab-new-order')?.addEventListener('click', () => { toggleFab(false); openEventOrderModal(); });
   document.getElementById('fab-new-client')?.addEventListener('click', () => { toggleFab(false); openClientModal(); });
   document.getElementById('fab-new-commitment')?.addEventListener('click', () => { toggleFab(false); openCommitmentModal(); });
-  document.getElementById('fab-new-maintenance')?.addEventListener('click', () => { toggleFab(false); openMaintenanceModal('new'); });
+
 
   // =====================================================
   // SIDE MENU (Mais)
@@ -8276,131 +8641,8 @@ function showCommitmentsForDay(dateString) {
   // MANUTENÇÃO DE EQUIPAMENTOS
   // =====================================================
 
-  function openMaintenanceModal(mode, id = null) {
-    const modal = document.getElementById('maintenance-modal');
-    const form = document.getElementById('maintenance-form');
-    form.reset();
-    document.getElementById('edit-maintenance-id').value = '';
-    document.getElementById('maintenance-modal-title').innerHTML = '<i class="fas fa-tools" style="color:var(--danger);"></i> Nova Nota de Manutenção';
 
-    // Popula datalist com equipamentos cadastrados
-    const dl = document.getElementById('maint-equipment-datalist');
-    if (dl) dl.innerHTML = globalEquipments.map(e => `<option value="${e}">`).join('');
 
-    // Popula seletor de evento
-    const evSelect = document.getElementById('maint-event-link');
-    evSelect.innerHTML = '<option value="">Nenhum evento específico</option>';
-    const allEvents = [
-      ...commitments.map(c => ({ id: 'c_' + c.id, label: `${c.title} — ${formatDate(c.date ? c.date.split('T')[0] : '')}` })),
-      ...eventOrders.map(o => { const cl = clients.find(c => c.id === o.clientId); return { id: 'o_' + o.id, label: `${o.eventType} — ${cl?.name || ''} (${formatDate(o.eventDate)})` }; })
-    ];
-    allEvents.forEach(ev => evSelect.add(new Option(ev.label, ev.id)));
-
-    document.getElementById('maint-date').valueAsDate = new Date();
-
-    if (mode === 'edit' && id) {
-      const note = maintenanceNotes.find(n => n.id === id);
-      if (note) {
-        document.getElementById('maintenance-modal-title').innerHTML = '<i class="fas fa-tools" style="color:var(--danger);"></i> Editar Nota de Manutenção';
-        document.getElementById('edit-maintenance-id').value = note.id;
-        document.getElementById('maint-equipment').value = note.equipment;
-        document.getElementById('maint-description').value = note.description;
-        document.getElementById('maint-severity').value = note.severity;
-        document.getElementById('maint-event-link').value = note.eventLink || '';
-        document.getElementById('maint-date').value = note.date;
-        document.getElementById('maint-status').value = note.status;
-        document.getElementById('maint-notes').value = note.notes || '';
-      }
-    }
-    modal.classList.add('active');
-  }
-
-  function handleMaintenanceSubmit(e) {
-    e.preventDefault();
-    const id = document.getElementById('edit-maintenance-id').value;
-    const data = {
-      equipment: document.getElementById('maint-equipment').value,
-      description: document.getElementById('maint-description').value,
-      severity: document.getElementById('maint-severity').value,
-      eventLink: document.getElementById('maint-event-link').value,
-      date: document.getElementById('maint-date').value,
-      status: document.getElementById('maint-status').value,
-      notes: document.getElementById('maint-notes').value,
-    };
-    if (id) {
-      const idx = maintenanceNotes.findIndex(n => n.id === parseFloat(id));
-      if (idx > -1) maintenanceNotes[idx] = { ...maintenanceNotes[idx], ...data };
-    } else {
-      maintenanceNotes.push({ ...data, id: Date.now(), createdAt: new Date().toISOString() });
-    }
-    saveData();
-    updateMaintenanceList();
-    document.getElementById('maintenance-modal').classList.remove('active');
-    showToast('Nota de manutenção salva!', 'success');
-  }
-
-  function updateMaintenanceList() {
-    const list = document.getElementById('maintenance-list');
-    if (!list) return;
-
-    const el = id => document.getElementById(id);
-    const total = maintenanceNotes.length;
-    const pendente = maintenanceNotes.filter(n => n.status === 'pendente').length;
-    const andamento = maintenanceNotes.filter(n => n.status === 'em-andamento').length;
-    const resolvida = maintenanceNotes.filter(n => n.status === 'resolvida').length;
-    if (el('maint-total-count')) el('maint-total-count').textContent = total;
-    if (el('maint-pendente-count')) el('maint-pendente-count').textContent = pendente;
-    if (el('maint-andamento-count')) el('maint-andamento-count').textContent = andamento;
-    if (el('maint-resolvida-count')) el('maint-resolvida-count').textContent = resolvida;
-
-    const filtered = activeMaintenanceFilter === 'all'
-      ? maintenanceNotes
-      : maintenanceNotes.filter(n => n.status === activeMaintenanceFilter);
-
-    if (filtered.length === 0) {
-      list.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-tools"></i></div><h4>${activeMaintenanceFilter === 'all' ? 'Nenhuma nota de manutenção' : 'Nenhum item neste status'}</h4><p>Adicione notas para rastrear problemas nos seus equipamentos</p></div>`;
-      return;
-    }
-
-    const severityLabels = { alta: '🔴 Alta', media: '🟡 Média', baixa: '🟢 Baixa' };
-    const statusLabels = { pendente: 'Pendente', 'em-andamento': 'Em Andamento', resolvida: 'Resolvida' };
-
-    list.innerHTML = '';
-    [...filtered].sort((a, b) => {
-      const sOrder = { pendente: 0, 'em-andamento': 1, resolvida: 2 };
-      const sevOrder = { alta: 0, media: 1, baixa: 2 };
-      if (sOrder[a.status] !== sOrder[b.status]) return sOrder[a.status] - sOrder[b.status];
-      if (sevOrder[a.severity] !== sevOrder[b.severity]) return sevOrder[a.severity] - sevOrder[b.severity];
-      return new Date(b.createdAt) - new Date(a.createdAt);
-    }).forEach(note => {
-      const card = document.createElement('div');
-      card.className = `maintenance-card transaction-card ${note.status === 'resolvida' ? 'resolvida' : ''}`;
-      card.style.borderLeftColor = note.status === 'resolvida' ? 'var(--success)' : note.severity === 'alta' ? 'var(--danger)' : note.severity === 'media' ? 'var(--warning)' : 'var(--info)';
-      card.innerHTML = `
-        <div class="transaction-header">
-          <span class="category-badge" style="background:rgba(239,71,111,0.1);color:var(--danger);max-width:none;">
-            <i class="fas fa-tools" style="margin-right:4px;"></i>${note.equipment}
-          </span>
-          <span class="maint-severity ${note.severity}">${severityLabels[note.severity]}</span>
-        </div>
-        <div class="transaction-body" style="margin:8px 0;">
-          <div style="font-size:0.88rem;color:var(--text2);margin-bottom:4px;">${note.description}</div>
-          ${note.notes ? `<div style="font-size:0.78rem;color:var(--text3);font-style:italic;margin-top:4px;"><i class="fas fa-note-sticky"></i> ${note.notes}</div>` : ''}
-        </div>
-        <div class="transaction-footer">
-          <div style="display:flex;flex-direction:column;gap:4px;">
-            <span class="maint-status-badge ${note.status}">${statusLabels[note.status]}</span>
-            <span style="font-size:0.75rem;color:var(--text3);"><i class="fas fa-calendar" style="margin-right:4px;"></i>${formatDate(note.date)}</span>
-          </div>
-          <div class="transaction-actions">
-            ${note.status !== 'resolvida' ? `<button class="btn btn-xs" style="background:var(--success);" data-action="resolve-maintenance" data-id="${note.id}"><i class="fas fa-check"></i> Resolver</button>` : ''}
-            <button class="btn btn-xs" data-action="edit-maintenance" data-id="${note.id}"><i class="fas fa-edit"></i></button>
-            <button class="btn btn-xs btn-danger" data-action="delete-maintenance" data-id="${note.id}"><i class="fas fa-trash"></i></button>
-          </div>
-        </div>`;
-      list.appendChild(card);
-    });
-  }
 
   // =====================================================
   // CHECKLIST DE EQUIPAMENTOS
@@ -8422,6 +8664,86 @@ function showCommitmentsForDay(dateString) {
     allEvents.sort((a, b) => a.label.localeCompare(b.label)).forEach(ev => sel.add(new Option(ev.label, ev.id)));
 
     if (currentVal) sel.value = currentVal;
+
+    // Wire up client search
+    const searchInput = document.getElementById('checklist-client-search');
+    const clearBtn = document.getElementById('checklist-search-clear');
+    const dropdown = document.getElementById('checklist-client-results');
+
+    if (searchInput && !searchInput._checklistWired) {
+      searchInput._checklistWired = true;
+
+      searchInput.addEventListener('input', () => {
+        const q = searchInput.value.trim().toLowerCase();
+        clearBtn.style.display = q ? 'inline' : 'none';
+        if (!q) { dropdown.style.display = 'none'; return; }
+
+        // Busca por clientes que têm eventos vinculados
+        const matchedClients = clients.filter(c => (c.name||'').toLowerCase().includes(q));
+        if (!matchedClients.length) {
+          dropdown.innerHTML = '<div class="checklist-client-option" style="color:var(--text3);">Nenhum cliente encontrado</div>';
+          dropdown.style.display = 'block';
+          return;
+        }
+
+        dropdown.innerHTML = '';
+        matchedClients.slice(0, 8).forEach(cl => {
+          // Busca eventos deste cliente
+          const clientOrders = eventOrders.filter(o => o.clientId === cl.id);
+          const clientCommitments = commitments.filter(c => c.clientId === cl.id);
+          const totalEvts = clientOrders.length + clientCommitments.length;
+          if (totalEvts === 0) return;
+
+          const div = document.createElement('div');
+          div.className = 'checklist-client-option';
+          div.innerHTML = `
+            <div class="cco-name"><i class="fas fa-user" style="color:var(--primary);margin-right:6px;font-size:0.78rem;"></i>${cl.name}</div>
+            <div class="cco-events">${totalEvts} evento${totalEvts !== 1 ? 's' : ''} vinculado${totalEvts !== 1 ? 's' : ''}</div>`;
+          div.addEventListener('click', () => {
+            searchInput.value = cl.name;
+            clearBtn.style.display = 'inline';
+            dropdown.style.display = 'none';
+            // Popula o select apenas com eventos deste cliente
+            sel.innerHTML = '<option value="">-- Selecione um evento --</option>';
+            clientCommitments.forEach(c => {
+              sel.add(new Option(`📅 ${c.title} — ${formatDate(c.date ? c.date.split('T')[0] : '')}`, 'c_' + c.id));
+            });
+            clientOrders.forEach(o => {
+              sel.add(new Option(`🎵 ${o.eventType} (${formatDate(o.eventDate)})`, 'o_' + o.id));
+            });
+            // Auto-seleciona se só tem 1 evento
+            if (sel.options.length === 2) {
+              sel.selectedIndex = 1;
+              renderChecklistForEvent(sel.value);
+            }
+          });
+          dropdown.appendChild(div);
+        });
+        dropdown.style.display = dropdown.children.length ? 'block' : 'none';
+      });
+
+      clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        clearBtn.style.display = 'none';
+        dropdown.style.display = 'none';
+        // Restaura todos os eventos no select
+        sel.innerHTML = '<option value="">-- Selecione um evento --</option>';
+        const allEvts2 = [
+          ...commitments.map(c => ({ id: 'c_' + c.id, label: `📅 ${c.title} — ${formatDate(c.date ? c.date.split('T')[0] : '')}` })),
+          ...eventOrders.map(o => {
+            const cl2 = clients.find(c => c.id === o.clientId);
+            return { id: 'o_' + o.id, label: `🎵 ${o.eventType} — ${cl2?.name || ''} (${formatDate(o.eventDate)})` };
+          })
+        ];
+        allEvts2.sort((a, b) => a.label.localeCompare(b.label)).forEach(ev => sel.add(new Option(ev.label, ev.id)));
+        sel.value = '';
+        renderChecklistForEvent('');
+      });
+
+      searchInput.addEventListener('blur', () => setTimeout(() => { dropdown.style.display = 'none'; }, 200));
+      searchInput.addEventListener('focus', () => { if (searchInput.value) searchInput.dispatchEvent(new Event('input')); });
+    }
+
     updateGlobalEquipmentList();
     renderChecklistForEvent(sel.value);
   }
@@ -8439,6 +8761,28 @@ function showCommitmentsForDay(dateString) {
 
     panel.style.display = 'block';
     emptyState.style.display = 'none';
+
+    // Renderiza info do evento selecionado
+    const infoEl = document.getElementById('checklist-event-info');
+    if (infoEl) {
+      let infoText = '';
+      if (eventId.startsWith('o_')) {
+        const orderId = parseFloat(eventId.slice(2));
+        const order = eventOrders.find(o => o.id === orderId);
+        if (order) {
+          const cl = clients.find(c => c.id === order.clientId);
+          infoText = `<i class="fas fa-music"></i> <strong>${order.eventType}</strong> — ${cl?.name || 'Cliente'} &nbsp;|&nbsp; <i class="fas fa-calendar" style="margin-left:4px;"></i> ${formatDate(order.eventDate)} &nbsp;|&nbsp; <i class="fas fa-map-marker-alt" style="margin-left:4px;"></i> ${order.eventLocation || 'Local não informado'}`;
+        }
+      } else if (eventId.startsWith('c_')) {
+        const commitId = parseFloat(eventId.slice(2));
+        const commit = commitments.find(c => c.id === commitId);
+        if (commit) {
+          infoText = `<i class="fas fa-calendar-check"></i> <strong>${commit.title}</strong> &nbsp;|&nbsp; <i class="fas fa-calendar" style="margin-left:4px;"></i> ${formatDate(commit.date ? commit.date.split('T')[0] : '')} &nbsp;|&nbsp; <i class="fas fa-map-marker-alt" style="margin-left:4px;"></i> ${commit.location || 'Local não informado'}`;
+        }
+      }
+      infoEl.innerHTML = infoText;
+      infoEl.style.display = infoText ? 'flex' : 'none';
+    }
 
     if (!eventChecklists[eventId]) {
       // Auto-populate with global equipment suggestions
@@ -8607,13 +8951,229 @@ function showCommitmentsForDay(dateString) {
   });
 
   // =====================================================
-  // EXPOSE FUNCTIONS GLOBALLY (needed for inline onclick)
+  // NOTAS DE MANUTENÇÃO
+  // =====================================================
+
+  let activeMaintenanceFilter = 'todas';
+
+  function updateMaintenanceTab() {
+    updateMaintenanceKPIs();
+    const activePill = document.querySelector('.maint-pill.active');
+    renderMaintenanceNotes(activePill ? activePill.dataset.maintFilter : 'todas');
+  }
+
+  function updateMaintenanceKPIs() {
+    const total = maintenanceNotes.length;
+    const pendente = maintenanceNotes.filter(n => n.status === 'pendente').length;
+    const andamento = maintenanceNotes.filter(n => n.status === 'em-andamento').length;
+    const resolvida = maintenanceNotes.filter(n => n.status === 'resolvida').length;
+    const el = id => document.getElementById(id);
+    if (el('maint-kpi-total'))    el('maint-kpi-total').textContent    = total;
+    if (el('maint-kpi-pendente')) el('maint-kpi-pendente').textContent = pendente;
+    if (el('maint-kpi-andamento'))el('maint-kpi-andamento').textContent= andamento;
+    if (el('maint-kpi-resolvida'))el('maint-kpi-resolvida').textContent= resolvida;
+  }
+
+  const SEVERITY_CONFIG = {
+    alta:  { label: '🔴 Alta',  color: 'var(--danger)',  bg: 'rgba(239,71,111,0.12)',  accent: '#ef476f', iconBg: 'rgba(239,71,111,0.15)' },
+    media: { label: '🟡 Média', color: 'var(--warning)', bg: 'rgba(255,193,7,0.12)',   accent: '#ffc107', iconBg: 'rgba(255,193,7,0.15)'   },
+    baixa: { label: '🟢 Baixa', color: 'var(--success)', bg: 'rgba(6,214,160,0.12)',   accent: '#06d6a0', iconBg: 'rgba(6,214,160,0.15)'   },
+  };
+
+  const STATUS_CONFIG = {
+    'pendente':    { label: 'Pendente',    color: 'var(--danger)',  bg: 'rgba(239,71,111,0.12)'  },
+    'em-andamento':{ label: 'Em Andamento',color: 'var(--warning)', bg: 'rgba(255,193,7,0.12)'   },
+    'resolvida':   { label: 'Resolvida',   color: 'var(--success)', bg: 'rgba(6,214,160,0.12)'   },
+  };
+
+  // Sort: status order (pendente > em-andamento > resolvida), then severity (alta > media > baixa)
+  function sortMaintenanceNotes(notes) {
+    const statusOrder = { 'pendente': 0, 'em-andamento': 1, 'resolvida': 2 };
+    const sevOrder    = { 'alta': 0, 'media': 1, 'baixa': 2 };
+    return [...notes].sort((a, b) => {
+      const sd = (statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9);
+      if (sd !== 0) return sd;
+      return (sevOrder[a.severity] ?? 9) - (sevOrder[b.severity] ?? 9);
+    });
+  }
+
+  function renderMaintenanceNotes(filter = 'todas') {
+    activeMaintenanceFilter = filter;
+    const container = document.getElementById('maintenance-notes-list');
+    if (!container) return;
+
+    let filtered = filter === 'todas'
+      ? maintenanceNotes
+      : maintenanceNotes.filter(n => n.status === filter);
+
+    filtered = sortMaintenanceNotes(filtered);
+
+    if (!filtered.length) {
+      const emptyMsgs = {
+        'todas':       { icon: 'fa-tools', title: 'Nenhuma nota registrada', sub: 'Toque em "Nova Nota" para registrar um problema' },
+        'pendente':    { icon: 'fa-exclamation-circle', title: 'Sem pendências!', sub: 'Nenhum problema pendente encontrado' },
+        'em-andamento':{ icon: 'fa-spinner', title: 'Nada em andamento', sub: 'Nenhum problema em andamento' },
+        'resolvida':   { icon: 'fa-check-circle', title: 'Nenhuma resolvida ainda', sub: 'As notas resolvidas aparecerão aqui' },
+      };
+      const msg = emptyMsgs[filter] || emptyMsgs['todas'];
+      container.innerHTML = `<div class="empty-state" style="padding:30px 0;">
+        <div class="empty-state-icon"><i class="fas ${msg.icon}"></i></div>
+        <h4>${msg.title}</h4><p>${msg.sub}</p>
+      </div>`;
+      return;
+    }
+
+    container.innerHTML = filtered.map(note => {
+      const sev = SEVERITY_CONFIG[note.severity] || SEVERITY_CONFIG.media;
+      const st  = STATUS_CONFIG[note.status]     || STATUS_CONFIG.pendente;
+
+      // Find linked event label
+      let eventLabel = '';
+      if (note.eventLink) {
+        const parts = note.eventLink.split('_');
+        const type  = parts[0];
+        const eid   = parseFloat(parts[1]);
+        if (type === 'c') {
+          const c = commitments.find(x => x.id === eid);
+          if (c) eventLabel = `<i class="fas fa-calendar-alt"></i> ${c.title}`;
+        } else if (type === 'o') {
+          const o = eventOrders.find(x => x.id === eid);
+          if (o) {
+            const cl = clients.find(x => x.id === o.clientId);
+            eventLabel = `<i class="fas fa-clipboard-list"></i> ${cl ? cl.name : 'Pedido'}`;
+          }
+        }
+      }
+
+      const dateStr = note.date ? formatDate(note.date) : '';
+      const isResolved = note.status === 'resolvida';
+
+      return `<div class="maint-card" data-id="${note.id}">
+        <div class="maint-card-accent" style="background:${sev.accent};"></div>
+        <div class="maint-card-header">
+          <div class="maint-card-icon" style="background:${sev.iconBg};color:${sev.color};">
+            <i class="fas fa-tools"></i>
+          </div>
+          <div class="maint-card-main">
+            <div class="maint-card-equipment">${note.equipment}</div>
+            <div class="maint-card-meta">
+              <span class="maint-badge" style="background:${sev.bg};color:${sev.color};">${sev.label}</span>
+              <span class="maint-badge" style="background:${st.bg};color:${st.color};">${st.label}</span>
+              ${eventLabel ? `<span class="maint-event-link">${eventLabel}</span>` : ''}
+            </div>
+          </div>
+        </div>
+        <div class="maint-card-description">${note.description}</div>
+        ${note.notes ? `<div class="maint-notes-snippet"><i class="fas fa-sticky-note"></i> ${note.notes}</div>` : ''}
+        <div class="maint-card-footer">
+          <div class="maint-card-date"><i class="fas fa-calendar"></i> ${dateStr}</div>
+          <div class="maint-card-actions">
+            ${!isResolved ? `<button class="maint-btn-sm" style="background:rgba(6,214,160,0.12);color:var(--success);" data-action="resolve-maintenance" data-id="${note.id}"><i class="fas fa-check"></i> Resolver</button>` : ''}
+            <button class="maint-btn-sm" style="background:var(--surface2);color:var(--text2);" data-action="edit-maintenance" data-id="${note.id}"><i class="fas fa-edit"></i></button>
+            <button class="maint-btn-sm" style="background:rgba(239,71,111,0.1);color:var(--danger);" data-action="delete-maintenance" data-id="${note.id}"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function openMaintenanceModal(mode, id = null) {
+    const modal   = document.getElementById('maintenance-modal');
+    const title   = document.getElementById('maintenance-modal-title');
+    const form    = document.getElementById('maintenance-form');
+    const editId  = document.getElementById('edit-maintenance-id');
+
+    form.reset();
+    editId.value = '';
+
+    // Populate datalist with globalEquipments + names already used
+    const dl = document.getElementById('maint-equipment-datalist');
+    const allEquip = [...new Set([
+      ...globalEquipments,
+      ...maintenanceNotes.map(n => n.equipment).filter(Boolean)
+    ])].sort();
+    dl.innerHTML = allEquip.map(e => `<option value="${e}">`).join('');
+
+    // Populate event link dropdown
+    const evSelect = document.getElementById('maint-event-link');
+    evSelect.innerHTML = '<option value="">Nenhum evento específico</option>';
+    const allEvents = [
+      ...commitments.map(c => ({ value: `c_${c.id}`, label: `📅 ${c.title} (${formatDate(c.date.split('T')[0])})` })),
+      ...eventOrders.map(o => {
+        const cl = clients.find(x => x.id === o.clientId);
+        return { value: `o_${o.id}`, label: `📋 ${cl ? cl.name : 'Cliente'} — ${o.eventType || ''} (${formatDate(o.eventDate || '')})` };
+      }),
+    ];
+    allEvents.forEach(ev => {
+      const opt = document.createElement('option');
+      opt.value = ev.value;
+      opt.textContent = ev.label;
+      evSelect.appendChild(opt);
+    });
+
+    // Set default date to today
+    document.getElementById('maint-date').value = new Date().toISOString().split('T')[0];
+
+    if (mode === 'edit' && id !== null) {
+      const note = maintenanceNotes.find(n => n.id === id);
+      if (!note) return;
+      title.innerHTML = '<i class="fas fa-tools" style="color:var(--danger);"></i> Editar Nota de Manutenção';
+      editId.value = note.id;
+      document.getElementById('maint-equipment').value   = note.equipment  || '';
+      document.getElementById('maint-description').value = note.description|| '';
+      document.getElementById('maint-severity').value    = note.severity   || 'media';
+      document.getElementById('maint-event-link').value  = note.eventLink  || '';
+      document.getElementById('maint-date').value        = note.date       || '';
+      document.getElementById('maint-status').value      = note.status     || 'pendente';
+      document.getElementById('maint-notes').value       = note.notes      || '';
+    } else {
+      title.innerHTML = '<i class="fas fa-tools" style="color:var(--danger);"></i> Nova Nota de Manutenção';
+    }
+
+    modal.classList.add('active');
+  }
+
+  function handleMaintenanceSubmit(e) {
+    e.preventDefault();
+    const editId = document.getElementById('edit-maintenance-id').value;
+    const data = {
+      equipment:   document.getElementById('maint-equipment').value.trim(),
+      description: document.getElementById('maint-description').value.trim(),
+      severity:    document.getElementById('maint-severity').value,
+      eventLink:   document.getElementById('maint-event-link').value,
+      date:        document.getElementById('maint-date').value,
+      status:      document.getElementById('maint-status').value,
+      notes:       document.getElementById('maint-notes').value.trim(),
+    };
+    if (editId) {
+      const idx = maintenanceNotes.findIndex(n => n.id === parseFloat(editId));
+      if (idx > -1) maintenanceNotes[idx] = { ...maintenanceNotes[idx], ...data };
+    } else {
+      maintenanceNotes.push({ ...data, id: Date.now(), createdAt: new Date().toISOString() });
+    }
+    saveData();
+    updateMaintenanceTab();
+    document.getElementById('maintenance-modal').classList.remove('active');
+    showToast(editId ? 'Nota atualizada!' : 'Nota de manutenção registrada!', 'success');
+  }
+
+  function resolveMaintenanceNote(id) {
+    const note = maintenanceNotes.find(n => n.id === id);
+    if (!note) return;
+    note.status = 'resolvida';
+    saveData();
+    updateMaintenanceTab();
+    showToast(`"${note.equipment}" marcado como resolvido! ✅`, 'success');
+  }
+
   // =====================================================
   window.openCommitmentFromHero = openCommitmentFromHero;
   window.openSingleCommitmentDetail = openSingleCommitmentDetail;
   window.updateCommitmentStatusFromDetail = updateCommitmentStatusFromDetail;
   window.deleteCommitmentFromDetail = deleteCommitmentFromDetail;
   window.updateOrdersKPI = updateOrdersKPI;
+  window.openMaintenanceModal = openMaintenanceModal;
+  window.resolveMaintenanceNote = resolveMaintenanceNote;
 });
 
 </script>
