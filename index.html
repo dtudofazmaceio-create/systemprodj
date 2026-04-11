@@ -4501,6 +4501,48 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
     document.querySelectorAll('.close-button, [data-action="close-modal"]').forEach(btn => {
       btn.addEventListener('click', () => btn.closest('.modal').classList.remove('active'));
     });
+
+    // Event detail modal — action buttons (edit, ver dia, pedido, status, delete)
+    document.getElementById('single-commitment-detail-modal')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-detail-action]');
+      if (!btn) return;
+      const action = btn.dataset.detailAction;
+      const modal = document.getElementById('single-commitment-detail-modal');
+
+      function closeAndDo(fn, delay = 320) {
+        modal.classList.remove('active');
+        setTimeout(fn, delay);
+      }
+
+      if (action === 'edit-commitment') {
+        const id = parseFloat(btn.dataset.id);
+        closeAndDo(() => openCommitmentModal('edit', id));
+      } else if (action === 'ver-dia') {
+        const date = btn.dataset.date;
+        closeAndDo(() => { showTab('Agenda'); setTimeout(() => showCommitmentsForDay(date), 150); });
+      } else if (action === 'edit-order') {
+        const id = parseFloat(btn.dataset.id);
+        closeAndDo(() => openEventOrderModal('edit', id));
+      } else if (action === 'status') {
+        const id = parseFloat(btn.dataset.commitmentId);
+        const status = btn.dataset.status;
+        updateCommitmentStatusFromDetail(id, status);
+      } else if (action === 'delete-commitment') {
+        const id = parseFloat(btn.dataset.id);
+        deleteCommitmentFromDetail(id);
+      } else if (action === 'open-checklist') {
+        const key = btn.dataset.key;
+        closeAndDo(() => openChecklistForEvent(key));
+      }
+
+      // Hover effects for delete button
+      btn.addEventListener('mouseenter', () => {
+        if (action === 'delete-commitment') { btn.style.background='var(--danger)'; btn.style.color='white'; }
+      });
+      btn.addEventListener('mouseleave', () => {
+        if (action === 'delete-commitment') { btn.style.background='transparent'; btn.style.color='var(--danger)'; }
+      });
+    });
     
     // Click outside to close modals
     document.querySelectorAll('.modal').forEach(modal => {
@@ -5188,6 +5230,23 @@ if (typeof activeModalCallback === 'function') {
         commitments.push(newCommitment);
         
         showToast('Pedido criado! Um compromisso foi agendado.', 'success');
+
+        // Pergunta se deseja baixar para enviar ao cliente
+        saveData();
+        updateUI();
+        modal.classList.remove('active');
+        showTab('pedidos');
+
+        setTimeout(() => {
+          showConfirm(
+            `Pedido Nº ${newOrder.orderNumber} criado!\nDeseja gerar o PDF para enviar ao cliente?`,
+            'Baixar Pedido',
+            () => downloadExistingOrderAsPDF(newOrder.id),
+            'success',
+            'Baixar PDF'
+          );
+        }, 400);
+        return; // já salvou acima
     }
 
     saveData();
@@ -8166,12 +8225,32 @@ function showCommitmentsForDay(dateString) {
   // CUSTOM CONFIRM SHEET
   // =====================================================
   let _confirmCallback = null;
-  function showConfirm(message, title = 'Confirmar exclusão', onConfirm = null, type = 'danger') {
+  function showConfirm(message, title = 'Confirmar exclusão', onConfirm = null, type = 'danger', okLabel = null) {
     document.getElementById('confirm-sheet-title').textContent = title;
     document.getElementById('confirm-sheet-message').textContent = message;
     const iconEl = document.getElementById('confirm-sheet-icon');
-    iconEl.className = `confirm-sheet-icon${type === 'warning' ? ' warning' : ''}`;
-    iconEl.innerHTML = type === 'warning' ? '<i class="fas fa-exclamation-triangle"></i>' : '<i class="fas fa-trash"></i>';
+    const okBtn = document.getElementById('confirm-sheet-ok');
+    if (type === 'warning') {
+      iconEl.className = 'confirm-sheet-icon warning';
+      iconEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+      okBtn.className = 'btn';
+      okBtn.style.background = 'linear-gradient(135deg,var(--primary),var(--primary-light))';
+    } else if (type === 'success') {
+      iconEl.className = 'confirm-sheet-icon';
+      iconEl.style.background = 'var(--success-bg)';
+      iconEl.style.color = 'var(--success)';
+      iconEl.innerHTML = '<i class="fas fa-download"></i>';
+      okBtn.className = 'btn btn-success';
+      okBtn.style.background = '';
+    } else {
+      iconEl.className = 'confirm-sheet-icon';
+      iconEl.style.background = '';
+      iconEl.style.color = '';
+      iconEl.innerHTML = '<i class="fas fa-trash"></i>';
+      okBtn.className = 'btn btn-danger';
+      okBtn.style.background = '';
+    }
+    okBtn.textContent = okLabel || (type === 'success' ? 'Baixar PDF' : type === 'warning' ? 'Confirmar' : 'Excluir');
     _confirmCallback = onConfirm;
     document.getElementById('confirm-sheet-overlay').classList.add('open');
     document.getElementById('confirm-sheet').classList.add('open');
@@ -8467,9 +8546,8 @@ function showCommitmentsForDay(dateString) {
           <div style="background:var(--surface3);border-radius:var(--r-full);height:6px;overflow:hidden;margin-bottom:10px;">
             <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--success),var(--ev-teal));border-radius:var(--r-full);transition:width 0.4s;"></div>
           </div>` : ''}
-        <button onclick="document.getElementById('single-commitment-detail-modal').classList.remove('active'); openChecklistForEvent('c_${c.id}');"
-          style="width:100%;padding:10px;border-radius:var(--r-sm);border:1.5px solid var(--ev-teal);background:rgba(6,214,160,0.08);color:var(--ev-teal);font-size:0.85rem;font-weight:700;cursor:pointer;font-family:var(--font-body);display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.15s;"
-          onmouseover="this.style.background='rgba(6,214,160,0.18)'" onmouseout="this.style.background='rgba(6,214,160,0.08)'">
+        <button data-detail-action="open-checklist" data-key="c_${c.id}"
+          style="width:100%;padding:10px;border-radius:var(--r-sm);border:1.5px solid var(--ev-teal);background:rgba(6,214,160,0.08);color:var(--ev-teal);font-size:0.85rem;font-weight:700;cursor:pointer;font-family:var(--font-body);display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.15s;">
           <i class="fas fa-clipboard-check"></i> ${total === 0 ? 'Montar Checklist' : 'Abrir Checklist'}
         </button>
       </div>`;
@@ -8516,25 +8594,25 @@ function showCommitmentsForDay(dateString) {
       </div>
       <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px;">
         <div style="display:grid;grid-template-columns:1fr 1fr ${linkedOrderId ? '1fr' : ''};gap:8px;">
-          <button class="btn" onclick="document.getElementById('single-commitment-detail-modal').classList.remove('active'); openCommitmentModal('edit', ${c.id});"><i class="fas fa-edit"></i> Editar</button>
-          <button class="btn btn-outline" onclick="document.getElementById('single-commitment-detail-modal').classList.remove('active'); showTab('Agenda'); setTimeout(()=>showCommitmentsForDay('${c.date ? c.date.split('T')[0] : ''}'),200);"><i class="fas fa-calendar-day"></i> Ver Dia</button>
-          ${linkedOrderId ? `<button class="btn" style="background:linear-gradient(135deg,var(--ev-orange),var(--warning));color:white;" onclick="document.getElementById('single-commitment-detail-modal').classList.remove('active'); openEventOrderModal('edit', ${linkedOrderId});"><i class="fas fa-clipboard-list"></i> Pedido</button>` : ''}
+          <button class="btn" data-detail-action="edit-commitment" data-id="${c.id}"><i class="fas fa-edit"></i> Editar</button>
+          <button class="btn btn-outline" data-detail-action="ver-dia" data-date="${c.date ? c.date.split('T')[0] : ''}"><i class="fas fa-calendar-day"></i> Ver Dia</button>
+          ${linkedOrderId ? `<button class="btn" style="background:linear-gradient(135deg,var(--ev-orange),var(--warning));color:white;" data-detail-action="edit-order" data-id="${linkedOrderId}"><i class="fas fa-clipboard-list"></i> Pedido</button>` : ''}
         </div>
         <div style="background:var(--surface2);border-radius:var(--r-md);padding:12px;">
           <div style="font-size:0.72rem;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">Alterar Status</div>
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
-            <button onclick="updateCommitmentStatusFromDetail(${c.id},'confirmado')" style="padding:8px 4px;border-radius:var(--r-sm);border:1.5px solid var(--primary);background:${c.status==='confirmado'?'var(--primary)':'transparent'};color:${c.status==='confirmado'?'white':'var(--primary)'};font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:var(--font-body);">
+            <button data-detail-action="status" data-commitment-id="${c.id}" data-status="confirmado" style="padding:8px 4px;border-radius:var(--r-sm);border:1.5px solid var(--primary);background:${c.status==='confirmado'?'var(--primary)':'transparent'};color:${c.status==='confirmado'?'white':'var(--primary)'};font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:var(--font-body);">
               <i class="fas fa-check-circle" style="display:block;font-size:1.1rem;margin-bottom:3px;"></i>Confirmado
             </button>
-            <button onclick="updateCommitmentStatusFromDetail(${c.id},'realizado')" style="padding:8px 4px;border-radius:var(--r-sm);border:1.5px solid var(--success);background:${c.status==='realizado'?'var(--success)':'transparent'};color:${c.status==='realizado'?'white':'var(--success)'};font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:var(--font-body);">
+            <button data-detail-action="status" data-commitment-id="${c.id}" data-status="realizado" style="padding:8px 4px;border-radius:var(--r-sm);border:1.5px solid var(--success);background:${c.status==='realizado'?'var(--success)':'transparent'};color:${c.status==='realizado'?'white':'var(--success)'};font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:var(--font-body);">
               <i class="fas fa-flag-checkered" style="display:block;font-size:1.1rem;margin-bottom:3px;"></i>Realizado
             </button>
-            <button onclick="updateCommitmentStatusFromDetail(${c.id},'cancelado')" style="padding:8px 4px;border-radius:var(--r-sm);border:1.5px solid var(--danger);background:${c.status==='cancelado'?'var(--danger)':'transparent'};color:${c.status==='cancelado'?'white':'var(--danger)'};font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:var(--font-body);">
+            <button data-detail-action="status" data-commitment-id="${c.id}" data-status="cancelado" style="padding:8px 4px;border-radius:var(--r-sm);border:1.5px solid var(--danger);background:${c.status==='cancelado'?'var(--danger)':'transparent'};color:${c.status==='cancelado'?'white':'var(--danger)'};font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:var(--font-body);">
               <i class="fas fa-times-circle" style="display:block;font-size:1.1rem;margin-bottom:3px;"></i>Cancelar
             </button>
           </div>
         </div>
-        <button onclick="deleteCommitmentFromDetail(${c.id})" style="width:100%;padding:12px;border-radius:var(--r-md);border:1.5px solid var(--danger);background:transparent;color:var(--danger);font-size:0.88rem;font-weight:700;cursor:pointer;font-family:var(--font-body);display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.15s;" onmouseover="this.style.background='var(--danger)';this.style.color='white'" onmouseout="this.style.background='transparent';this.style.color='var(--danger)'">
+        <button data-detail-action="delete-commitment" data-id="${c.id}" style="width:100%;padding:12px;border-radius:var(--r-md);border:1.5px solid var(--danger);background:transparent;color:var(--danger);font-size:0.88rem;font-weight:700;cursor:pointer;font-family:var(--font-body);display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.15s;">
           <i class="fas fa-trash"></i> Excluir Compromisso
         </button>
       </div>`;
@@ -9645,6 +9723,8 @@ function showCommitmentsForDay(dateString) {
   }
 
   // =====================================================
+  // EXPOSE GLOBALS (funções usadas em onclick inline)
+  // =====================================================
   window.openCommitmentFromHero = openCommitmentFromHero;
   window.openSingleCommitmentDetail = openSingleCommitmentDetail;
   window.updateCommitmentStatusFromDetail = updateCommitmentStatusFromDetail;
@@ -9653,6 +9733,10 @@ function showCommitmentsForDay(dateString) {
   window.openMaintenanceModal = openMaintenanceModal;
   window.resolveMaintenanceNote = resolveMaintenanceNote;
   window.openChecklistForEvent = openChecklistForEvent;
+  window.openCommitmentModal = openCommitmentModal;
+  window.openEventOrderModal = openEventOrderModal;
+  window.showCommitmentsForDay = showCommitmentsForDay;
+  window.showTab = showTab;
 });
 
 </script>
