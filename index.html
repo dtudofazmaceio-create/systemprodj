@@ -1205,7 +1205,34 @@
   }
   .btn-checklist-order:hover { opacity: 0.88; transform: scale(1.04); }
 
-  .equip-catalog-chip {
+  .equip-suggestion-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-soft);
+    transition: background var(--t-fast);
+    font-size: 0.9rem;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .equip-suggestion-item:last-child { border-bottom: none; }
+  .equip-suggestion-item:hover, .equip-suggestion-item.highlighted {
+    background: var(--surface2);
+  }
+  .equip-suggestion-item i { color: var(--ev-teal); font-size: 0.85rem; flex-shrink: 0; }
+  .equip-suggestion-item .equip-suggest-name { flex: 1; font-weight: 500; color: var(--text); }
+  .equip-suggestion-item .equip-suggest-name mark {
+    background: rgba(108,99,255,0.18); color: var(--primary);
+    border-radius: 2px; padding: 0 1px; font-weight: 700;
+  }
+  .equip-suggestion-item .equip-suggest-new {
+    font-size: 0.72rem; font-weight: 700;
+    padding: 2px 8px; border-radius: var(--r-full);
+    background: rgba(6,214,160,0.12); color: var(--success);
+  }
+  .equip-suggestion-empty {
+    padding: 14px; text-align: center;
+    font-size: 0.85rem; color: var(--text3);
+  }
     display: inline-flex; align-items: center; gap: 5px;
     padding: 5px 10px 5px 8px;
     background: var(--surface2);
@@ -3684,8 +3711,24 @@ max="31" required>
         </div>
         <div class="form-group">
           <label for="commitment-location">Local</label>
-          <input type="text" 
-id="commitment-location">
+          <input type="text" id="commitment-location">
+        </div>
+        <div class="form-group">
+          <label for="commitment-location-link"><i class="fas fa-map-marker-alt" style="color:var(--ev-pink);margin-right:4px;"></i> Link da Localização (Google Maps)</label>
+          <input type="url" id="commitment-location-link" placeholder="https://maps.google.com/...">
+        </div>
+        <div class="form-group">
+          <label>🚗 Quilometragem</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div>
+              <label for="commitment-km-inicial" style="font-size:0.75rem;color:var(--text3);">KM Inicial</label>
+              <input type="number" id="commitment-km-inicial" placeholder="0" min="0" step="1">
+            </div>
+            <div>
+              <label for="commitment-km-final" style="font-size:0.75rem;color:var(--text3);">KM Final</label>
+              <input type="number" id="commitment-km-final" placeholder="0" min="0" step="1">
+            </div>
+          </div>
         </div>
         <div class="form-group">
           <label for="commitment-description">Descrição/Observações</label>
@@ -4029,13 +4072,17 @@ class="modal-content">
           <!-- Adicionar equipamento: manual ou do catálogo -->
           <div style="margin-top:16px;">
             <div style="font-size:0.78rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;"><i class="fas fa-plus-circle" style="color:var(--ev-teal);margin-right:5px;"></i>Adicionar Equipamento</div>
-            <div class="equip-add-row" style="margin-bottom:8px;">
-              <input type="text" id="new-equip-input" placeholder="Digitar nome do equipamento..." style="flex:1;padding:12px 14px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.95rem;outline:none;" list="equip-catalog-datalist">
-              <datalist id="equip-catalog-datalist"></datalist>
-              <button class="btn" id="add-equip-btn" style="flex-shrink:0;background:linear-gradient(135deg,var(--ev-teal),var(--info));"><i class="fas fa-plus"></i> Adicionar</button>
+            <div style="position:relative;">
+              <div class="equip-add-row" style="margin-bottom:0;">
+                <input type="text" id="new-equip-input" placeholder="Buscar ou digitar novo equipamento..." autocomplete="off"
+                  style="flex:1;padding:12px 14px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.95rem;outline:none;transition:0.15s;">
+                <button class="btn" id="add-equip-btn" style="flex-shrink:0;background:linear-gradient(135deg,var(--ev-teal),var(--info));"><i class="fas fa-plus"></i> Adicionar</button>
+              </div>
+              <!-- Dropdown de sugestões filtradas -->
+              <div id="equip-suggestions-dropdown" style="display:none;position:absolute;left:0;right:0;top:100%;margin-top:4px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-md);z-index:100;box-shadow:0 8px 28px rgba(0,0,0,0.15);max-height:220px;overflow-y:auto;"></div>
             </div>
-            <!-- Catálogo rápido: chips dos equipamentos globais não adicionados ainda -->
-            <div id="checklist-catalog-chips" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+            <!-- Chips do catálogo (não adicionados) -->
+            <div id="checklist-catalog-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;"></div>
           </div>
           <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
             <button class="btn btn-xs" id="checklist-clear-btn" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border);">
@@ -4056,6 +4103,36 @@ class="modal-content">
           <h4>Selecione um evento</h4>
           <p>Busque pelo nome do cliente ou escolha<br>um evento acima para gerenciar o checklist</p>
         </div>
+      </div>
+
+      <!-- Configuração de Combustível -->
+      <div class="card">
+        <div class="card-accent-top" style="background: linear-gradient(90deg, var(--ev-orange), var(--warning));"></div>
+        <h2><i class="fas fa-gas-pump" style="color:var(--ev-orange);"></i> Combustível & Km</h2>
+        <p style="color:var(--text3);font-size:0.85rem;margin-bottom:16px;">Configure seu veículo para calcular automaticamente o custo de combustível nos eventos.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="fuel-type-input">Tipo</label>
+            <select id="fuel-type-input">
+              <option value="Gasolina">⛽ Gasolina</option>
+              <option value="Etanol">🌿 Etanol</option>
+              <option value="Diesel">🚛 Diesel</option>
+              <option value="GNV">💨 GNV</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="fuel-price-input">Preço por Litro (R$)</label>
+            <input type="number" id="fuel-price-input" placeholder="0,00" step="0.01" min="0">
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="fuel-consumption-input">Consumo (km/L)</label>
+            <input type="number" id="fuel-consumption-input" placeholder="10" step="0.1" min="1">
+          </div>
+          <div style="display:flex;align-items:flex-end;">
+            <button class="btn" id="save-fuel-config-btn" style="width:100%;background:linear-gradient(135deg,var(--ev-orange),var(--warning));"><i class="fas fa-save"></i> Salvar</button>
+          </div>
+        </div>
+        <div id="fuel-config-preview" style="margin-top:14px;padding:12px;background:var(--surface2);border-radius:var(--r-md);font-size:0.85rem;color:var(--text2);display:none;"></div>
       </div>
 
       <!-- Equipamentos do catálogo global -->
@@ -4102,6 +4179,7 @@ document.addEventListener('DOMContentLoaded', () => {
     'Extensão Elétrica', 'Iluminação LED', 'Microfone', 'Suporte de Caixa'
   ]);
   let eventChecklists = parseLocalStorage('eventChecklists', {}); // { eventId: [{name, checked}] }
+  let fuelConfig = parseLocalStorage('fuelConfig', { type: 'Gasolina', pricePerLiter: 0, consumption: 10 }); // consumption = km/L
 
   const pageTitles = {
     dashboard: 'Início', transacoes: 'Transações', contas: 'Contas',
@@ -4348,7 +4426,7 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
       renderChecklistForEvent(e.target.value);
     });
     document.getElementById('add-equip-btn')?.addEventListener('click', addEquipmentToChecklist);
-    document.getElementById('new-equip-input')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addEquipmentToChecklist(); } });
+    initEquipSuggestionsInput();
     document.getElementById('checklist-clear-btn')?.addEventListener('click', () => {
       const eventId = document.getElementById('checklist-event-select').value;
       if (!eventId || !eventChecklists[eventId]) return;
@@ -4381,6 +4459,9 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
     });
     document.getElementById('add-global-equip-btn')?.addEventListener('click', addGlobalEquipment);
     document.getElementById('new-global-equip-input')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addGlobalEquipment(); } });
+
+    // Fuel config
+    initFuelConfigPanel();
     
     document.getElementById('view-order-modal-download-btn')?.addEventListener('click', (e) => {
       const orderId = e.target.dataset.id;
@@ -4656,6 +4737,7 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
         localStorage.setItem('maintenanceNotes', JSON.stringify(maintenanceNotes));
         localStorage.setItem('globalEquipments', JSON.stringify(globalEquipments));
         localStorage.setItem('eventChecklists', JSON.stringify(eventChecklists));
+        localStorage.setItem('fuelConfig', JSON.stringify(fuelConfig));
         if (typeof updateOrdersKPI === 'function') updateOrdersKPI();
     } catch (e) {
         if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
@@ -4975,9 +5057,11 @@ if (typeof activeModalCallback === 'function') {
   clientId: parseFloat(document.getElementById('commitment-client').value) || null,
   date: document.getElementById('commitment-date').value,
   location: document.getElementById('commitment-location').value,
+  locationLink: document.getElementById('commitment-location-link').value.trim(),
+  kmInicial: parseFloat(document.getElementById('commitment-km-inicial').value) || null,
+  kmFinal: parseFloat(document.getElementById('commitment-km-final').value) || null,
   description: document.getElementById('commitment-description').value,
   status: document.getElementById('commitment-status').value,
-  // NOVO - Adicione esta linha
   linkedOrderId: parseFloat(document.getElementById('commitment-order').value) || null
 };
     if (id) {
@@ -5527,8 +5611,11 @@ function openCommitmentModal(mode, id = null, date = null) {
       modal.querySelector('#commitment-title').value = commitment.title;
       clientSelect.value = commitment.clientId || '';
       dateInput.value = commitment.date;
-      modal.querySelector('#commitment-location').value = commitment.location;
-      modal.querySelector('#commitment-description').value = commitment.description;
+      modal.querySelector('#commitment-location').value = commitment.location || '';
+      modal.querySelector('#commitment-location-link').value = commitment.locationLink || '';
+      modal.querySelector('#commitment-km-inicial').value = commitment.kmInicial || '';
+      modal.querySelector('#commitment-km-final').value = commitment.kmFinal || '';
+      modal.querySelector('#commitment-description').value = commitment.description || '';
       modal.querySelector('#commitment-status').value = commitment.status;
 
       // NOVO: Popula e seleciona o pedido vinculado (se houver)
@@ -7282,7 +7369,7 @@ function updateCommitmentOrderSelector(clientId) {
 
     for (let day = 1; day <= daysInMonth; day++) {
         const currentDate = new Date(year, month, day);
-        const dateString = currentDate.toISOString().split('T')[0];
+        const dateString = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
         
         let classes = 'calendar-day';
         if (currentDate.getTime() === today.getTime()) {
@@ -8314,10 +8401,11 @@ function showCommitmentsForDay(dateString) {
     const statusColor = statusColors[c.status] || 'var(--text3)';
     const statusLabel = statusLabels[c.status] || c.status;
 
-    // Check linked order financial info
+    // Financial info from linked order
     let financialHtml = '';
-    if (c.linkedOrderId) {
-      const order = eventOrders.find(o => o.id === c.linkedOrderId);
+    let linkedOrderId = c.linkedOrderId;
+    if (linkedOrderId) {
+      const order = eventOrders.find(o => o.id === linkedOrderId);
       if (order) {
         const paidReceipts = receipts.filter(r => r.orderId === order.id && r.status === 'pago');
         const totalPaid = paidReceipts.reduce((s, r) => s + r.amount, 0);
@@ -8331,6 +8419,60 @@ function showCommitmentsForDay(dateString) {
           </div>`;
       }
     }
+
+    // Fuel / km calculation
+    let fuelHtml = '';
+    const kmI = c.kmInicial != null ? c.kmInicial : null;
+    const kmF = c.kmFinal != null ? c.kmFinal : null;
+    if (kmI !== null || kmF !== null) {
+      const kmTotal = (kmI !== null && kmF !== null && kmF > kmI) ? (kmF - kmI) : null;
+      const litros = (kmTotal !== null && fuelConfig.consumption > 0) ? (kmTotal / fuelConfig.consumption) : null;
+      const custo = (litros !== null && fuelConfig.pricePerLiter > 0) ? (litros * fuelConfig.pricePerLiter) : null;
+      fuelHtml = `
+        <div style="background:var(--surface2);border-radius:var(--r-md);padding:14px;border-left:4px solid var(--ev-orange);">
+          <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text3);font-weight:700;margin-bottom:10px;"><i class="fas fa-gas-pump" style="margin-right:6px;color:var(--ev-orange);"></i>Combustível</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;">
+            <div><span style="color:var(--text3);">KM Inicial</span><div style="font-weight:700;">${kmI !== null ? kmI + ' km' : '—'}</div></div>
+            <div><span style="color:var(--text3);">KM Final</span><div style="font-weight:700;">${kmF !== null ? kmF + ' km' : '—'}</div></div>
+            ${kmTotal !== null ? `<div><span style="color:var(--text3);">Distância</span><div style="font-weight:700;color:var(--ev-orange);">${kmTotal} km</div></div>` : ''}
+            ${litros !== null ? `<div><span style="color:var(--text3);">Litros (${fuelConfig.consumption}km/L)</span><div style="font-weight:700;color:var(--warning);">${litros.toFixed(2)} L</div></div>` : ''}
+          </div>
+          ${custo !== null ? `<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-soft);display:flex;justify-content:space-between;align-items:center;"><span style="font-size:0.82rem;color:var(--text2);">Custo estimado (${fuelConfig.type} R$${fuelConfig.pricePerLiter.toFixed(2)}/L)</span><strong style="font-size:1rem;color:var(--danger);">${formatCurrency(custo)}</strong></div>` : `<div style="margin-top:8px;font-size:0.78rem;color:var(--text3);"><i class="fas fa-info-circle"></i> Configure o combustível na aba Checklist para ver o custo.</div>`}
+        </div>`;
+    }
+
+    // Map link
+    const mapHtml = c.locationLink ? `
+      <a href="${c.locationLink}" target="_blank" rel="noopener noreferrer"
+        style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:rgba(247,37,133,0.08);border-radius:var(--r-md);border:1.5px solid rgba(247,37,133,0.2);text-decoration:none;color:var(--ev-pink);font-weight:600;font-size:0.88rem;transition:0.15s;"
+        onmouseover="this.style.background='rgba(247,37,133,0.14)'" onmouseout="this.style.background='rgba(247,37,133,0.08)'">
+        <i class="fas fa-map-location-dot" style="font-size:1.1rem;flex-shrink:0;"></i>
+        <span style="flex:1;">Ver no Mapa</span>
+        <i class="fas fa-external-link-alt" style="font-size:0.75rem;opacity:0.7;"></i>
+      </a>` : '';
+
+    // Checklist preview
+    const eventKey = 'c_' + c.id;
+    const checklistItems = eventChecklists[eventKey] || [];
+    const checked = checklistItems.filter(i => i.checked).length;
+    const total = checklistItems.length;
+    const pct = total > 0 ? Math.round(checked / total * 100) : 0;
+    const checklistHtml = `
+      <div style="background:var(--surface2);border-radius:var(--r-md);padding:14px;border-left:4px solid var(--ev-teal);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text3);font-weight:700;"><i class="fas fa-clipboard-list" style="margin-right:6px;color:var(--ev-teal);"></i>Checklist</div>
+          <span style="font-size:0.78rem;font-weight:700;color:${pct===100?'var(--success)':'var(--text3)'};">${checked}/${total} itens</span>
+        </div>
+        ${total > 0 ? `
+          <div style="background:var(--surface3);border-radius:var(--r-full);height:6px;overflow:hidden;margin-bottom:10px;">
+            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--success),var(--ev-teal));border-radius:var(--r-full);transition:width 0.4s;"></div>
+          </div>` : ''}
+        <button onclick="document.getElementById('single-commitment-detail-modal').classList.remove('active'); openChecklistForEvent('c_${c.id}');"
+          style="width:100%;padding:10px;border-radius:var(--r-sm);border:1.5px solid var(--ev-teal);background:rgba(6,214,160,0.08);color:var(--ev-teal);font-size:0.85rem;font-weight:700;cursor:pointer;font-family:var(--font-body);display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.15s;"
+          onmouseover="this.style.background='rgba(6,214,160,0.18)'" onmouseout="this.style.background='rgba(6,214,160,0.08)'">
+          <i class="fas fa-clipboard-check"></i> ${total === 0 ? 'Montar Checklist' : 'Abrir Checklist'}
+        </button>
+      </div>`;
 
     document.getElementById('single-commitment-detail-body').innerHTML = `
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
@@ -8354,11 +8496,12 @@ function showCommitmentsForDay(dateString) {
         ${c.location ? `
         <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;background:var(--surface2);border-radius:var(--r-md);">
           <i class="fas fa-map-marker-alt" style="color:var(--ev-pink);margin-top:2px;flex-shrink:0;"></i>
-          <div>
+          <div style="flex:1;min-width:0;">
             <div style="font-size:0.75rem;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Local</div>
             <div style="font-weight:600;font-size:0.9rem;margin-top:2px;">${c.location}</div>
           </div>
         </div>` : ''}
+        ${mapHtml}
         ${c.description ? `
         <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;background:var(--surface2);border-radius:var(--r-md);">
           <i class="fas fa-align-left" style="color:var(--ev-blue);margin-top:2px;flex-shrink:0;"></i>
@@ -8368,22 +8511,25 @@ function showCommitmentsForDay(dateString) {
           </div>
         </div>` : ''}
         ${financialHtml}
+        ${fuelHtml}
+        ${checklistHtml}
       </div>
       <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-          <button class="btn" style="background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;border:none;" onclick="document.getElementById('single-commitment-detail-modal').classList.remove('active'); openCommitmentModal('edit', ${c.id});"><i class="fas fa-edit"></i> Editar</button>
-          <button class="btn btn-outline" onclick="document.getElementById('single-commitment-detail-modal').classList.remove('active'); showTab('Agenda'); setTimeout(()=>showCommitmentsForDay('${c.date ? c.date.split('T')[0] : ''}'),150);"><i class="fas fa-calendar-day"></i> Ver Dia</button>
+        <div style="display:grid;grid-template-columns:1fr 1fr ${linkedOrderId ? '1fr' : ''};gap:8px;">
+          <button class="btn" onclick="document.getElementById('single-commitment-detail-modal').classList.remove('active'); openCommitmentModal('edit', ${c.id});"><i class="fas fa-edit"></i> Editar</button>
+          <button class="btn btn-outline" onclick="document.getElementById('single-commitment-detail-modal').classList.remove('active'); showTab('Agenda'); setTimeout(()=>showCommitmentsForDay('${c.date ? c.date.split('T')[0] : ''}'),200);"><i class="fas fa-calendar-day"></i> Ver Dia</button>
+          ${linkedOrderId ? `<button class="btn" style="background:linear-gradient(135deg,var(--ev-orange),var(--warning));color:white;" onclick="document.getElementById('single-commitment-detail-modal').classList.remove('active'); openEventOrderModal('edit', ${linkedOrderId});"><i class="fas fa-clipboard-list"></i> Pedido</button>` : ''}
         </div>
         <div style="background:var(--surface2);border-radius:var(--r-md);padding:12px;">
           <div style="font-size:0.72rem;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">Alterar Status</div>
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
-            <button onclick="updateCommitmentStatusFromDetail(${c.id},'confirmado')" style="padding:8px 4px;border-radius:var(--r-sm);border:1.5px solid var(--primary);background:${c.status==='confirmado'?'var(--primary)':'transparent'};color:${c.status==='confirmado'?'white':'var(--primary)'};font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:var(--font-body);" onmouseover="this.style.background='var(--primary)';this.style.color='white'" onmouseout="this.style.background='${c.status==='confirmado'?'var(--primary)':'transparent'}';this.style.color='${c.status==='confirmado'?'white':'var(--primary)'}'">
+            <button onclick="updateCommitmentStatusFromDetail(${c.id},'confirmado')" style="padding:8px 4px;border-radius:var(--r-sm);border:1.5px solid var(--primary);background:${c.status==='confirmado'?'var(--primary)':'transparent'};color:${c.status==='confirmado'?'white':'var(--primary)'};font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:var(--font-body);">
               <i class="fas fa-check-circle" style="display:block;font-size:1.1rem;margin-bottom:3px;"></i>Confirmado
             </button>
-            <button onclick="updateCommitmentStatusFromDetail(${c.id},'realizado')" style="padding:8px 4px;border-radius:var(--r-sm);border:1.5px solid var(--success);background:${c.status==='realizado'?'var(--success)':'transparent'};color:${c.status==='realizado'?'white':'var(--success)'};font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:var(--font-body);" onmouseover="this.style.background='var(--success)';this.style.color='white'" onmouseout="this.style.background='${c.status==='realizado'?'var(--success)':'transparent'}';this.style.color='${c.status==='realizado'?'white':'var(--success)'}'">
+            <button onclick="updateCommitmentStatusFromDetail(${c.id},'realizado')" style="padding:8px 4px;border-radius:var(--r-sm);border:1.5px solid var(--success);background:${c.status==='realizado'?'var(--success)':'transparent'};color:${c.status==='realizado'?'white':'var(--success)'};font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:var(--font-body);">
               <i class="fas fa-flag-checkered" style="display:block;font-size:1.1rem;margin-bottom:3px;"></i>Realizado
             </button>
-            <button onclick="updateCommitmentStatusFromDetail(${c.id},'cancelado')" style="padding:8px 4px;border-radius:var(--r-sm);border:1.5px solid var(--danger);background:${c.status==='cancelado'?'var(--danger)':'transparent'};color:${c.status==='cancelado'?'white':'var(--danger)'};font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:var(--font-body);" onmouseover="this.style.background='var(--danger)';this.style.color='white'" onmouseout="this.style.background='${c.status==='cancelado'?'var(--danger)':'transparent'}';this.style.color='${c.status==='cancelado'?'white':'var(--danger)'}'">
+            <button onclick="updateCommitmentStatusFromDetail(${c.id},'cancelado')" style="padding:8px 4px;border-radius:var(--r-sm);border:1.5px solid var(--danger);background:${c.status==='cancelado'?'var(--danger)':'transparent'};color:${c.status==='cancelado'?'white':'var(--danger)'};font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:var(--font-body);">
               <i class="fas fa-times-circle" style="display:block;font-size:1.1rem;margin-bottom:3px;"></i>Cancelar
             </button>
           </div>
@@ -8479,10 +8625,12 @@ function showCommitmentsForDay(dateString) {
       return;
     }
     const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const _now = new Date();
+    const localToday = `${_now.getFullYear()}-${String(_now.getMonth()+1).padStart(2,'0')}-${String(_now.getDate()).padStart(2,'0')}`;
     el.innerHTML = upcoming.map(c => {
-      const d = new Date(c.date);
+      const d = new Date(c.date + (c.date.includes('T') ? '' : 'T00:00:00'));
       const timeStr = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-      const isToday = d.toISOString().split('T')[0] === new Date().toISOString().split('T')[0];
+      const isToday = c.date.split('T')[0] === localToday;
       const dayLabel = isToday ? 'Hoje' : String(d.getDate());
       return `<div class="upcoming-event-item" onclick="openCommitmentFromHero(${c.id})">
         <div class="upcoming-event-date-badge">
@@ -8885,12 +9033,8 @@ function showCommitmentsForDay(dateString) {
       saveData();
     }
 
-    // Populate datalist and catalog chips with not-yet-added global equipment
-    const catalogDatalist = document.getElementById('equip-catalog-datalist');
+    // Populate catalog chips with not-yet-added global equipment
     const catalogChips = document.getElementById('checklist-catalog-chips');
-    if (catalogDatalist) {
-      catalogDatalist.innerHTML = globalEquipments.map(n => `<option value="${n}">`).join('');
-    }
     if (catalogChips) {
       const existingNames = (eventChecklists[eventId] || []).map(i => i.name.toLowerCase());
       const missing = globalEquipments.filter(n => !existingNames.includes(n.toLowerCase()));
@@ -8955,6 +9099,9 @@ function showCommitmentsForDay(dateString) {
       });
       container.appendChild(row);
     });
+
+    // Refresh catalog panel to reflect which items are already added
+    updateGlobalEquipmentList();
   }
 
   function addEquipmentToChecklist() {
@@ -8970,8 +9117,158 @@ function showCommitmentsForDay(dateString) {
     eventChecklists[eventId].push({ name, checked: false });
     saveData();
     input.value = '';
+    closeEquipSuggestions();
     renderChecklistForEvent(eventId);
     showToast(`"${name}" adicionado ao checklist!`, 'success');
+  }
+
+  function closeEquipSuggestions() {
+    const dd = document.getElementById('equip-suggestions-dropdown');
+    if (dd) dd.style.display = 'none';
+  }
+
+  function initEquipSuggestionsInput() {
+    const input = document.getElementById('new-equip-input');
+    const dropdown = document.getElementById('equip-suggestions-dropdown');
+    if (!input || !dropdown) return;
+
+    let highlightedIdx = -1;
+
+    function getEventId() {
+      return document.getElementById('checklist-event-select')?.value || '';
+    }
+
+    function getAvailable(query) {
+      const eventId = getEventId();
+      const added = eventId && eventChecklists[eventId]
+        ? eventChecklists[eventId].map(i => i.name.toLowerCase()) : [];
+      const q = query.toLowerCase().trim();
+      // From catalog: not yet added, matching query
+      const fromCatalog = globalEquipments
+        .filter(n => !added.includes(n.toLowerCase()))
+        .filter(n => !q || n.toLowerCase().includes(q));
+      return { fromCatalog, query: q };
+    }
+
+    function highlight(text, query) {
+      if (!query) return text;
+      const idx = text.toLowerCase().indexOf(query.toLowerCase());
+      if (idx === -1) return text;
+      return text.slice(0, idx) +
+        `<mark>${text.slice(idx, idx + query.length)}</mark>` +
+        text.slice(idx + query.length);
+    }
+
+    function renderDropdown(query) {
+      const eventId = getEventId();
+      if (!eventId) { dropdown.style.display = 'none'; return; }
+
+      const { fromCatalog } = getAvailable(query);
+      const q = query.trim();
+
+      dropdown.innerHTML = '';
+      highlightedIdx = -1;
+
+      const items = [];
+
+      // Catalog matches
+      fromCatalog.forEach(name => {
+        items.push({ name, isNew: false });
+      });
+
+      // "Add new" option if typed something not in catalog
+      const exactMatch = globalEquipments.some(n => n.toLowerCase() === q.toLowerCase());
+      const alreadyInChecklist = eventId && eventChecklists[eventId]
+        ? eventChecklists[eventId].some(i => i.name.toLowerCase() === q.toLowerCase()) : false;
+      if (q && !exactMatch && !alreadyInChecklist) {
+        items.push({ name: q, isNew: true });
+      }
+
+      if (items.length === 0) {
+        if (q) {
+          dropdown.innerHTML = `<div class="equip-suggestion-empty"><i class="fas fa-search" style="margin-right:6px;opacity:0.5;"></i>Nenhum resultado. Digite para criar novo.</div>`;
+          dropdown.style.display = 'block';
+        } else {
+          dropdown.style.display = 'none';
+        }
+        return;
+      }
+
+      items.forEach((item, i) => {
+        const el = document.createElement('div');
+        el.className = 'equip-suggestion-item';
+        el.dataset.idx = i;
+        el.innerHTML = `
+          <i class="fas ${item.isNew ? 'fa-plus-circle' : 'fa-box'}"></i>
+          <span class="equip-suggest-name">${highlight(item.name, q)}</span>
+          ${item.isNew ? `<span class="equip-suggest-new">Novo</span>` : ''}`;
+        el.addEventListener('mousedown', (e) => {
+          e.preventDefault(); // prevent blur before click
+          selectSuggestion(item.name);
+        });
+        dropdown.appendChild(el);
+      });
+
+      dropdown.style.display = 'block';
+    }
+
+    function selectSuggestion(name) {
+      input.value = name;
+      closeEquipSuggestions();
+      addEquipmentToChecklist();
+    }
+
+    function updateHighlight(idx) {
+      const items = dropdown.querySelectorAll('.equip-suggestion-item');
+      items.forEach((el, i) => el.classList.toggle('highlighted', i === idx));
+      if (items[idx]) items[idx].scrollIntoView({ block: 'nearest' });
+    }
+
+    input.addEventListener('input', () => {
+      renderDropdown(input.value);
+    });
+
+    input.addEventListener('focus', () => {
+      if (document.getElementById('checklist-event-select')?.value) {
+        renderDropdown(input.value);
+      }
+    });
+
+    input.addEventListener('blur', () => {
+      setTimeout(closeEquipSuggestions, 150);
+    });
+
+    input.addEventListener('keydown', (e) => {
+      const items = dropdown.querySelectorAll('.equip-suggestion-item');
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        highlightedIdx = Math.min(highlightedIdx + 1, items.length - 1);
+        updateHighlight(highlightedIdx);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        highlightedIdx = Math.max(highlightedIdx - 1, 0);
+        updateHighlight(highlightedIdx);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (highlightedIdx >= 0 && items[highlightedIdx]) {
+          // Get name from highlighted item's text
+          const nameEl = items[highlightedIdx].querySelector('.equip-suggest-name');
+          // Strip HTML marks to get plain text
+          const plain = nameEl ? nameEl.textContent : '';
+          if (plain) { input.value = plain; closeEquipSuggestions(); addEquipmentToChecklist(); }
+        } else {
+          addEquipmentToChecklist();
+        }
+      } else if (e.key === 'Escape') {
+        closeEquipSuggestions();
+      }
+    });
+
+    // Close when event selector changes
+    document.getElementById('checklist-event-select')?.addEventListener('change', () => {
+      input.value = '';
+      closeEquipSuggestions();
+    });
   }
 
   function addGlobalEquipment() {
@@ -8994,14 +9291,20 @@ function showCommitmentsForDay(dateString) {
       return;
     }
     list.innerHTML = '';
+    const currentEventId = document.getElementById('checklist-event-select')?.value || '';
+    const addedNames = currentEventId && eventChecklists[currentEventId]
+      ? eventChecklists[currentEventId].map(i => i.name.toLowerCase())
+      : [];
+
     globalEquipments.forEach(name => {
+      const alreadyAdded = addedNames.includes(name.toLowerCase());
       const row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border-soft);margin-bottom:8px;';
+      row.style.cssText = `display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid ${alreadyAdded ? 'rgba(6,214,160,0.3)' : 'var(--border-soft)'};margin-bottom:8px;transition:0.15s;`;
       row.innerHTML = `
-        <i class="fas fa-plug" style="color:var(--primary);flex-shrink:0;"></i>
-        <span style="flex:1;font-size:0.9rem;font-weight:500;">${name}</span>
-        <button class="btn btn-xs" style="background:var(--ev-teal);" data-action="add-global-to-checklist" data-name="${name}" title="Adicionar ao checklist atual">
-          <i class="fas fa-plus"></i>
+        <i class="fas ${alreadyAdded ? 'fa-check-circle' : 'fa-plug'}" style="color:${alreadyAdded ? 'var(--success)' : 'var(--primary)'};flex-shrink:0;"></i>
+        <span style="flex:1;font-size:0.9rem;font-weight:500;${alreadyAdded ? 'color:var(--text3);text-decoration:line-through;' : ''}">${name}</span>
+        <button class="btn btn-xs" style="background:${alreadyAdded ? 'var(--surface3)' : 'var(--ev-teal)'};" data-action="add-global-to-checklist" data-name="${name}" title="${alreadyAdded ? 'Já adicionado ao checklist' : 'Adicionar ao checklist atual'}" ${alreadyAdded ? 'disabled' : ''}>
+          <i class="fas ${alreadyAdded ? 'fa-check' : 'fa-plus'}"></i>
         </button>
         <button class="btn btn-xs btn-danger" data-action="delete-global-equip" data-name="${name}" title="Remover do catálogo">
           <i class="fas fa-trash"></i>
@@ -9025,6 +9328,46 @@ function showCommitmentsForDay(dateString) {
         });
       });
       list.appendChild(row);
+    });
+  }
+
+  function initFuelConfigPanel() {
+    const typeEl = document.getElementById('fuel-type-input');
+    const priceEl = document.getElementById('fuel-price-input');
+    const consumptionEl = document.getElementById('fuel-consumption-input');
+    const saveBtn = document.getElementById('save-fuel-config-btn');
+    const preview = document.getElementById('fuel-config-preview');
+    if (!typeEl) return;
+
+    // Load saved values
+    typeEl.value = fuelConfig.type || 'Gasolina';
+    priceEl.value = fuelConfig.pricePerLiter || '';
+    consumptionEl.value = fuelConfig.consumption || '';
+
+    function updatePreview() {
+      const p = parseFloat(priceEl.value);
+      const c = parseFloat(consumptionEl.value);
+      if (p > 0 && c > 0) {
+        const costPer100 = (100 / c) * p;
+        preview.innerHTML = `<i class="fas fa-info-circle" style="color:var(--ev-orange);margin-right:6px;"></i>A cada <strong>100 km</strong> você gasta aproximadamente <strong>${(100/c).toFixed(1)} L</strong> e <strong>${formatCurrency(costPer100)}</strong>.`;
+        preview.style.display = 'block';
+      } else {
+        preview.style.display = 'none';
+      }
+    }
+
+    [typeEl, priceEl, consumptionEl].forEach(el => el.addEventListener('input', updatePreview));
+    updatePreview();
+
+    saveBtn.addEventListener('click', () => {
+      const p = parseFloat(priceEl.value);
+      const c = parseFloat(consumptionEl.value);
+      if (!p || p <= 0) { showToast('Informe o preço por litro.', 'warning'); return; }
+      if (!c || c <= 0) { showToast('Informe o consumo em km/L.', 'warning'); return; }
+      fuelConfig = { type: typeEl.value, pricePerLiter: p, consumption: c };
+      saveData();
+      showToast(`Combustível salvo: ${fuelConfig.type} a R$${p.toFixed(2)}/L, ${c} km/L`, 'success');
+      updatePreview();
     });
   }
 
@@ -9290,6 +9633,17 @@ function showCommitmentsForDay(dateString) {
     showToast(`"${note.equipment}" marcado como resolvido! ✅`, 'success');
   }
 
+  function openChecklistForEvent(eventKey) {
+    showTab('checklist');
+    setTimeout(() => {
+      const sel = document.getElementById('checklist-event-select');
+      if (sel) {
+        sel.value = eventKey;
+        sel.dispatchEvent(new Event('change'));
+      }
+    }, 200);
+  }
+
   // =====================================================
   window.openCommitmentFromHero = openCommitmentFromHero;
   window.openSingleCommitmentDetail = openSingleCommitmentDetail;
@@ -9298,6 +9652,7 @@ function showCommitmentsForDay(dateString) {
   window.updateOrdersKPI = updateOrdersKPI;
   window.openMaintenanceModal = openMaintenanceModal;
   window.resolveMaintenanceNote = resolveMaintenanceNote;
+  window.openChecklistForEvent = openChecklistForEvent;
 });
 
 </script>
