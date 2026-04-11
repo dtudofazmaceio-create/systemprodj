@@ -7349,7 +7349,11 @@ function updateCommitmentOrderSelector(clientId) {
   }
   
   function exportBackup() {
-    const data = { accounts, transactions, goals, creditcards, userInfo, categories, receipts, clients, commitments, eventOrders, eventQuotes, userLogo, packages };
+    const data = {
+      accounts, transactions, goals, creditcards, userInfo, categories,
+      receipts, clients, commitments, eventOrders, eventQuotes, userLogo, packages,
+      maintenanceNotes, globalEquipments, eventChecklists, fuelConfig
+    };
     const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -7367,25 +7371,32 @@ function updateCommitmentOrderSelector(clientId) {
       if (confirm('⚠️ Substituir TODOS os dados? Esta ação não pode ser desfeita!')) {
         try {
           const data = JSON.parse(e.target.result);
-          accounts = data.accounts || [];
-          transactions = data.transactions || [];
-          goals = data.goals || [];
-          creditcards = data.creditcards || [];
-          userInfo = data.userInfo || {};
-          categories = data.categories || [];
-          receipts = data.receipts || [];
-          clients = data.clients || [];
-          commitments = data.commitments || [];
-          eventOrders = data.eventOrders || []; 
-          eventQuotes = data.eventQuotes || [];
-          packages = data.packages || []; // NOVO
-          userLogo = data.userLogo || null;
+          accounts        = data.accounts        || [];
+          transactions    = data.transactions    || [];
+          goals           = data.goals           || [];
+          creditcards     = data.creditcards     || [];
+          userInfo        = data.userInfo        || {};
+          categories      = data.categories      || [];
+          receipts        = data.receipts        || [];
+          clients         = data.clients         || [];
+          commitments     = data.commitments     || [];
+          eventOrders     = data.eventOrders     || [];
+          eventQuotes     = data.eventQuotes     || [];
+          packages        = data.packages        || [];
+          userLogo        = data.userLogo        || null;
+          // Checklist, equipamentos, manutenção e combustível
+          maintenanceNotes  = data.maintenanceNotes  || [];
+          globalEquipments  = data.globalEquipments  || [];
+          eventChecklists   = data.eventChecklists   || {};
+          fuelConfig        = data.fuelConfig        || { type: 'Gasolina', pricePerLiter: 0, consumption: 10 };
           saveData();
           updateUI();
-          showToast('Backup restaurado com sucesso!', 'warning');
+          updateMaintenanceTab();
+          initFuelConfigPanel();
+          showToast('Backup restaurado com sucesso! ✅', 'success');
           showTab('dashboard');
         } catch (err) {
-          showToast('Erro ao importar o backup.', 'warning');
+          showToast('Erro ao importar o backup. Arquivo inválido.', 'warning');
         }
       }
     };
