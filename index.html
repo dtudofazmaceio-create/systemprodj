@@ -71,6 +71,9 @@
     --space-lg: 24px;
     --space-xl: 32px;
 
+    /* Glow */
+    --primary-glow: rgba(108, 99, 255, 0.18);
+
     /* Radii */
     --r-sm: 8px;
     --r-md: 14px;
@@ -91,26 +94,27 @@
 
   /* DARK MODE */
   [data-theme="dark"] {
-    --bg: #0f0f1a;
+    --bg: #0d0d1a;
     --bg2: #141428;
-    --surface: #1c1c32;
-    --surface2: #232340;
-    --surface3: #2a2a4a;
-    --border: rgba(108, 99, 255, 0.2);
+    --surface: #1a1a2e;
+    --surface2: #20203a;
+    --surface3: #282848;
+    --border: rgba(108, 99, 255, 0.22);
     --border-soft: rgba(255,255,255,0.07);
     --text: #f0f0ff;
     --text2: #b0b0d0;
-    --text3: #6060a0;
-    --card-shadow: 0 2px 20px rgba(0,0,0,0.4), 0 1px 6px rgba(0,0,0,0.3);
-    --card-shadow-hover: 0 8px 36px rgba(108,99,255,0.2), 0 2px 12px rgba(0,0,0,0.4);
-    --nav-bg: #1a1a2e;
-    --nav-border: rgba(255,255,255,0.06);
-    --modal-bg: rgba(0, 0, 0, 0.75);
-    --header-bg: linear-gradient(135deg, #3d2fa0 0%, #5a52e0 100%);
-    --input-bg: #1a1a30;
+    --text3: #5a5a90;
+    --card-shadow: 0 2px 20px rgba(0,0,0,0.5), 0 1px 6px rgba(0,0,0,0.4);
+    --card-shadow-hover: 0 8px 36px rgba(108,99,255,0.22), 0 2px 12px rgba(0,0,0,0.5);
+    --nav-bg: rgba(26,26,46,0.95);
+    --nav-border: rgba(255,255,255,0.07);
+    --modal-bg: rgba(0, 0, 0, 0.8);
+    --header-bg: linear-gradient(135deg, #2d2580 0%, #4a42c0 100%);
+    --input-bg: #16162a;
     --input-border: #2a2a50;
     --scrollbar: rgba(108,99,255,0.3);
     --primary-dark: #3d2fa0;
+    --primary-glow: rgba(108, 99, 255, 0.12);
   }
 
   /* ==========================================
@@ -130,6 +134,8 @@
     overflow-x: hidden;
     padding-bottom: 0;
     transition: background var(--t-slow), color var(--t-slow);
+    background-image: radial-gradient(circle at 80% 20%, rgba(108,99,255,0.04) 0%, transparent 50%),
+                      radial-gradient(circle at 20% 80%, rgba(76,201,240,0.03) 0%, transparent 50%);
   }
 
   ::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -148,29 +154,32 @@
   .top-bar {
     background: var(--header-bg);
     padding: 0 var(--space-md);
-    height: 56px;
-    padding-top: 0;
+    height: 60px;
+    padding-top: env(safe-area-inset-top, 0px);
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: fixed;
     top: 0; left: 0; right: 0;
     z-index: 200;
-    box-shadow: 0 2px 20px rgba(108,99,255,0.25);
+    box-shadow: 0 2px 24px rgba(108,99,255,0.3);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
   .top-bar .page-title {
     font-family: var(--font-display);
-    font-size: 1.05rem;
-    font-weight: 700;
+    font-size: 1.08rem;
+    font-weight: 800;
     color: white;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
     flex: 1;
     text-align: center;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.15);
   }
   .top-bar .icon-button {
-    background: rgba(255,255,255,0.15);
-    border: none;
-    width: 38px; height: 38px;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.15);
+    width: 40px; height: 40px;
     border-radius: var(--r-full);
     color: white;
     font-size: 1rem;
@@ -178,9 +187,10 @@
     transition: var(--t-fast);
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
+    backdrop-filter: blur(8px);
   }
   .top-bar .icon-button:hover, .top-bar .icon-button:active {
-    background: rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.28);
     transform: scale(1.08);
   }
   .top-bar-actions { display: flex; gap: 8px; }
@@ -195,11 +205,11 @@
 
   .main-content {
     flex: 1;
-    margin-top: 56px;
-    padding: 8px var(--space-md) calc(var(--space-xl) + env(safe-area-inset-bottom, 0px));
+    margin-top: 60px;
+    padding: 12px var(--space-md) calc(80px + env(safe-area-inset-bottom, 0px));
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
   }
 
   /* ==========================================
@@ -230,15 +240,15 @@
     border-top: 1px solid var(--nav-border);
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    height: calc(64px + env(safe-area-inset-bottom, 0px));
+    height: calc(68px + env(safe-area-inset-bottom, 0px));
     padding-bottom: env(safe-area-inset-bottom, 0px);
     display: flex;
     align-items: center;
     justify-content: space-around;
     z-index: 200;
-    box-shadow: 0 -4px 24px rgba(0,0,0,0.08);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 -6px 32px rgba(0,0,0,0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
   }
   .bottom-nav-item {
     background: none; border: none;
@@ -258,19 +268,20 @@
     position: relative;
     -webkit-tap-highlight-color: transparent;
   }
-  .bottom-nav-item i { font-size: 1.25rem; transition: var(--t-fast); }
+  .bottom-nav-item i { font-size: 1.3rem; transition: var(--t-fast); }
   .bottom-nav-item.active { color: var(--primary); }
   .bottom-nav-item.active i { transform: translateY(-2px); }
   .bottom-nav-item.active::after {
     content: '';
     position: absolute;
-    bottom: 4px; left: 50%;
+    bottom: 5px; left: 50%;
     transform: translateX(-50%);
-    width: 18px; height: 3px;
+    width: 20px; height: 3px;
     background: var(--primary);
     border-radius: 3px;
+    box-shadow: 0 0 8px rgba(108,99,255,0.5);
   }
-  .bottom-nav-item:active { transform: scale(0.92); }
+  .bottom-nav-item:active { transform: scale(0.9); }
 
   /* FAB - Floating Action Button */
   .fab-wrapper {
@@ -623,15 +634,19 @@
     position: relative;
     overflow: hidden;
   }
+  .card:hover {
+    box-shadow: var(--card-shadow-hover);
+  }
   .card-accent-top {
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 3px;
+    height: 4px;
     background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    border-radius: var(--r-lg) var(--r-lg) 0 0;
   }
   .card h2 {
     font-family: var(--font-display);
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 700;
     color: var(--text);
     display: flex;
@@ -643,14 +658,21 @@
 
   .section-title {
     font-family: var(--font-display);
-    font-size: 0.85rem;
-    font-weight: 700;
+    font-size: 0.78rem;
+    font-weight: 800;
     color: var(--text3);
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     margin-bottom: 12px;
     margin-top: 4px;
-    display: flex; align-items: center; gap: 8px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-title::before {
+    content: '';
+    width: 3px; height: 14px;
+    background: linear-gradient(180deg, var(--primary), var(--primary-light));
+    border-radius: 3px;
+    flex-shrink: 0;
   }
   .section-title::after {
     content: '';
@@ -663,29 +685,29 @@
      DASHBOARD HERO
   ========================================== */
   .dashboard-hero {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-    border-radius: var(--r-lg);
-    padding: var(--space-lg);
+    background: var(--header-bg);
+    border-radius: var(--r-xl);
+    padding: 22px var(--space-lg);
     color: white;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 8px 32px var(--primary-glow);
+    box-shadow: 0 8px 36px rgba(108,99,255,0.28);
   }
   .dashboard-hero::before {
     content: '';
     position: absolute;
-    top: -30px; right: -30px;
-    width: 140px; height: 140px;
+    top: -40px; right: -40px;
+    width: 160px; height: 160px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.07);
   }
   .dashboard-hero::after {
     content: '';
     position: absolute;
-    bottom: -40px; right: 20px;
-    width: 100px; height: 100px;
+    bottom: -50px; left: -20px;
+    width: 130px; height: 130px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.05);
+    background: rgba(255,255,255,0.04);
   }
   .hero-greeting {
     font-size: 0.85rem;
@@ -780,7 +802,7 @@
   .feature-item {
     background: var(--surface);
     border-radius: var(--r-md);
-    padding: 14px 8px;
+    padding: 14px 8px 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -790,10 +812,22 @@
     border: 1px solid var(--border-soft);
     box-shadow: var(--card-shadow);
     -webkit-tap-highlight-color: transparent;
+    position: relative;
+    overflow: hidden;
   }
-  .feature-item:active { transform: scale(0.92); background: var(--surface2); }
+  .feature-item::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    opacity: 0;
+    transition: opacity var(--t-fast);
+  }
+  .feature-item:hover::after { opacity: 1; }
+  .feature-item:active { transform: scale(0.91); background: var(--surface2); }
   .feature-item i {
-    font-size: 1.35rem;
+    font-size: 1.3rem;
     width: 44px; height: 44px;
     border-radius: var(--r-sm);
     display: flex; align-items: center; justify-content: center;
@@ -1006,31 +1040,41 @@
   .package-card { border-left-color: var(--ev-teal); }
   .equipment-item-check {
     display: flex; align-items: center; gap: 12px;
-    padding: 10px 14px;
+    padding: 12px 14px;
     background: var(--surface2);
-    border-radius: var(--r-sm);
-    border: 1px solid var(--border-soft);
+    border-radius: var(--r-md);
+    border: 1.5px solid var(--border-soft);
     margin-bottom: 8px;
     transition: var(--t-fast);
     cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
   }
-  .equipment-item-check.checked { background: var(--success-bg); border-color: rgba(6,214,160,0.3); }
+  .equipment-item-check:hover { border-color: var(--primary); background: var(--surface); }
+  .equipment-item-check.checked {
+    background: var(--success-bg);
+    border-color: rgba(6,214,160,0.4);
+    box-shadow: 0 2px 8px rgba(6,214,160,0.1);
+  }
   .equipment-item-check label { flex: 1; font-size: 0.9rem; font-weight: 500; cursor: pointer; margin: 0; color: var(--text); }
   .equipment-item-check.checked label { text-decoration: line-through; color: var(--text3); }
   .equip-checkbox { width: 20px; height: 20px; accent-color: var(--success); cursor: pointer; flex-shrink: 0; }
   .checklist-progress {
-    background: var(--surface2); border-radius: var(--r-full);
-    height: 8px; margin-bottom: 16px; overflow: hidden;
+    background: var(--surface2);
+    border-radius: var(--r-full);
+    height: 10px; margin-bottom: 18px; overflow: hidden;
+    border: 1px solid var(--border-soft);
   }
   .checklist-progress-bar {
     height: 100%; background: linear-gradient(90deg, var(--success), var(--ev-teal));
-    border-radius: var(--r-full); transition: width 0.4s ease;
+    border-radius: var(--r-full); transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(6,214,160,0.4);
   }
   .checklist-summary {
     display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 8px; font-size: 0.82rem; color: var(--text3);
+    margin-bottom: 10px; font-size: 0.82rem; color: var(--text3);
+    font-weight: 500;
   }
-  .checklist-summary strong { color: var(--success); font-family: var(--font-display); }
+  .checklist-summary strong { color: var(--success); font-family: var(--font-display); font-size: 1rem; }
   .equip-add-row {
     display: flex; gap: 8px; margin-top: 12px;
   }
@@ -1161,8 +1205,24 @@
   }
   .btn-checklist-order:hover { opacity: 0.88; transform: scale(1.04); }
 
+  .equip-catalog-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 10px 5px 8px;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-full);
+    font-size: 0.78rem; font-weight: 600; color: var(--text2);
+    cursor: pointer;
+    transition: var(--t-fast);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .equip-catalog-chip:hover { background: var(--success-bg); border-color: var(--success); color: var(--success); }
+  .equip-catalog-chip i { font-size: 0.7rem; color: var(--ev-teal); }
+
+  .btn-success { background: linear-gradient(135deg, var(--success), #04b88a) !important; color: white !important; }
+
   /* ==========================================
-     EMPTY STATES
+     LAYOUT IMPROVEMENTS
   ========================================== */
   .empty-state {
     display: flex;
@@ -1243,31 +1303,39 @@
     padding: 12px 20px;
     background: linear-gradient(135deg, var(--primary), var(--primary-light));
     color: white; border: none;
-    border-radius: var(--r-sm);
+    border-radius: var(--r-md);
     font-family: var(--font-body);
-    font-weight: 600; cursor: pointer;
+    font-weight: 700; cursor: pointer;
     transition: var(--t-fast);
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     font-size: 0.9rem;
     -webkit-tap-highlight-color: transparent;
     white-space: nowrap;
+    box-shadow: 0 2px 12px rgba(108,99,255,0.2);
+    letter-spacing: 0.01em;
   }
-  .btn:active { transform: scale(0.96); opacity: 0.9; }
-  .btn-xs { padding: 6px 12px; font-size: 0.78rem; border-radius: var(--r-sm); }
-  .btn-sm { padding: 8px 14px; font-size: 0.82rem; }
+  .btn:hover { box-shadow: 0 4px 20px rgba(108,99,255,0.3); transform: translateY(-1px); }
+  .btn:active { transform: scale(0.96) translateY(0); opacity: 0.9; box-shadow: none; }
+  .btn-xs { padding: 6px 12px; font-size: 0.78rem; border-radius: var(--r-sm); box-shadow: none; }
+  .btn-sm { padding: 9px 15px; font-size: 0.83rem; }
   .btn-outline {
     background: transparent;
     border: 1.5px solid var(--primary);
     color: var(--primary);
+    box-shadow: none;
   }
+  .btn-outline:hover { background: rgba(108,99,255,0.07); }
   .btn-outline:active { background: var(--primary-glow); }
-  .btn-danger { background: linear-gradient(135deg, var(--danger), #ff6b9d); }
-  .btn-success { background: linear-gradient(135deg, var(--success), #4ecdc4); }
+  .btn-danger { background: linear-gradient(135deg, var(--danger), #ff6b9d); box-shadow: 0 2px 12px rgba(239,71,111,0.2); }
+  .btn-danger:hover { box-shadow: 0 4px 20px rgba(239,71,111,0.35); }
+  .btn-success { background: linear-gradient(135deg, var(--success), #04b88a); box-shadow: 0 2px 12px rgba(6,214,160,0.2); }
   .btn-ghost {
     background: var(--surface2);
     color: var(--text2);
     border: 1px solid var(--border-soft);
+    box-shadow: none;
   }
+  .btn-ghost:hover { background: var(--surface3); }
 
   /* ==========================================
      MODALS (Bottom Sheet Style on Mobile)
@@ -1295,12 +1363,14 @@
     animation: sheetUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
     position: relative;
     -webkit-overflow-scrolling: touch;
+    border-top: 1px solid var(--border-soft);
+    box-shadow: 0 -10px 50px rgba(0,0,0,0.2);
   }
   .modal-handle {
-    width: 36px; height: 4px;
+    width: 40px; height: 4px;
     background: var(--border-soft);
     border-radius: var(--r-full);
-    margin: 12px auto 16px;
+    margin: 14px auto 18px;
   }
   @keyframes sheetUp {
     from { transform: translateY(60px); opacity: 0; }
@@ -3956,9 +4026,16 @@ class="modal-content">
           </div>
           <div class="checklist-progress"><div class="checklist-progress-bar" id="checklist-progress-bar" style="width:0%"></div></div>
           <div id="checklist-items-list"></div>
-          <div class="equip-add-row" style="margin-top:12px;">
-            <input type="text" id="new-equip-input" placeholder="Adicionar equipamento a este evento..." style="flex:1;padding:12px 14px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.95rem;outline:none;">
-            <button class="btn" id="add-equip-btn" style="flex-shrink:0;"><i class="fas fa-plus"></i> Adicionar</button>
+          <!-- Adicionar equipamento: manual ou do catálogo -->
+          <div style="margin-top:16px;">
+            <div style="font-size:0.78rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;"><i class="fas fa-plus-circle" style="color:var(--ev-teal);margin-right:5px;"></i>Adicionar Equipamento</div>
+            <div class="equip-add-row" style="margin-bottom:8px;">
+              <input type="text" id="new-equip-input" placeholder="Digitar nome do equipamento..." style="flex:1;padding:12px 14px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.95rem;outline:none;" list="equip-catalog-datalist">
+              <datalist id="equip-catalog-datalist"></datalist>
+              <button class="btn" id="add-equip-btn" style="flex-shrink:0;background:linear-gradient(135deg,var(--ev-teal),var(--info));"><i class="fas fa-plus"></i> Adicionar</button>
+            </div>
+            <!-- Catálogo rápido: chips dos equipamentos globais não adicionados ainda -->
+            <div id="checklist-catalog-chips" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
           </div>
           <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
             <button class="btn btn-xs" id="checklist-clear-btn" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border);">
@@ -5947,9 +6024,10 @@ function openCommitmentModal(mode, id = null, date = null) {
           const eventsWrapper = document.createElement('div');
           eventsWrapper.style.cssText = 'background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border-soft);overflow:hidden;box-shadow:var(--card-shadow);';
 
-          // Verifica se há algum evento hoje
-          const todayStr = new Date().toISOString().split('T')[0];
-          const hasEventToday = upcomingEvts.some(c => c.date.split('T')[0] === todayStr);
+          // Verifica se há algum evento hoje — usando data local, não UTC
+          const _tnow = new Date();
+          const todayLocalStr = `${_tnow.getFullYear()}-${String(_tnow.getMonth()+1).padStart(2,'0')}-${String(_tnow.getDate()).padStart(2,'0')}`;
+          const hasEventToday = upcomingEvts.some(c => c.date.split('T')[0] === todayLocalStr);
 
           // Alerta de checklist para eventos de hoje
           const checklistAlertHTML = hasEventToday ? `
@@ -5965,7 +6043,9 @@ function openCommitmentModal(mode, id = null, date = null) {
           eventsWrapper.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;"><i class="fas fa-bell" style="animation:bellRing 2s ease-in-out infinite;"></i><div style="flex:1;"><span style="font-weight:700;font-size:0.88rem;display:block;">Próximos ${upcomingEvts.length > 1 ? upcomingEvts.length + ' eventos' : 'evento'} nos próximos 7 dias</span><span style="font-size:0.72rem;opacity:0.8;">Toque para ver detalhes</span></div></div>${checklistAlertHTML}`;
           upcomingEvts.forEach(c => {
               const d = new Date(c.date + (c.date.includes('T') ? '' : 'T00:00:00'));
-              const isToday = d.toISOString().split('T')[0] === new Date().toISOString().split('T')[0];
+              const _dn = new Date();
+              const localTodayStr2 = `${_dn.getFullYear()}-${String(_dn.getMonth()+1).padStart(2,'0')}-${String(_dn.getDate()).padStart(2,'0')}`;
+              const isToday = c.date.split('T')[0] === localTodayStr2;
               const dayLabel = isToday ? '🎯 Hoje' : `${d.getDate()} ${months[d.getMonth()]}`;
               const timeStr = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
               const statusColors = { agendado: 'var(--warning)', confirmado: 'var(--primary)', realizado: 'var(--success)', cancelado: 'var(--danger)' };
@@ -8160,7 +8240,8 @@ function showCommitmentsForDay(dateString) {
     if (nameEl) nameEl.textContent = userInfo.name || 'FinancePro';
     
     // Show today's events in hero (all, clickable)
-    const todayStr = new Date().toISOString().split('T')[0];
+    const _todayLocal = new Date();
+    const todayStr = `${_todayLocal.getFullYear()}-${String(_todayLocal.getMonth()+1).padStart(2,'0')}-${String(_todayLocal.getDate()).padStart(2,'0')}`;
     const todayEvents = commitments.filter(c => {
       const d = c.date ? c.date.split('T')[0] : '';
       return d === todayStr && c.status !== 'cancelado';
@@ -8802,6 +8883,35 @@ function showCommitmentsForDay(dateString) {
       // Auto-populate with global equipment suggestions
       eventChecklists[eventId] = globalEquipments.map(name => ({ name, checked: false }));
       saveData();
+    }
+
+    // Populate datalist and catalog chips with not-yet-added global equipment
+    const catalogDatalist = document.getElementById('equip-catalog-datalist');
+    const catalogChips = document.getElementById('checklist-catalog-chips');
+    if (catalogDatalist) {
+      catalogDatalist.innerHTML = globalEquipments.map(n => `<option value="${n}">`).join('');
+    }
+    if (catalogChips) {
+      const existingNames = (eventChecklists[eventId] || []).map(i => i.name.toLowerCase());
+      const missing = globalEquipments.filter(n => !existingNames.includes(n.toLowerCase()));
+      if (missing.length > 0) {
+        catalogChips.innerHTML = `<span style="font-size:0.75rem;color:var(--text3);align-self:center;margin-right:2px;white-space:nowrap;">Do catálogo:</span>` + 
+          missing.map(n => `<button type="button" class="equip-catalog-chip" data-equip-name="${n}"><i class="fas fa-plus"></i>${n}</button>`).join('');
+        catalogChips.querySelectorAll('.equip-catalog-chip').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const name = btn.dataset.equipName;
+            if (!eventChecklists[eventId]) eventChecklists[eventId] = [];
+            if (!eventChecklists[eventId].find(i => i.name.toLowerCase() === name.toLowerCase())) {
+              eventChecklists[eventId].push({ name, checked: false });
+              saveData();
+              renderChecklistForEvent(eventId);
+              showToast(`"${name}" adicionado!`, 'success');
+            }
+          });
+        });
+      } else {
+        catalogChips.innerHTML = '';
+      }
     }
 
     const items = eventChecklists[eventId];
