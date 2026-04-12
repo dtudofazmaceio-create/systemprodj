@@ -2502,7 +2502,41 @@
     flex-shrink: 0;
   }
 
-  /* CTA row */
+  /* ==========================================
+     PHOTO DROPZONE
+  ========================================== */
+  #maint-photo-dropzone:hover {
+    border-color: var(--danger);
+    background: var(--danger-bg);
+  }
+  #maint-photo-dropzone:active {
+    transform: scale(0.98);
+  }
+
+  /* ==========================================
+     RESPONSIVE 2-COL GRIDS
+  ========================================== */
+  @media (max-width: 359px) {
+    #clients-list > div,
+    #orders-list > div,
+    #all-transactions-list > div,
+    #receipts-list > div,
+    #saved-documents-list > div {
+      grid-template-columns: 1fr !important;
+    }
+  }
+
+  /* ==========================================
+     DOCUMENT SAVED CARD ACCENT TOP
+  ========================================== */
+  #saved-documents-list .saved-doc-card {
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ==========================================
+     CTA row
+  ========================================== */
   .ped-cta-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -3067,12 +3101,27 @@
     <div class="tab-content" id="documentos-content">
       <div class="card" id="document-generation-card" style="margin-bottom: 25px;">
           <h2><i class="fas fa-file-signature"></i> Gerar Novo Documento</h2>
-          <p>Selecione o tipo de documento que deseja criar.</p>
+          <p style="color:var(--text2);font-size:0.88rem;">Selecione o tipo de documento que deseja criar.</p>
           <div class="shortcuts-container" style="padding-bottom: 0; margin-top: 15px;">
              <div class="shortcut-item" id="generate-dj-contract-doc-tab"><i class="fas fa-file-contract"></i><span>Contrato DJ</span></div>
              <div class="shortcut-item" id="generate-event-order-doc-tab"><i class="fas fa-clipboard-list"></i><span>Pedido de Evento</span></div>
              <div class="shortcut-item" id="generate-event-quote-doc-tab"><i class="fas fa-file-alt"></i><span>Orçamento</span></div>
           </div>
+      </div>
+
+      <!-- DOCUMENTOS SALVOS -->
+      <div class="card" id="saved-documents-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <h2 style="margin:0;"><i class="fas fa-folder-open" style="color:var(--ev-orange);"></i> Documentos Salvos</h2>
+          <button class="btn btn-xs btn-danger" id="clear-saved-docs-btn" style="font-size:0.72rem;"><i class="fas fa-trash"></i> Limpar</button>
+        </div>
+        <div id="saved-documents-list">
+          <div class="empty-state" style="padding:20px;">
+            <div class="empty-state-icon"><i class="fas fa-folder-open"></i></div>
+            <h4>Nenhum documento salvo</h4>
+            <p>Os documentos gerados aparecerão aqui para download posterior</p>
+          </div>
+        </div>
       </div>
 
       <div class="card">
@@ -3312,7 +3361,7 @@ fa-download"></i> Baixar Pedido</button>
         <div class="module-hero-icon"><i class="fas fa-tools"></i></div>
         <div class="module-hero-text">
           <h3>Notas de Manutenção</h3>
-          <p>Registre e acompanhe problemas nos equipamentos</p>
+          <p>Registre problemas e gerencie compras de equipamentos</p>
         </div>
       </div>
 
@@ -3354,6 +3403,23 @@ fa-download"></i> Baixar Pedido</button>
 
       <!-- Notes list -->
       <div id="maintenance-notes-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+
+      <!-- LISTA DE COMPRAS DE EQUIPAMENTOS -->
+      <div class="card" id="equipment-shopping-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <h2 style="margin:0;font-size:1rem;"><i class="fas fa-shopping-cart" style="color:var(--ev-orange);"></i> Lista de Compras</h2>
+          <button class="btn" id="add-shopping-item-btn" style="background:linear-gradient(135deg,var(--ev-orange),#ffd93d);color:white;flex-shrink:0;padding:9px 14px;font-size:0.82rem;">
+            <i class="fas fa-plus"></i> Adicionar
+          </button>
+        </div>
+        <div id="shopping-list-container">
+          <div class="empty-state" style="padding:20px;">
+            <div class="empty-state-icon"><i class="fas fa-shopping-cart"></i></div>
+            <h4>Lista vazia</h4>
+            <p>Adicione equipamentos que precisam ser comprados ou substituídos</p>
+          </div>
+        </div>
+      </div>
 
     </div>
 
@@ -4180,6 +4246,8 @@ document.addEventListener('DOMContentLoaded', () => {
   ]);
   let eventChecklists = parseLocalStorage('eventChecklists', {}); // { eventId: [{name, checked}] }
   let fuelConfig = parseLocalStorage('fuelConfig', { type: 'Gasolina', pricePerLiter: 0, consumption: 10 }); // consumption = km/L
+  let shoppingItems = parseLocalStorage('shoppingItems', []);
+  let savedDocuments = parseLocalStorage('savedDocuments', []);
 
   const pageTitles = {
     dashboard: 'Início', transacoes: 'Transações', contas: 'Contas',
@@ -4249,7 +4317,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tabId === 'Agenda') renderCalendar(calendarCurrentDate);
     
     if (tabId === 'checklist') updateChecklistTab();
-    if (tabId === 'manutencao') updateMaintenanceTab();
+    if (tabId === 'manutencao') { updateMaintenanceTab(); updateShoppingList(); }
+    if (tabId === 'documentos') { updateSavedDocumentsList(); }
     if (tabId === 'dashboard') {
       updateDashboardHero();
       updateDashboardRecent();
@@ -4457,6 +4526,23 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
       pill.classList.add('active');
       renderMaintenanceNotes(pill.dataset.maintFilter);
     });
+
+    // Shopping List events
+    document.getElementById('add-shopping-item-btn')?.addEventListener('click', () => openShoppingModal('new'));
+    document.getElementById('shopping-item-form')?.addEventListener('submit', handleShoppingSubmit);
+
+    // Saved Documents events
+    document.getElementById('clear-saved-docs-btn')?.addEventListener('click', () => {
+      showConfirm('Remover todos os documentos salvos?', 'Limpar Documentos', () => {
+        savedDocuments = []; saveData(); updateSavedDocumentsList();
+        showToast('Documentos removidos!', 'success');
+      });
+    });
+
+    // Photo upload init (called when modal opens)
+    document.getElementById('maintenance-modal')?.addEventListener('transitionend', () => {});
+    // Init photo once on page load
+    initMaintenancePhotoUpload();
     document.getElementById('add-global-equip-btn')?.addEventListener('click', addGlobalEquipment);
     document.getElementById('new-global-equip-input')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addGlobalEquipment(); } });
 
@@ -4635,6 +4721,8 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
     document.body.addEventListener('click', (e) => {
         const target = e.target.closest('[data-action]');
         if (!target) return;
+        // Skip checkboxes (handled by change event)
+        if (target.tagName === 'INPUT' && target.type === 'checkbox') return;
         
         const action = target.dataset.action;
         const id = target.dataset.id ? parseFloat(target.dataset.id) : null;
@@ -4699,10 +4787,42 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
             'edit-maintenance': () => openMaintenanceModal('edit', id),
             'delete-maintenance': () => deleteItem(maintenanceNotes, id, 'Nota de Manutenção', null, null),
             'resolve-maintenance': () => resolveMaintenanceNote(id),
+            // Shopping List
+            'edit-shopping': () => openShoppingModal('edit', id),
+            'delete-shopping': () => {
+              const idx = shoppingItems.findIndex(i => i.id === id);
+              if (idx > -1) { shoppingItems.splice(idx, 1); saveData(); updateShoppingList(); showToast('Item removido!', 'success'); }
+            },
+            'toggle-shopping': () => {
+              const item = shoppingItems.find(i => i.id === id);
+              if (item) { item.purchased = !item.purchased; saveData(); updateShoppingList(); }
+            },
+            // Saved Documents
+            'download-saved-doc': () => {
+              const doc = savedDocuments.find(d => d.id === id);
+              if (doc) {
+                const a = document.createElement('a');
+                a.href = doc.data;
+                a.download = doc.name + '.pdf';
+                a.click();
+              }
+            },
+            'delete-saved-doc': () => {
+              const idx = savedDocuments.findIndex(d => d.id === id);
+              if (idx > -1) { savedDocuments.splice(idx, 1); saveData(); updateSavedDocumentsList(); showToast('Documento removido!', 'success'); }
+            },
         };
         if(actions[action]) actions[action]();
     });
   }
+
+    document.body.addEventListener('change', (e) => {
+      const target = e.target.closest('[data-action="toggle-shopping"]');
+      if (!target) return;
+      const id = parseFloat(target.dataset.id);
+      const item = shoppingItems.find(i => i.id === id);
+      if (item) { item.purchased = target.checked; saveData(); updateShoppingList(); }
+    });
 
   function applyFilterAndSwitchTab(filters) {
     clearFilters();
@@ -4780,6 +4900,8 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
         localStorage.setItem('globalEquipments', JSON.stringify(globalEquipments));
         localStorage.setItem('eventChecklists', JSON.stringify(eventChecklists));
         localStorage.setItem('fuelConfig', JSON.stringify(fuelConfig));
+        localStorage.setItem('shoppingItems', JSON.stringify(shoppingItems));
+        try { localStorage.setItem('savedDocuments', JSON.stringify(savedDocuments)); } catch(e2) { /* skip if quota exceeded */ }
         if (typeof updateOrdersKPI === 'function') updateOrdersKPI();
     } catch (e) {
         if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
@@ -6249,41 +6371,54 @@ function openCommitmentModal(mode, id = null, date = null) {
       const typeMatch = activeFilters.type === 'all' || t.type === activeFilters.type;
       const statusMatch = activeFilters.status === 'all' || t.status === activeFilters.status;
       const expiredMatch = !activeFilters.expiredOnly || (t.status === 'pendente' && t.date < today);
-      
       const transactionDate = new Date(t.date + 'T00:00:00');
       const startDateMatch = !activeFilters.startDate || transactionDate >= new Date(activeFilters.startDate + 'T00:00:00');
       const endDateMatch = !activeFilters.endDate || transactionDate <= new Date(activeFilters.endDate + 'T00:00:00');
-
       return descMatch && typeMatch && statusMatch && expiredMatch && startDateMatch && endDateMatch;
     }).sort((a,b) => new Date(b.date) - new Date(a.date) || b.id - a.id);
+
     if (filteredTransactions.length === 0) {
-      list.innerHTML = `<div style="text-align: center; padding: 30px; color: var(--gray);"><i class="fas fa-search" style="font-size: 3rem; margin-bottom: 15px;"></i><p>Nenhuma transação encontrada</p></div>`;
+      list.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-search"></i></div><h4>Nenhuma transação encontrada</h4><p>Tente ajustar os filtros ou adicione uma transação</p></div>`;
       return;
     }
     
-    filteredTransactions.forEach(t => list.appendChild(createTransactionCard(t)));
+    const grid = document.createElement('div');
+    grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:10px;';
+    filteredTransactions.forEach(t => grid.appendChild(createTransactionCard(t)));
+    list.appendChild(grid);
   }
 
   function createTransactionCard(t) {
     const card = document.createElement('div');
     card.className = `transaction-card ${t.type}`;
-    const valueClass = t.type === 'despesa' ? 'negative' : 'positive';
-    const statusClass = t.status === 'confirmada' ? 'confirmada' : 'pendente';
-    const statusText = t.status === 'confirmada' ? 'Confirmada' : 'Pendente';
+    const isReceita = t.type === 'receita';
+    const isDespesa = t.type === 'despesa';
+    const isTransfer = t.type === 'transferencia';
+    const valueColor = isDespesa ? 'var(--danger)' : isReceita ? 'var(--success)' : 'var(--info)';
+    const iconName = isDespesa ? 'fa-arrow-up' : isReceita ? 'fa-arrow-down' : 'fa-exchange-alt';
+    const iconBg = isDespesa ? 'var(--danger-bg)' : isReceita ? 'var(--success-bg)' : 'var(--info-bg)';
+    const confirmed = t.status === 'confirmada';
+    const statusColor = confirmed ? 'var(--success)' : 'var(--warning)';
+    card.style.cssText = 'background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border-soft);padding:12px;box-shadow:var(--card-shadow);display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden;';
     card.innerHTML = `
-      <div class="transaction-header">
-        <span class="category-badge">${t.category}</span>
-        <span class="status-badge ${statusClass}">${statusText}</span>
+      <div style="position:absolute;top:0;left:0;width:3px;height:100%;background:${valueColor};border-radius:4px 0 0 4px;"></div>
+      <div style="padding-left:6px;display:flex;align-items:flex-start;gap:8px;">
+        <div style="width:32px;height:32px;border-radius:50%;background:${iconBg};color:${valueColor};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.8rem;">
+          <i class="fas ${iconName}"></i>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:700;font-size:0.82rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.description}${t.linkedReceiptId ? ' <i class="fas fa-link" style="font-size:0.7rem;color:var(--text3);"></i>' : ''}</div>
+          <div style="font-size:0.7rem;color:var(--text3);margin-top:2px;">${t.category} · ${formatDate(t.date)}</div>
+        </div>
       </div>
-      <div class="transaction-body">
-        <span class="transaction-favorecido">${t.description} ${t.linkedReceiptId ? '<i class="fas fa-link" style="font-size: 0.8em; color: var(--gray);"></i>' : ''}</span>
-        <span class="transaction-details">${formatDate(t.date)}</span>
-      </div>
-      <div class="transaction-footer">
-        <span class="transaction-value ${valueClass}">${formatCurrency(t.amount)}</span>
-        <div class="transaction-actions">
-          <button class="btn btn-xs" data-action="edit-transaction" data-id="${t.id}"><i class="fas fa-edit"></i></button>
-          <button class="btn btn-xs btn-danger" data-action="delete-transaction" data-id="${t.id}"><i class="fas fa-trash"></i></button>
+      <div style="padding-left:6px;display:flex;align-items:center;justify-content:space-between;gap:6px;">
+        <div>
+          <div style="font-family:var(--font-display);font-weight:800;font-size:0.95rem;color:${valueColor};">${formatCurrency(t.amount)}</div>
+          <div style="font-size:0.65rem;font-weight:700;color:${statusColor};">${confirmed ? '✓ Confirmada' : '⏳ Pendente'}</div>
+        </div>
+        <div style="display:flex;gap:4px;">
+          <button class="btn btn-xs btn-ghost" style="padding:5px 8px;" data-action="edit-transaction" data-id="${t.id}"><i class="fas fa-edit"></i></button>
+          <button class="btn btn-xs btn-danger" style="padding:5px 8px;" data-action="delete-transaction" data-id="${t.id}"><i class="fas fa-trash"></i></button>
         </div>
       </div>
     `;
@@ -6416,91 +6551,102 @@ function openCommitmentModal(mode, id = null, date = null) {
     list.innerHTML = '';
     
     if (receipts.length === 0) {
-      list.innerHTML = `<div style="text-align: center; padding: 30px; color: var(--gray);"><i class="fas fa-file-invoice" style="font-size: 3rem; margin-bottom: 15px;"></i><p>Nenhum recibo cadastrado</p></div>`;
+      list.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-file-invoice"></i></div><h4>Nenhum recibo cadastrado</h4><p>Crie recibos para documentar seus pagamentos</p></div>`;
       return;
     }
+
+    const grid = document.createElement('div');
+    grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:10px;';
     
     receipts.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(receipt => {
-      const client = clients.find(c => c.id === receipt.clientId) || { name: 'Cliente não encontrado' };
-      const statusTexts = { emitido: 'Emitido', pago: 'Pago', cancelado: 'Cancelado' };
+      const client = clients.find(c => c.id === receipt.clientId) || { name: 'N/A' };
+      const statusMap = { emitido: ['Emitido','var(--info)'], pago: ['Pago','var(--success)'], cancelado: ['Cancelado','var(--danger)'] };
+      const [statusLabel, statusColor] = statusMap[receipt.status] || ['—','var(--text3)'];
       
       const card = document.createElement('div');
       card.className = 'receipt-card';
+      card.style.cssText = 'background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border-soft);padding:12px;box-shadow:var(--card-shadow);display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden;';
       card.innerHTML = `
-        <div class="transaction-header">
-          <span class="category-badge">Recibo #${receipt.id.toString().slice(-4)}</span>
-          <span class="status-badge ${receipt.status}">${statusTexts[receipt.status]}</span>
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${statusColor};border-radius:var(--r-md) var(--r-md) 0 0;"></div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;">
+          <div style="font-size:0.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;">Recibo #${receipt.id.toString().slice(-4)}</div>
+          <span style="font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:999px;background:${statusColor}22;color:${statusColor};white-space:nowrap;">${statusLabel}</span>
         </div>
-        <div class="transaction-body">
-          <span class="transaction-favorecido">${client.name}</span>
-          <span class="transaction-details">${receipt.description}</span>
-          <span class="transaction-details">${formatDate(receipt.date)}</span>
+        <div>
+          <div style="font-family:var(--font-display);font-weight:700;font-size:0.88rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${client.name}</div>
+          <div style="font-size:0.72rem;color:var(--text3);margin-top:2px;">${formatDate(receipt.date)}</div>
         </div>
-        <div class="transaction-footer">
-          <span class="transaction-value">${formatCurrency(receipt.amount)}</span>
-          <div class="transaction-actions">
-            <button class="btn btn-xs" data-action="download-receipt-pdf" data-id="${receipt.id}"><i class="fas fa-download"></i> PDF</button>
-            <button class="btn btn-xs" data-action="edit-receipt" data-id="${receipt.id}"><i class="fas fa-edit"></i></button>
-            <button class="btn btn-xs btn-danger" data-action="delete-receipt" data-id="${receipt.id}"><i class="fas fa-trash"></i></button>
-          </div>
+        <div style="font-family:var(--font-display);font-weight:800;font-size:1rem;color:var(--ev-teal);">${formatCurrency(receipt.amount)}</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;">
+          <button class="btn btn-xs" style="flex:1;font-size:0.7rem;" data-action="download-receipt-pdf" data-id="${receipt.id}"><i class="fas fa-download"></i> PDF</button>
+          <button class="btn btn-xs btn-ghost" style="padding:5px 8px;" data-action="edit-receipt" data-id="${receipt.id}"><i class="fas fa-edit"></i></button>
+          <button class="btn btn-xs btn-danger" style="padding:5px 8px;" data-action="delete-receipt" data-id="${receipt.id}"><i class="fas fa-trash"></i></button>
         </div>
       `;
-      list.appendChild(card);
+      grid.appendChild(card);
     });
+    list.appendChild(grid);
   }
   
 function updateClientsList() {
   const list = document.getElementById('clients-list');
   list.innerHTML = '';
 
-  // Pega o valor da busca
   const searchTerm = document.getElementById('search-clients-input') ? document.getElementById('search-clients-input').value.toLowerCase() : '';
 
   if (clients.length === 0) {
-    list.innerHTML = `<div style="text-align: center; padding: 30px; color: var(--gray);"><i class="fas fa-users" style="font-size: 3rem; margin-bottom: 15px;"></i><p>Nenhum cliente cadastrado</p></div>`;
+    list.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-users"></i></div><h4>Nenhum cliente cadastrado</h4><p>Adicione seu primeiro cliente para começar</p></div>`;
     return;
   }
 
-  // Filtra os clientes com base no termo da busca
   const filteredClients = clients.filter(client => {
       const name = (client.name || '').toLowerCase();
       const email = (client.email || '').toLowerCase();
       const phone = (client.phone || '').toLowerCase();
-
-      return name.includes(searchTerm) || 
-             email.includes(searchTerm) || 
-             phone.includes(searchTerm);
+      return name.includes(searchTerm) || email.includes(searchTerm) || phone.includes(searchTerm);
   });
 
-  // Verifica se o filtro retornou algum resultado
   if (filteredClients.length === 0) {
-      list.innerHTML = `<div style="text-align: center; padding: 30px; color: var(--gray);"><i class="fas fa-search-minus" style="font-size: 3rem; margin-bottom: 15px;"></i><p>Nenhum cliente encontrado para "${searchTerm}"</p></div>`;
+      list.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-search-minus"></i></div><h4>Nenhum resultado</h4><p>Nenhum cliente encontrado para "${searchTerm}"</p></div>`;
       return;
   }
 
-  // Usa o array 'filteredClients' em vez de 'clients'
+  // 2-column grid wrapper
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:12px;';
+
   filteredClients.sort((a,b) => a.name.localeCompare(b.name)).forEach(client => {
-    const birthday = client.birthday ? formatDate(client.birthday) : 'Não informado';
+    const birthday = client.birthday ? formatDate(client.birthday) : null;
+    const initials = (client.name || '?').split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase();
+    const colors = ['#6c63ff','#4895ef','#06d6a0','#f77f00','#f72585','#ffd93d'];
+    const colorIdx = (client.name || '').charCodeAt(0) % colors.length;
+    const avatarColor = colors[colorIdx];
+    // Count orders for this client
+    const clientOrders = eventOrders.filter(o => o.clientId === client.id).length;
     const card = document.createElement('div');
     card.className = 'client-card';
+    card.style.cssText = 'background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border-soft);padding:14px;box-shadow:var(--card-shadow);display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;';
     card.innerHTML = `
-      <div class="transaction-body">
-        <span class="transaction-favorecido">${client.name}</span>
-        <div class="transaction-details" style="display: flex; flex-direction: column; gap: 4px; margin-top: 8px;">
-          ${client.email ? `<div><i class="fas fa-envelope fa-fw" style="margin-right: 5px;"></i>${client.email}</div>` : ''}
-          ${client.phone ? `<div><i class="fas fa-phone fa-fw" style="margin-right: 5px;"></i>${client.phone}</div>` : ''}
-          <div><i class="fas fa-birthday-cake fa-fw" style="margin-right: 5px;"></i>${birthday}</div>
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${avatarColor};border-radius:var(--r-md) var(--r-md) 0 0;"></div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:38px;height:38px;border-radius:50%;background:${avatarColor}22;color:${avatarColor};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.85rem;flex-shrink:0;border:2px solid ${avatarColor}44;">${initials}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-family:var(--font-display);font-weight:700;font-size:0.88rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${client.name}</div>
+          ${clientOrders > 0 ? `<div style="font-size:0.68rem;color:${avatarColor};font-weight:600;">${clientOrders} pedido${clientOrders>1?'s':''}</div>` : '<div style="font-size:0.68rem;color:var(--text3);">Sem pedidos</div>'}
         </div>
       </div>
-      <div class="transaction-footer">
-          <span></span>
-          <div class="transaction-actions">
-              <button class="btn btn-xs" data-action="edit-client" data-id="${client.id}"><i class="fas fa-edit"></i></button>
-              <button class="btn btn-xs btn-danger" data-action="delete-client" data-id="${client.id}"><i class="fas fa-trash"></i></button>
-          </div>
+      <div style="display:flex;flex-direction:column;gap:4px;font-size:0.75rem;color:var(--text2);">
+        ${client.phone ? `<div style="display:flex;align-items:center;gap:6px;"><i class="fas fa-phone" style="color:${avatarColor};width:12px;"></i><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${client.phone}</span></div>` : ''}
+        ${client.email ? `<div style="display:flex;align-items:center;gap:6px;"><i class="fas fa-envelope" style="color:${avatarColor};width:12px;"></i><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${client.email}</span></div>` : ''}
+        ${birthday ? `<div style="display:flex;align-items:center;gap:6px;"><i class="fas fa-birthday-cake" style="color:${avatarColor};width:12px;"></i><span>${birthday}</span></div>` : ''}
+      </div>
+      <div style="display:flex;gap:6px;margin-top:auto;">
+        <button class="btn btn-xs btn-outline" style="flex:1;font-size:0.72rem;" data-action="edit-client" data-id="${client.id}"><i class="fas fa-edit"></i> Editar</button>
+        <button class="btn btn-xs btn-danger" style="padding:6px 10px;" data-action="delete-client" data-id="${client.id}"><i class="fas fa-trash"></i></button>
       </div>`;
-    list.appendChild(card);
+    grid.appendChild(card);
   });
+  list.appendChild(grid);
 }
   
   function updateCommitmentsList() {
@@ -6558,67 +6704,79 @@ function updateClientsList() {
 
     let allItems = [];
     if (typeFilter === 'all' || typeFilter === 'order') {
-        allItems.push(...eventOrders.map(o => ({ ...o, type: 'order' })));
+        allItems.push(...eventOrders.map(o => ({ ...o, _type: 'order' })));
     }
     if (typeFilter === 'all' || typeFilter === 'quote') {
-        allItems.push(...eventQuotes.map(q => ({ ...q, type: 'quote' })));
+        allItems.push(...eventQuotes.map(q => ({ ...q, _type: 'quote' })));
     }
 
     let filteredItems = allItems.filter(item => {
         const client = clients.find(c => c.id === item.clientId) || {};
         const clientName = (client.name || '').toLowerCase();
-        const number = (item.type === 'order' ? item.orderNumber : item.quoteNumber).toLowerCase();
+        const number = (item._type === 'order' ? item.orderNumber : item.quoteNumber).toLowerCase();
         return clientName.includes(searchTerm) || number.includes(searchTerm);
     });
 
     if (filteredItems.length === 0) {
         const message = searchTerm ? 'Nenhum item encontrado para sua busca.' : 'Nenhum pedido ou orçamento cadastrado.';
-        list.innerHTML = `<div style="text-align: center; padding: 30px; color: var(--gray);"><i class="fas fa-clipboard-check" style="font-size: 3rem; margin-bottom: 15px;"></i><p>${message}</p></div>`;
+        list.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-clipboard-check"></i></div><h4>Nenhum resultado</h4><p>${message}</p></div>`;
         return;
     }
 
+    const grid = document.createElement('div');
+    grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:12px;';
+
     filteredItems.sort((a, b) => {
-        const dateA = a.type === 'order' ? a.eventDate : a.emissionDate;
-        const dateB = b.type === 'order' ? b.eventDate : b.emissionDate;
+        const dateA = a._type === 'order' ? a.eventDate : a.emissionDate;
+        const dateB = b._type === 'order' ? b.eventDate : b.emissionDate;
         return new Date(dateB) - new Date(dateA);
     }).forEach(item => {
-        const client = clients.find(c => c.id === item.clientId) || { name: 'Cliente não encontrado' };
-        
-        const cardType = item.type === 'order' ? 'order-card' : 'quote-card';
-        const number = item.type === 'order' ? item.orderNumber : item.quoteNumber;
-        const typeLabel = item.type === 'order' ? 'Pedido' : 'Orçamento';
-        const valueColor = item.type === 'order' ? 'var(--ev-orange)' : 'var(--ev-blue)';
-        const date = item.type === 'order' ? item.eventDate : item.emissionDate;
+        const client = clients.find(c => c.id === item.clientId) || { name: 'N/A' };
+        const isOrder = item._type === 'order';
+        const number = isOrder ? item.orderNumber : item.quoteNumber;
+        const typeLabel = isOrder ? 'Pedido' : 'Orçamento';
+        const accentColor = isOrder ? 'var(--ev-orange)' : 'var(--ev-blue)';
+        const iconName = isOrder ? 'fa-clipboard-check' : 'fa-file-alt';
+        const date = isOrder ? item.eventDate : item.emissionDate;
 
         let statusBadge = '';
-        if (item.type === 'quote') {
-          const statusTexts = { 'emitido': 'Pendente', 'aprovado': 'Aprovado', 'recusado': 'Recusado' };
-          statusBadge = `<span class="status-badge ${item.status}-orcamento">${statusTexts[item.status]}</span>`;
+        if (!isOrder) {
+          const statusMap = { 'emitido': ['Pendente', 'var(--warning)'], 'aprovado': ['Aprovado', 'var(--success)'], 'recusado': ['Recusado', 'var(--danger)'] };
+          const [lbl, clr] = statusMap[item.status] || ['—', 'var(--text3)'];
+          statusBadge = `<span style="font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:999px;background:${clr}22;color:${clr};">${lbl}</span>`;
         }
 
         const card = document.createElement('div');
-        card.className = cardType;
+        card.className = isOrder ? 'order-card' : 'quote-card';
+        card.style.cssText = 'background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border-soft);padding:14px;box-shadow:var(--card-shadow);display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;';
         card.innerHTML = `
-            <div class="transaction-header">
-              <span class="category-badge">${typeLabel} Nº ${number}</span>
-                <span class="transaction-details">${formatDate(date)}</span>
+          <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${accentColor};border-radius:var(--r-md) var(--r-md) 0 0;"></div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:34px;height:34px;border-radius:var(--r-sm);background:${accentColor}18;color:${accentColor};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fas ${iconName}" style="font-size:0.85rem;"></i>
             </div>
-            <div class="transaction-body">
-                <span class="transaction-favorecido">${item.eventType} - ${client.name}</span>
-                <span class="transaction-details">Local: ${item.eventLocation || 'Não informado'}</span>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:0.65rem;font-weight:700;color:${accentColor};text-transform:uppercase;letter-spacing:0.04em;">${typeLabel} Nº ${number}</div>
+              <div style="font-family:var(--font-display);font-weight:700;font-size:0.82rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${client.name}</div>
             </div>
-            <div class="transaction-footer">
-                <span class="transaction-value" style="color: ${valueColor};">${formatCurrency(item.totalValue)}</span>
-                <div class="transaction-actions">
-                    ${statusBadge}
-                    ${item.type === 'order' ? `<button class="btn-checklist-order" data-action="open-checklist-from-order" data-id="${item.id}" title="Abrir Checklist"><i class="fas fa-clipboard-list"></i> Checklist</button>` : ''}
-                    <button class="btn btn-xs" data-action="view-${item.type}" data-id="${item.id}" title="Visualizar"><i class="fas fa-eye"></i></button>
-                    <button class="btn btn-xs" data-action="edit-${item.type}" data-id="${item.id}" title="Editar"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-xs btn-danger" data-action="delete-${item.type}" data-id="${item.id}" title="Excluir"><i class="fas fa-trash"></i></button>
-                </div>
-            </div>`;
-        list.appendChild(card);
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;font-size:0.75rem;color:var(--text2);">
+            <div style="display:flex;align-items:center;gap:6px;"><i class="fas fa-calendar" style="color:${accentColor};width:12px;"></i><span>${formatDate(date)}</span></div>
+            <div style="display:flex;align-items:center;gap:6px;"><i class="fas fa-star" style="color:${accentColor};width:12px;"></i><span>${item.eventType || '—'}</span></div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto;">
+            <div style="font-family:var(--font-display);font-size:0.9rem;font-weight:800;color:${accentColor};">${formatCurrency(item.totalValue)}</div>
+            ${statusBadge}
+          </div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;">
+            ${isOrder ? `<button class="btn btn-xs btn-ghost" style="flex:1;font-size:0.68rem;" data-action="open-checklist-from-order" data-id="${item.id}"><i class="fas fa-clipboard-list"></i></button>` : ''}
+            <button class="btn btn-xs" style="flex:1;font-size:0.68rem;" data-action="view-${isOrder?'order':'quote'}" data-id="${item.id}"><i class="fas fa-eye"></i></button>
+            <button class="btn btn-xs btn-ghost" style="flex:1;font-size:0.68rem;" data-action="edit-${isOrder?'order':'quote'}" data-id="${item.id}"><i class="fas fa-edit"></i></button>
+            <button class="btn btn-xs btn-danger" style="flex:1;font-size:0.68rem;" data-action="delete-${isOrder?'order':'quote'}" data-id="${item.id}"><i class="fas fa-trash"></i></button>
+          </div>`;
+        grid.appendChild(card);
     });
+    list.appendChild(grid);
   }
 
   function addModernDocLayout(doc, title) {
@@ -6729,7 +6887,9 @@ function updateClientsList() {
     startY += 5;
     doc.text(userInfo.cpf, doc.internal.pageSize.width / 2, startY, { align: 'center' });
     
-    doc.save(`Recibo_${receipt.id}_${(client.name || 'cliente').replace(/\s/g, '_')}.pdf`);
+    const receiptFilename = `Recibo_${receipt.id}_${(client.name || 'cliente').replace(/\s/g, '_')}`;
+    doc.save(receiptFilename + '.pdf');
+    try { const blob = doc.output('blob'); savePdfDocument('receipt', receiptFilename, blob); } catch(e) {}
   }
   
   function downloadDJContractAsPDF() {
@@ -6941,7 +7101,9 @@ function updateClientsList() {
     doc.setTextColor('#333333');
     doc.text(doc.splitTextToSize(data.notes || 'Nenhuma.', doc.internal.pageSize.width - 30), 15, startY);
 
-    doc.save(`Pedido_${data.orderNumber}_${data.clientName.replace(/\s/g, '_')}.pdf`);
+    const orderFilename = `Pedido_${data.orderNumber}_${data.clientName.replace(/\s/g, '_')}`;
+    doc.save(orderFilename + '.pdf');
+    try { const blob = doc.output('blob'); savePdfDocument('order', orderFilename, blob); } catch(e) {}
   }
 
   // Função para baixar orçamento existente por ID (chamada do modal de visualização)
@@ -8127,7 +8289,9 @@ function showCommitmentsForDay(dateString) {
     }
 
     const clientNameSafe = (client.name || 'cliente').replace(/[^a-zA-Z0-9]/g, '_');
-    doc.save(`Orcamento_${quote.quoteNumber}_${clientNameSafe}.pdf`);
+    const quoteFilename = `Orcamento_${quote.quoteNumber}_${clientNameSafe}`;
+    doc.save(quoteFilename + '.pdf');
+    try { const blob = doc.output('blob'); savePdfDocument('quote', quoteFilename, blob); } catch(e) {}
   }
 
   function downloadDJContractWithClauses(clauses) {
@@ -8210,7 +8374,9 @@ function showCommitmentsForDay(dateString) {
     doc.text('CONTRATANTE', margin, y);
     doc.text('CONTRATADO', pageWidth - margin, y, { align: 'right' });
 
-    doc.save(`Contrato_DJ_${(clauses.clientName || 'contrato').replace(/[^a-zA-Z0-9]/g, '_')}.pdf`);
+    const contractFilename = `Contrato_DJ_${(clauses.clientName || 'contrato').replace(/[^a-zA-Z0-9]/g, '_')}`;
+    doc.save(contractFilename + '.pdf');
+    try { const blob = doc.output('blob'); savePdfDocument('contract', contractFilename, blob); } catch(e) {}
   }
   // =====================================================
   // TOAST NOTIFICATION SYSTEM
@@ -9608,7 +9774,7 @@ function showCommitmentsForDay(dateString) {
         <div class="maint-card-accent" style="background:${sev.accent};"></div>
         <div class="maint-card-header">
           <div class="maint-card-icon" style="background:${sev.iconBg};color:${sev.color};">
-            <i class="fas fa-tools"></i>
+            ${note.photo ? `<img src="${note.photo}" alt="foto" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">` : '<i class="fas fa-tools"></i>'}
           </div>
           <div class="maint-card-main">
             <div class="maint-card-equipment">${note.equipment}</div>
@@ -9621,6 +9787,7 @@ function showCommitmentsForDay(dateString) {
         </div>
         <div class="maint-card-description">${note.description}</div>
         ${note.notes ? `<div class="maint-notes-snippet"><i class="fas fa-sticky-note"></i> ${note.notes}</div>` : ''}
+        ${note.photo ? `<img src="${note.photo}" alt="Foto do defeito" style="width:100%;max-height:140px;object-fit:cover;border-radius:var(--r-sm);margin-top:4px;cursor:pointer;" onclick="this.style.maxHeight=this.style.maxHeight==='none'?'140px':'none'">` : ''}
         <div class="maint-card-footer">
           <div class="maint-card-date"><i class="fas fa-calendar"></i> ${dateStr}</div>
           <div class="maint-card-actions">
@@ -9667,6 +9834,18 @@ function showCommitmentsForDay(dateString) {
       evSelect.appendChild(opt);
     });
 
+    // Reset photo state
+    const dropzone = document.getElementById('maint-photo-dropzone');
+    const preview = document.getElementById('maint-photo-preview');
+    const placeholder = document.getElementById('maint-photo-placeholder');
+    const removeBtn = document.getElementById('maint-photo-remove');
+    if (dropzone) { delete dropzone.dataset.photoData; }
+    if (preview) { preview.src = '#'; preview.style.display = 'none'; }
+    if (placeholder) placeholder.style.display = 'block';
+    if (removeBtn) removeBtn.style.display = 'none';
+    const photoInput = document.getElementById('maint-photo');
+    if (photoInput) photoInput.value = '';
+
     // Set default date to today
     document.getElementById('maint-date').value = new Date().toISOString().split('T')[0];
 
@@ -9682,6 +9861,14 @@ function showCommitmentsForDay(dateString) {
       document.getElementById('maint-date').value        = note.date       || '';
       document.getElementById('maint-status').value      = note.status     || 'pendente';
       document.getElementById('maint-notes').value       = note.notes      || '';
+      // Restore photo if exists
+      if (note.photo && dropzone && preview && placeholder && removeBtn) {
+        dropzone.dataset.photoData = note.photo;
+        preview.src = note.photo;
+        preview.style.display = 'block';
+        placeholder.style.display = 'none';
+        removeBtn.style.display = 'inline-block';
+      }
     } else {
       title.innerHTML = '<i class="fas fa-tools" style="color:var(--danger);"></i> Nova Nota de Manutenção';
     }
@@ -9692,6 +9879,8 @@ function showCommitmentsForDay(dateString) {
   function handleMaintenanceSubmit(e) {
     e.preventDefault();
     const editId = document.getElementById('edit-maintenance-id').value;
+    const dropzone = document.getElementById('maint-photo-dropzone');
+    const photoData = dropzone ? (dropzone.dataset.photoData || '') : '';
     const data = {
       equipment:   document.getElementById('maint-equipment').value.trim(),
       description: document.getElementById('maint-description').value.trim(),
@@ -9700,6 +9889,7 @@ function showCommitmentsForDay(dateString) {
       date:        document.getElementById('maint-date').value,
       status:      document.getElementById('maint-status').value,
       notes:       document.getElementById('maint-notes').value.trim(),
+      photo:       photoData || undefined,
     };
     if (editId) {
       const idx = maintenanceNotes.findIndex(n => n.id === parseFloat(editId));
@@ -9720,6 +9910,198 @@ function showCommitmentsForDay(dateString) {
     saveData();
     updateMaintenanceTab();
     showToast(`"${note.equipment}" marcado como resolvido! ✅`, 'success');
+  }
+
+  // =====================================================
+  // SHOPPING LIST (Lista de Compras de Equipamentos)
+  // =====================================================
+  function updateShoppingList() {
+    const container = document.getElementById('shopping-list-container');
+    if (!container) return;
+    if (!shoppingItems || shoppingItems.length === 0) {
+      container.innerHTML = `<div class="empty-state" style="padding:20px;"><div class="empty-state-icon"><i class="fas fa-shopping-cart"></i></div><h4>Lista vazia</h4><p>Adicione equipamentos que precisam ser comprados ou substituídos</p></div>`;
+      return;
+    }
+    const priorityMap = {
+      alta: { label: '🔴 Alta', color: 'var(--danger)', bg: 'var(--danger-bg)' },
+      media: { label: '🟡 Média', color: 'var(--warning)', bg: 'var(--warning-bg)' },
+      baixa: { label: '🟢 Baixa', color: 'var(--success)', bg: 'var(--success-bg)' },
+    };
+    const totalEstimate = shoppingItems.filter(i => !i.purchased && i.estimatedPrice).reduce((s, i) => s + (parseFloat(i.estimatedPrice) * (parseInt(i.qty) || 1)), 0);
+    let html = '';
+    if (totalEstimate > 0) {
+      html += `<div style="background:var(--surface2);border-radius:var(--r-md);padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border-soft);">
+        <span style="font-size:0.82rem;color:var(--text2);font-weight:600;"><i class="fas fa-tag" style="color:var(--ev-orange);margin-right:6px;"></i>Estimativa Total</span>
+        <span style="font-family:var(--font-display);font-weight:800;color:var(--ev-orange);">${formatCurrency(totalEstimate)}</span>
+      </div>`;
+    }
+    shoppingItems.sort((a,b) => {
+      const po = {alta:0,media:1,baixa:2};
+      return (po[a.priority]||1) - (po[b.priority]||1);
+    }).forEach(item => {
+      const prio = priorityMap[item.priority] || priorityMap.media;
+      const price = item.estimatedPrice ? formatCurrency(parseFloat(item.estimatedPrice) * (parseInt(item.qty)||1)) : null;
+      html += `<div style="background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border-soft);padding:12px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;${item.purchased ? 'opacity:0.55;' : ''}">
+        <input type="checkbox" ${item.purchased ? 'checked' : ''} data-action="toggle-shopping" data-id="${item.id}" style="width:18px;height:18px;margin-top:2px;accent-color:var(--success);cursor:pointer;flex-shrink:0;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:700;font-size:0.88rem;color:var(--text);${item.purchased ? 'text-decoration:line-through;' : ''}">${item.name} <span style="font-size:0.75rem;color:var(--text3);font-weight:500;">×${item.qty||1}</span></div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;">
+            <span style="font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:999px;background:${prio.bg};color:${prio.color};">${prio.label}</span>
+            ${price ? `<span style="font-size:0.72rem;color:var(--ev-orange);font-weight:600;">${price}</span>` : ''}
+          </div>
+          ${item.notes ? `<div style="font-size:0.75rem;color:var(--text3);margin-top:4px;">${item.notes}</div>` : ''}
+          ${item.link ? `<a href="${item.link}" target="_blank" rel="noopener" style="font-size:0.72rem;color:var(--primary);text-decoration:none;margin-top:3px;display:inline-flex;align-items:center;gap:4px;"><i class="fas fa-external-link-alt"></i> Ver produto</a>` : ''}
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0;">
+          <button class="maint-btn-sm" style="background:var(--surface2);color:var(--text2);" data-action="edit-shopping" data-id="${item.id}"><i class="fas fa-edit"></i></button>
+          <button class="maint-btn-sm" style="background:rgba(239,71,111,0.1);color:var(--danger);" data-action="delete-shopping" data-id="${item.id}"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>`;
+    });
+    container.innerHTML = html;
+  }
+
+  function openShoppingModal(mode, id = null) {
+    const modal = document.getElementById('shopping-item-modal');
+    const form = document.getElementById('shopping-item-form');
+    form.reset();
+    document.getElementById('edit-shopping-id').value = '';
+    document.getElementById('shopping-modal-title').innerHTML = '<i class="fas fa-shopping-cart" style="color:var(--ev-orange);"></i> Novo Item';
+    if (mode === 'edit' && id !== null) {
+      const item = shoppingItems.find(i => i.id === id);
+      if (!item) return;
+      document.getElementById('shopping-modal-title').innerHTML = '<i class="fas fa-shopping-cart" style="color:var(--ev-orange);"></i> Editar Item';
+      document.getElementById('edit-shopping-id').value = item.id;
+      document.getElementById('shopping-name').value = item.name || '';
+      document.getElementById('shopping-qty').value = item.qty || 1;
+      document.getElementById('shopping-priority').value = item.priority || 'media';
+      document.getElementById('shopping-estimated-price').value = item.estimatedPrice || '';
+      document.getElementById('shopping-link').value = item.link || '';
+      document.getElementById('shopping-notes').value = item.notes || '';
+    }
+    modal.classList.add('active');
+  }
+
+  function handleShoppingSubmit(e) {
+    e.preventDefault();
+    const editId = document.getElementById('edit-shopping-id').value;
+    const data = {
+      name: document.getElementById('shopping-name').value.trim(),
+      qty: parseInt(document.getElementById('shopping-qty').value) || 1,
+      priority: document.getElementById('shopping-priority').value,
+      estimatedPrice: parseFloat(document.getElementById('shopping-estimated-price').value) || 0,
+      link: document.getElementById('shopping-link').value.trim(),
+      notes: document.getElementById('shopping-notes').value.trim(),
+      purchased: false,
+    };
+    if (editId) {
+      const idx = shoppingItems.findIndex(i => i.id === parseFloat(editId));
+      if (idx > -1) shoppingItems[idx] = { ...shoppingItems[idx], ...data };
+    } else {
+      shoppingItems.push({ ...data, id: Date.now() });
+    }
+    saveData();
+    updateShoppingList();
+    document.getElementById('shopping-item-modal').classList.remove('active');
+    showToast(editId ? 'Item atualizado!' : 'Item adicionado à lista!', 'success');
+  }
+
+  // =====================================================
+  // SAVED DOCUMENTS
+  // =====================================================
+  function savePdfDocument(type, name, pdfBlob) {
+    try {
+      const reader = new FileReader();
+      reader.onload = function() {
+        const b64 = reader.result;
+        const doc = { id: Date.now(), type, name, data: b64, createdAt: new Date().toISOString() };
+        savedDocuments.push(doc);
+        // Limit to 20 most recent
+        if (savedDocuments.length > 20) savedDocuments.splice(0, savedDocuments.length - 20);
+        saveData();
+        updateSavedDocumentsList();
+      };
+      reader.readAsDataURL(pdfBlob);
+    } catch(e) { console.warn('Could not save document', e); }
+  }
+
+  function updateSavedDocumentsList() {
+    const list = document.getElementById('saved-documents-list');
+    if (!list) return;
+    if (!savedDocuments || savedDocuments.length === 0) {
+      list.innerHTML = `<div class="empty-state" style="padding:20px;"><div class="empty-state-icon"><i class="fas fa-folder-open"></i></div><h4>Nenhum documento salvo</h4><p>Os documentos gerados aparecerão aqui para download posterior</p></div>`;
+      return;
+    }
+    const typeIcon = { contract: 'fa-file-contract', order: 'fa-clipboard-list', quote: 'fa-file-alt', receipt: 'fa-file-invoice' };
+    const typeColor = { contract: 'var(--primary)', order: 'var(--ev-orange)', quote: 'var(--ev-blue)', receipt: 'var(--ev-teal)' };
+    const typeLabel = { contract: 'Contrato', order: 'Pedido', quote: 'Orçamento', receipt: 'Recibo' };
+    const grid = document.createElement('div');
+    grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:10px;';
+    [...savedDocuments].reverse().forEach(doc => {
+      const icon = typeIcon[doc.type] || 'fa-file-pdf';
+      const color = typeColor[doc.type] || 'var(--danger)';
+      const label = typeLabel[doc.type] || 'Documento';
+      const card = document.createElement('div');
+      card.style.cssText = `background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border-soft);padding:12px;box-shadow:var(--card-shadow);display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden;`;
+      card.innerHTML = `
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${color};border-radius:var(--r-md) var(--r-md) 0 0;"></div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:32px;height:32px;border-radius:var(--r-sm);background:${color}18;color:${color};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fas ${icon}" style="font-size:0.85rem;"></i>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:0.62rem;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:0.04em;">${label}</div>
+          </div>
+        </div>
+        <div style="font-size:0.78rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${doc.name}</div>
+        <div style="font-size:0.68rem;color:var(--text3);">${new Date(doc.createdAt).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</div>
+        <div style="display:flex;gap:4px;">
+          <button class="btn btn-xs" style="flex:1;font-size:0.72rem;" data-action="download-saved-doc" data-id="${doc.id}"><i class="fas fa-download"></i> Baixar</button>
+          <button class="btn btn-xs btn-danger" style="padding:5px 8px;" data-action="delete-saved-doc" data-id="${doc.id}"><i class="fas fa-trash"></i></button>
+        </div>`;
+      grid.appendChild(card);
+    });
+    list.innerHTML = '';
+    list.appendChild(grid);
+  }
+
+  // =====================================================
+  // MAINTENANCE PHOTO UPLOAD
+  // =====================================================
+  function initMaintenancePhotoUpload() {
+    const dropzone = document.getElementById('maint-photo-dropzone');
+    const input = document.getElementById('maint-photo');
+    const preview = document.getElementById('maint-photo-preview');
+    const placeholder = document.getElementById('maint-photo-placeholder');
+    const removeBtn = document.getElementById('maint-photo-remove');
+    if (!dropzone || !input) return;
+
+    dropzone.addEventListener('click', () => input.click());
+    input.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+          const compressed = await compressImage(ev.target.result, 600, 600);
+          preview.src = compressed;
+          preview.style.display = 'block';
+          placeholder.style.display = 'none';
+          removeBtn.style.display = 'inline-block';
+          dropzone.dataset.photoData = compressed;
+        };
+        reader.readAsDataURL(file);
+      } catch(err) { showToast('Erro ao processar imagem', 'warning'); }
+    });
+    if (removeBtn) {
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        preview.src = '#'; preview.style.display = 'none';
+        placeholder.style.display = 'block'; removeBtn.style.display = 'none';
+        delete dropzone.dataset.photoData;
+        input.value = '';
+      });
+    }
   }
 
   function openChecklistForEvent(eventKey) {
@@ -9748,9 +10130,55 @@ function showCommitmentsForDay(dateString) {
   window.openEventOrderModal = openEventOrderModal;
   window.showCommitmentsForDay = showCommitmentsForDay;
   window.showTab = showTab;
+  window.openShoppingModal = openShoppingModal;
+  window.updateShoppingList = updateShoppingList;
+  window.updateSavedDocumentsList = updateSavedDocumentsList;
 });
 
 </script>
+
+  <!-- Modal Lista de Compras de Equipamentos -->
+  <div id="shopping-item-modal" class="modal">
+    <div class="modal-content"><div class="modal-handle"></div>
+      <span class="close-button" data-action="close-modal">&times;</span>
+      <h2 id="shopping-modal-title"><i class="fas fa-shopping-cart" style="color:var(--ev-orange);"></i> Novo Item</h2>
+      <form id="shopping-item-form">
+        <input type="hidden" id="edit-shopping-id">
+        <div class="form-group">
+          <label for="shopping-name">Equipamento / Item</label>
+          <input type="text" id="shopping-name" placeholder="Ex: Cabo XLR, Mesa de Som Behringer..." required>
+        </div>
+        <div class="form-group">
+          <label for="shopping-qty">Quantidade</label>
+          <input type="number" id="shopping-qty" min="1" value="1" required>
+        </div>
+        <div class="form-group">
+          <label for="shopping-priority">Prioridade</label>
+          <select id="shopping-priority" required>
+            <option value="alta">🔴 Alta — Urgente</option>
+            <option value="media" selected>🟡 Média — Em breve</option>
+            <option value="baixa">🟢 Baixa — Quando possível</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="shopping-estimated-price">Preço Estimado (R$)</label>
+          <input type="number" id="shopping-estimated-price" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label for="shopping-link">Link do Produto (Opcional)</label>
+          <input type="url" id="shopping-link" placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label for="shopping-notes">Observações</label>
+          <textarea id="shopping-notes" rows="2" placeholder="Modelo preferido, cor, especificações..."></textarea>
+        </div>
+        <div class="btn-container">
+          <button type="button" class="btn btn-danger" data-action="close-modal">Cancelar</button>
+          <button type="submit" class="btn" style="background:linear-gradient(135deg,var(--ev-orange),#ffd93d);color:white;">Salvar Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- Modal Relatório de Eventos PDF -->
   <div id="relatorio-eventos-modal" class="modal">
@@ -9885,6 +10313,21 @@ function showCommitmentsForDay(dateString) {
         <div class="form-group">
           <label for="maint-notes">Observações / Solução (Opcional)</label>
           <textarea id="maint-notes" rows="2" placeholder="Ações tomadas, orçamentos, notas adicionais..."></textarea>
+        </div>
+        <!-- FOTO DO EQUIPAMENTO COM DEFEITO -->
+        <div class="form-group">
+          <label for="maint-photo"><i class="fas fa-camera" style="color:var(--danger);margin-right:5px;"></i> Foto do Equipamento (Opcional)</label>
+          <div id="maint-photo-dropzone" style="border:2px dashed var(--input-border);border-radius:var(--r-md);padding:16px;text-align:center;cursor:pointer;transition:var(--t-fast);background:var(--input-bg);">
+            <input type="file" id="maint-photo" accept="image/*" style="display:none;">
+            <div id="maint-photo-placeholder">
+              <i class="fas fa-cloud-upload-alt" style="font-size:1.5rem;color:var(--text3);margin-bottom:6px;display:block;"></i>
+              <span style="font-size:0.82rem;color:var(--text3);">Toque para tirar foto ou escolher da galeria</span>
+            </div>
+            <img id="maint-photo-preview" src="#" alt="Preview" style="display:none;max-width:100%;max-height:180px;border-radius:var(--r-sm);object-fit:cover;">
+            <button type="button" id="maint-photo-remove" style="display:none;margin-top:8px;background:var(--danger-bg);color:var(--danger);border:none;border-radius:var(--r-sm);padding:5px 12px;font-size:0.78rem;cursor:pointer;font-family:var(--font-body);">
+              <i class="fas fa-times"></i> Remover foto
+            </button>
+          </div>
         </div>
         <div class="btn-container">
           <button type="button" class="btn btn-danger" data-action="close-modal">Cancelar</button>
