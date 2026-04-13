@@ -2,67 +2,69 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>FinancePro - Controle Financeiro para Eventos</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#1e293b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>DJ Manager Pro - Sistema Financeiro</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
   /* ============================================
      DESIGN SYSTEM - FINANCEPRO MOBILE
      Tema: Luxury Dark Finance, refinado e moderno
   ============================================ */
-  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
 
   :root {
-    /* Brand */
-    --primary: #6c63ff;
-    --primary-dark: #5a52e0;
-    --primary-light: #8b85ff;
-    --accent: #ff6b6b;
-    --accent2: #ffd93d;
+    /* Brand — azul moderno como no sistema de orçamento */
+    --primary: #3b82f6;
+    --primary-dark: #1d4ed8;
+    --primary-light: #60a5fa;
+    --accent: #8b5cf6;
+    --accent2: #f59e0b;
 
     /* Semantic */
-    --success: #06d6a0;
-    --success-bg: rgba(6, 214, 160, 0.12);
-    --danger: #ef476f;
-    --danger-bg: rgba(239, 71, 111, 0.12);
-    --warning: #ffc107;
-    --warning-bg: rgba(255, 193, 7, 0.12);
-    --info: #4cc9f0;
-    --info-bg: rgba(76, 201, 240, 0.12);
+    --success: #10b981;
+    --success-bg: rgba(16, 185, 129, 0.12);
+    --danger: #ef4444;
+    --danger-bg: rgba(239, 68, 68, 0.12);
+    --warning: #f59e0b;
+    --warning-bg: rgba(245, 158, 11, 0.12);
+    --info: #06b6d4;
+    --info-bg: rgba(6, 182, 212, 0.12);
 
-    /* Light Theme (default) */
-    --bg: #f0f2f9;
-    --bg2: #e8eaf6;
+    /* Light Theme */
+    --bg: #f1f5f9;
+    --bg2: #e2e8f0;
     --surface: #ffffff;
-    --surface2: #f7f8ff;
-    --surface3: #eef0fb;
-    --border: rgba(108, 99, 255, 0.12);
+    --surface2: #f8fafc;
+    --surface3: #f1f5f9;
+    --border: #e2e8f0;
     --border-soft: rgba(0,0,0,0.06);
-    --text: #1a1a2e;
-    --text2: #4a4a6a;
-    --text3: #8888aa;
-    --card-shadow: 0 2px 16px rgba(108, 99, 255, 0.08), 0 1px 4px rgba(0,0,0,0.04);
-    --card-shadow-hover: 0 8px 32px rgba(108, 99, 255, 0.16), 0 2px 8px rgba(0,0,0,0.08);
-    --nav-bg: #ffffff;
-    --nav-border: rgba(0,0,0,0.06);
-    --modal-bg: rgba(10, 10, 30, 0.55);
-    --header-bg: linear-gradient(135deg, #6c63ff 0%, #8b85ff 100%);
-    --scrollbar: rgba(108,99,255,0.2);
-    --input-bg: #f7f8ff;
-    --input-border: #dde0f0;
-    --input-focus: rgba(108, 99, 255, 0.3);
+    --text: #0f172a;
+    --text2: #475569;
+    --text3: #94a3b8;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+    --card-shadow-hover: 0 4px 12px rgba(59,130,246,0.15), 0 2px 6px rgba(0,0,0,0.06);
+    --nav-bg: rgba(255,255,255,0.95);
+    --nav-border: #e2e8f0;
+    --modal-bg: rgba(0,0,0,0.5);
+    --header-bg: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+    --scrollbar: rgba(59,130,246,0.2);
+    --input-bg: #f8fafc;
+    --input-border: #e2e8f0;
+    --input-focus: rgba(59,130,246,0.25);
 
     /* Event colors */
-    --ev-purple: #9b5de5;
-    --ev-blue: #4895ef;
-    --ev-teal: #06d6a0;
-    --ev-orange: #f77f00;
-    --ev-pink: #f72585;
-    --ev-green: #4cc9f0;
+    --ev-purple: #8b5cf6;
+    --ev-blue: #3b82f6;
+    --ev-teal: #10b981;
+    --ev-orange: #f59e0b;
+    --ev-pink: #ec4899;
+    --ev-green: #06b6d4;
 
     /* Spacing */
     --space-xs: 4px;
@@ -72,55 +74,59 @@
     --space-xl: 32px;
 
     /* Glow */
-    --primary-glow: rgba(108, 99, 255, 0.18);
+    --primary-glow: rgba(59,130,246,0.15);
 
     /* Radii */
     --r-sm: 8px;
-    --r-md: 14px;
-    --r-lg: 20px;
-    --r-xl: 28px;
+    --r-md: 12px;
+    --r-lg: 16px;
+    --r-xl: 20px;
     --r-full: 999px;
 
-    /* Typography */
-    --font-display: 'Sora', sans-serif;
-    --font-body: 'DM Sans', sans-serif;
+    /* Typography — Inter como no sistema de orçamento */
+    --font-display: 'Inter', sans-serif;
+    --font-body: 'Inter', sans-serif;
 
     /* Transitions */
     --t-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     --t-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     --t-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     --t-spring: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    /* Safe areas */
+    --safe-top: env(safe-area-inset-top);
+    --safe-bottom: env(safe-area-inset-bottom);
   }
 
   /* DARK MODE */
   [data-theme="dark"] {
-    --bg: #0d0d1a;
-    --bg2: #141428;
-    --surface: #1a1a2e;
-    --surface2: #20203a;
-    --surface3: #282848;
-    --border: rgba(108, 99, 255, 0.22);
-    --border-soft: rgba(255,255,255,0.07);
-    --text: #f0f0ff;
-    --text2: #b0b0d0;
-    --text3: #5a5a90;
-    --card-shadow: 0 2px 20px rgba(0,0,0,0.5), 0 1px 6px rgba(0,0,0,0.4);
-    --card-shadow-hover: 0 8px 36px rgba(108,99,255,0.22), 0 2px 12px rgba(0,0,0,0.5);
-    --nav-bg: rgba(26,26,46,0.95);
-    --nav-border: rgba(255,255,255,0.07);
-    --modal-bg: rgba(0, 0, 0, 0.8);
-    --header-bg: linear-gradient(135deg, #2d2580 0%, #4a42c0 100%);
-    --input-bg: #16162a;
-    --input-border: #2a2a50;
-    --scrollbar: rgba(108,99,255,0.3);
-    --primary-dark: #3d2fa0;
-    --primary-glow: rgba(108, 99, 255, 0.12);
+    --bg: #0f172a;
+    --bg2: #1e293b;
+    --surface: #1e293b;
+    --surface2: #243044;
+    --surface3: #2d3a50;
+    --border: #334155;
+    --border-soft: rgba(255,255,255,0.06);
+    --text: #f1f5f9;
+    --text2: #94a3b8;
+    --text3: #475569;
+    --card-shadow: 0 2px 12px rgba(0,0,0,0.4), 0 1px 4px rgba(0,0,0,0.3);
+    --card-shadow-hover: 0 8px 24px rgba(59,130,246,0.2), 0 2px 8px rgba(0,0,0,0.4);
+    --nav-bg: rgba(30,41,59,0.97);
+    --nav-border: #334155;
+    --modal-bg: rgba(0, 0, 0, 0.75);
+    --header-bg: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+    --input-bg: #1e293b;
+    --input-border: #334155;
+    --scrollbar: rgba(59,130,246,0.3);
+    --primary-dark: #1d4ed8;
+    --primary-glow: rgba(59,130,246,0.1);
   }
 
   /* ==========================================
      BASE RESET & GLOBAL
   ========================================== */
-  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   
   html { font-size: 16px; -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
   
@@ -134,8 +140,6 @@
     overflow-x: hidden;
     padding-bottom: 0;
     transition: background var(--t-slow), color var(--t-slow);
-    background-image: radial-gradient(circle at 80% 20%, rgba(108,99,255,0.04) 0%, transparent 50%),
-                      radial-gradient(circle at 20% 80%, rgba(76,201,240,0.03) 0%, transparent 50%);
   }
 
   ::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -152,7 +156,9 @@
      TOP BAR
   ========================================== */
   .top-bar {
-    background: var(--header-bg);
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     padding: 0 var(--space-md);
     height: 60px;
     padding-top: env(safe-area-inset-top, 0px);
@@ -162,38 +168,50 @@
     position: fixed;
     top: 0; left: 0; right: 0;
     z-index: 200;
-    box-shadow: 0 2px 24px rgba(108,99,255,0.3);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 1px 0 rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.05);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+  [data-theme="dark"] .top-bar {
+    background: rgba(30,41,59,0.95);
+    border-bottom-color: #334155;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.3);
   }
   .top-bar .page-title {
     font-family: var(--font-display);
-    font-size: 1.08rem;
-    font-weight: 800;
-    color: white;
-    letter-spacing: -0.02em;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
     flex: 1;
     text-align: center;
-    text-shadow: 0 1px 8px rgba(0,0,0,0.15);
   }
   .top-bar .icon-button {
-    background: rgba(255,255,255,0.18);
-    border: 1px solid rgba(255,255,255,0.15);
+    background: none;
+    border: none;
     width: 40px; height: 40px;
     border-radius: var(--r-full);
-    color: white;
-    font-size: 1rem;
+    color: var(--text2);
+    font-size: 1.15rem;
     cursor: pointer;
     transition: var(--t-fast);
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
-    backdrop-filter: blur(8px);
   }
   .top-bar .icon-button:hover, .top-bar .icon-button:active {
-    background: rgba(255,255,255,0.28);
+    background: var(--surface3);
+    color: var(--primary);
     transform: scale(1.08);
   }
-  .top-bar-actions { display: flex; gap: 8px; }
+  .top-bar-actions { display: flex; gap: 4px; }
+
+  /* Brand logo na topbar */
+  .top-bar-brand {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 1.15rem; font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+  .top-bar-brand .brand-dot { color: var(--primary); }
 
   /* ==========================================
      MAIN CONTENT
@@ -236,19 +254,22 @@
      BOTTOM NAVIGATION
   ========================================== */
   .bottom-nav {
-    background: var(--nav-bg);
-    border-top: 1px solid var(--nav-border);
+    background: rgba(255,255,255,0.95);
+    border-top: 1px solid var(--border);
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    height: calc(68px + env(safe-area-inset-bottom, 0px));
+    height: calc(65px + env(safe-area-inset-bottom, 0px));
     padding-bottom: env(safe-area-inset-bottom, 0px);
     display: flex;
     align-items: center;
     justify-content: space-around;
     z-index: 200;
-    box-shadow: 0 -6px 32px rgba(0,0,0,0.1);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  [data-theme="dark"] .bottom-nav {
+    background: rgba(30,41,59,0.97);
+    border-top-color: #334155;
   }
   .bottom-nav-item {
     background: none; border: none;
@@ -257,9 +278,9 @@
     flex-direction: column;
     align-items: center;
     gap: 3px;
-    color: var(--text3);
+    color: #94a3b8;
     font-family: var(--font-body);
-    font-size: 0.68rem;
+    font-size: 0.7rem;
     font-weight: 500;
     padding: 8px 12px;
     border-radius: var(--r-md);
@@ -267,21 +288,12 @@
     min-width: 56px;
     position: relative;
     -webkit-tap-highlight-color: transparent;
+    flex: 1;
+    justify-content: center;
   }
-  .bottom-nav-item i { font-size: 1.3rem; transition: var(--t-fast); }
+  .bottom-nav-item i { font-size: 1.25rem; margin-bottom: 2px; }
   .bottom-nav-item.active { color: var(--primary); }
-  .bottom-nav-item.active i { transform: translateY(-2px); }
-  .bottom-nav-item.active::after {
-    content: '';
-    position: absolute;
-    bottom: 5px; left: 50%;
-    transform: translateX(-50%);
-    width: 20px; height: 3px;
-    background: var(--primary);
-    border-radius: 3px;
-    box-shadow: 0 0 8px rgba(108,99,255,0.5);
-  }
-  .bottom-nav-item:active { transform: scale(0.9); }
+  .bottom-nav-item:active { transform: scale(0.95); }
 
   /* FAB - Floating Action Button */
   .fab-wrapper {
@@ -291,22 +303,22 @@
     align-items: center;
   }
   .fab-btn {
-    width: 54px; height: 54px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    width: 56px; height: 56px;
+    background: var(--primary);
     border: none;
     border-radius: 50%;
     color: white;
-    font-size: 1.3rem;
+    font-size: 1.5rem;
     cursor: pointer;
-    box-shadow: 0 4px 20px var(--primary-glow);
+    box-shadow: 0 4px 16px rgba(59,130,246,0.4);
     transition: var(--t-spring);
     display: flex; align-items: center; justify-content: center;
     position: relative;
     top: -14px;
     -webkit-tap-highlight-color: transparent;
   }
-  .fab-btn:active { transform: scale(0.9); }
-  .fab-btn.open { transform: rotate(45deg) scale(1.05); }
+  .fab-btn:active { transform: scale(0.9) rotate(90deg); }
+  .fab-btn.open { transform: rotate(45deg) scale(1.05) translateY(-14px); }
   .fab-menu {
     position: fixed;
     bottom: calc(80px + env(safe-area-inset-bottom, 0px));
@@ -626,10 +638,10 @@
   ========================================== */
   .card {
     background: var(--surface);
-    border-radius: var(--r-lg);
+    border-radius: var(--r-md);
     box-shadow: var(--card-shadow);
     padding: var(--space-lg);
-    border: 1px solid var(--border-soft);
+    border: 1px solid var(--border);
     transition: box-shadow var(--t-normal), background var(--t-slow);
     position: relative;
     overflow: hidden;
@@ -640,13 +652,13 @@
   .card-accent-top {
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--primary), var(--primary-light));
-    border-radius: var(--r-lg) var(--r-lg) 0 0;
+    height: 3px;
+    background: var(--primary);
+    border-radius: var(--r-md) var(--r-md) 0 0;
   }
   .card h2 {
     font-family: var(--font-display);
-    font-size: 1.05rem;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--text);
     display: flex;
@@ -658,8 +670,8 @@
 
   .section-title {
     font-family: var(--font-display);
-    font-size: 0.78rem;
-    font-weight: 800;
+    font-size: 0.75rem;
+    font-weight: 700;
     color: var(--text3);
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -685,13 +697,13 @@
      DASHBOARD HERO
   ========================================== */
   .dashboard-hero {
-    background: var(--header-bg);
-    border-radius: var(--r-xl);
+    background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+    border-radius: var(--r-lg);
     padding: 22px var(--space-lg);
     color: white;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 8px 36px rgba(108,99,255,0.28);
+    box-shadow: 0 4px 20px rgba(59,130,246,0.3);
   }
   .dashboard-hero::before {
     content: '';
@@ -699,7 +711,7 @@
     top: -40px; right: -40px;
     width: 160px; height: 160px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.07);
+    background: rgba(255,255,255,0.08);
   }
   .dashboard-hero::after {
     content: '';
@@ -707,7 +719,7 @@
     bottom: -50px; left: -20px;
     width: 130px; height: 130px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.04);
+    background: rgba(255,255,255,0.05);
   }
   .hero-greeting {
     font-size: 0.85rem;
@@ -723,9 +735,9 @@
     letter-spacing: -0.02em;
   }
   .hero-balance-label {
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     opacity: 0.75;
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 0.05em;
     text-transform: uppercase;
   }
@@ -891,16 +903,15 @@
     width: 100%; padding: 16px;
     font-family: var(--font-display);
     font-size: 0.95rem; font-weight: 700;
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    background: var(--primary);
     border: none; color: white;
     border-radius: var(--r-md);
     cursor: pointer;
     transition: var(--t-fast);
     display: flex; align-items: center; justify-content: center; gap: 8px;
-    box-shadow: 0 4px 16px var(--primary-glow);
-    letter-spacing: 0.01em;
     -webkit-tap-highlight-color: transparent;
   }
+  .main-cta-button:hover { background: var(--primary-dark); }
   .main-cta-button:active { transform: scale(0.98); opacity: 0.9; }
 
   /* ==========================================
@@ -913,7 +924,7 @@
     padding: 12px;
     background: var(--surface2);
     border-radius: var(--r-md);
-    border: 1px solid var(--border-soft);
+    border: 1px solid var(--border);
     margin-bottom: 8px;
     cursor: pointer;
     transition: var(--t-fast);
@@ -922,7 +933,7 @@
   .upcoming-event-item:active { transform: scale(0.98); }
   .upcoming-event-date-badge {
     width: 44px; height: 44px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    background: var(--primary);
     border-radius: var(--r-sm);
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
@@ -1023,12 +1034,13 @@
   .receipt-card, .client-card, .commitment-card, .order-card, .quote-card, .package-card {
     background: var(--surface);
     border-radius: var(--r-md);
-    padding: 14px 16px;
+    padding: 16px;
     box-shadow: var(--card-shadow);
-    border: 1px solid var(--border-soft);
+    border: 1px solid var(--border);
     border-left: 4px solid var(--primary);
-    transition: var(--t-fast);
+    transition: transform 0.2s, box-shadow 0.2s;
     position: relative;
+    margin-bottom: 12px;
     -webkit-tap-highlight-color: transparent;
   }
   .receipt-card:active, .client-card:active, .commitment-card:active, .order-card:active, .quote-card:active, .package-card:active { transform: scale(0.98); }
@@ -1041,40 +1053,38 @@
   .equipment-item-check {
     display: flex; align-items: center; gap: 12px;
     padding: 12px 14px;
-    background: var(--surface2);
+    background: var(--surface);
     border-radius: var(--r-md);
-    border: 1.5px solid var(--border-soft);
+    border: 1px solid var(--border);
     margin-bottom: 8px;
     transition: var(--t-fast);
     cursor: pointer;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
   }
-  .equipment-item-check:hover { border-color: var(--primary); background: var(--surface); }
+  .equipment-item-check:hover { border-color: var(--primary); }
   .equipment-item-check.checked {
-    background: var(--success-bg);
-    border-color: rgba(6,214,160,0.4);
-    box-shadow: 0 2px 8px rgba(6,214,160,0.1);
+    background: #f0fdf4;
+    border-color: #86efac;
   }
+  [data-theme="dark"] .equipment-item-check.checked { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); }
   .equipment-item-check label { flex: 1; font-size: 0.9rem; font-weight: 500; cursor: pointer; margin: 0; color: var(--text); }
   .equipment-item-check.checked label { text-decoration: line-through; color: var(--text3); }
   .equip-checkbox { width: 20px; height: 20px; accent-color: var(--success); cursor: pointer; flex-shrink: 0; }
   .checklist-progress {
-    background: var(--surface2);
+    background: var(--surface3);
     border-radius: var(--r-full);
-    height: 10px; margin-bottom: 18px; overflow: hidden;
-    border: 1px solid var(--border-soft);
+    height: 8px; margin-bottom: 18px; overflow: hidden;
+    border: 1px solid var(--border);
   }
   .checklist-progress-bar {
-    height: 100%; background: linear-gradient(90deg, var(--success), var(--ev-teal));
+    height: 100%; background: var(--success);
     border-radius: var(--r-full); transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 8px rgba(6,214,160,0.4);
   }
   .checklist-summary {
     display: flex; align-items: center; justify-content: space-between;
     margin-bottom: 10px; font-size: 0.82rem; color: var(--text3);
     font-weight: 500;
   }
-  .checklist-summary strong { color: var(--success); font-family: var(--font-display); font-size: 1rem; }
+  .checklist-summary strong { color: var(--success); font-size: 1rem; }
   .equip-add-row {
     display: flex; gap: 8px; margin-top: 12px;
   }
@@ -1284,22 +1294,21 @@
   .form-group label {
     display: block;
     margin-bottom: 6px;
-    font-size: 0.82rem;
+    font-size: 0.9rem;
     font-weight: 600;
-    color: var(--text2);
-    letter-spacing: 0.01em;
+    color: var(--text);
   }
   .form-group input,
   .form-group select,
   .form-group textarea {
     width: 100%;
-    padding: 12px 14px;
-    background: var(--input-bg);
-    border: 1.5px solid var(--input-border);
-    border-radius: var(--r-sm);
+    padding: 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
     color: var(--text);
     font-family: var(--font-body);
-    font-size: 0.95rem;
+    font-size: 1rem;
     transition: var(--t-fast);
     outline: none;
     -webkit-appearance: none;
@@ -1309,60 +1318,56 @@
   .form-group select:focus,
   .form-group textarea:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px var(--input-focus);
     background: var(--surface);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
   }
-  .form-group textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+  .form-group textarea { resize: none; min-height: 80px; line-height: 1.5; }
   .form-group select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238888aa' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 36px;
+    background-position: right 14px center;
+    padding-right: 38px;
   }
   .flex-group { display: flex; gap: 10px; align-items: flex-end; }
   .flex-group .form-group { flex: 1; }
-  /* filter-checkbox styles moved to FILTERS section */
 
   /* ==========================================
      BUTTONS
   ========================================== */
   .btn {
     padding: 12px 20px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    background: var(--primary);
     color: white; border: none;
     border-radius: var(--r-md);
     font-family: var(--font-body);
-    font-weight: 700; cursor: pointer;
+    font-weight: 600; cursor: pointer;
     transition: var(--t-fast);
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     font-size: 0.9rem;
     -webkit-tap-highlight-color: transparent;
     white-space: nowrap;
-    box-shadow: 0 2px 12px rgba(108,99,255,0.2);
     letter-spacing: 0.01em;
   }
-  .btn:hover { box-shadow: 0 4px 20px rgba(108,99,255,0.3); transform: translateY(-1px); }
-  .btn:active { transform: scale(0.96) translateY(0); opacity: 0.9; box-shadow: none; }
-  .btn-xs { padding: 6px 12px; font-size: 0.78rem; border-radius: var(--r-sm); box-shadow: none; }
+  .btn:hover { background: var(--primary-dark); }
+  .btn:active { transform: scale(0.97); opacity: 0.9; }
+  .btn-xs { padding: 6px 12px; font-size: 0.78rem; border-radius: var(--r-sm); }
   .btn-sm { padding: 9px 15px; font-size: 0.83rem; }
   .btn-outline {
     background: transparent;
     border: 1.5px solid var(--primary);
     color: var(--primary);
-    box-shadow: none;
   }
-  .btn-outline:hover { background: rgba(108,99,255,0.07); }
-  .btn-outline:active { background: var(--primary-glow); }
-  .btn-danger { background: linear-gradient(135deg, var(--danger), #ff6b9d); box-shadow: 0 2px 12px rgba(239,71,111,0.2); }
-  .btn-danger:hover { box-shadow: 0 4px 20px rgba(239,71,111,0.35); }
-  .btn-success { background: linear-gradient(135deg, var(--success), #04b88a); box-shadow: 0 2px 12px rgba(6,214,160,0.2); }
+  .btn-outline:hover { background: rgba(59,130,246,0.07); }
+  .btn-danger { background: var(--danger); }
+  .btn-danger:hover { background: #dc2626; }
+  .btn-success { background: var(--success); }
+  .btn-success:hover { background: #059669; }
   .btn-ghost {
-    background: var(--surface2);
+    background: var(--surface3);
     color: var(--text2);
-    border: 1px solid var(--border-soft);
-    box-shadow: none;
+    border: 1px solid var(--border);
   }
-  .btn-ghost:hover { background: var(--surface3); }
+  .btn-ghost:hover { background: var(--bg2); }
 
   /* ==========================================
      MODALS (Bottom Sheet Style on Mobile)
@@ -1596,6 +1601,56 @@
      CLAUSE EDITOR
   ========================================== */
   #clause-editor-modal .modal-content { max-width: 600px; }
+
+  /* ==========================================
+     DOC VIEWER MODAL - fullscreen PDF viewer
+  ========================================== */
+  #doc-viewer-modal { align-items: flex-end; padding: 0; }
+  #doc-viewer-modal .modal-content {
+    width: 100%; max-width: 100%;
+    height: 100dvh; max-height: 100dvh;
+    border-radius: 0; padding: 0; margin: 0;
+    display: flex; flex-direction: column;
+  }
+  .doc-viewer-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px;
+    padding-top: calc(12px + env(safe-area-inset-top, 0px));
+    border-bottom: 1px solid var(--border);
+    background: var(--surface); flex-shrink: 0;
+  }
+  .doc-viewer-back {
+    background: none; border: none;
+    width: 38px; height: 38px; border-radius: var(--r-full);
+    color: var(--text2); font-size: 1.1rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: var(--t-fast);
+  }
+  .doc-viewer-back:active { background: var(--surface3); color: var(--primary); }
+  #doc-viewer-title {
+    flex: 1; font-size: 0.95rem; font-weight: 700; color: var(--text);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .doc-viewer-iframe-wrap { flex: 1; overflow: hidden; background: #525659; }
+  #doc-viewer-iframe { width: 100%; height: 100%; border: none; display: block; }
+  .doc-viewer-footer {
+    display: flex; gap: 8px; align-items: center;
+    padding: 10px 16px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--border);
+    background: var(--surface); flex-shrink: 0;
+  }
+  .doc-viewer-name-wrap {
+    flex: 1; display: flex; align-items: center; gap: 6px;
+    background: var(--input-bg); border: 1.5px solid var(--input-border);
+    border-radius: var(--r-sm); padding: 0 10px; height: 40px;
+  }
+  .doc-viewer-name-wrap i { color: var(--text3); font-size: 0.8rem; flex-shrink: 0; }
+  #doc-viewer-name {
+    flex: 1; background: none; border: none;
+    color: var(--text); font-family: var(--font-body);
+    font-size: 0.85rem; outline: none;
+  }
   .clause-editor-item { margin-bottom: 16px; }
   .clause-editor-item label { display: block; font-weight: 700; color: var(--primary); margin-bottom: 6px; font-size: 0.85rem; letter-spacing: 0.01em; }
   .clause-editor-item textarea {
@@ -2609,7 +2664,11 @@
   
   <header class="top-bar">
     <button class="icon-button" id="back-button" style="display: none;"><i class="fas fa-arrow-left"></i></button>
-    <h1 class="page-title" id="page-title">Início</h1>
+    <div class="top-bar-brand" id="top-bar-brand-logo" style="display:flex;">
+      <i class="fas fa-music" style="color:var(--primary);font-size:1.1rem;"></i>
+      DJ <span class="brand-dot">Manager</span>
+    </div>
+    <h1 class="page-title" id="page-title" style="display:none;">Início</h1>
     <div class="top-bar-actions">
       <button class="icon-button" id="search-toggle-btn" title="Buscar"><i class="fas fa-search"></i></button>
       <button class="icon-button theme-toggle" id="theme-toggle-btn" title="Alternar tema"><i class="fas fa-moon"></i></button>
@@ -4207,8 +4266,10 @@ class="modal-content">
         <h2><i class="fas fa-box-open" style="color:var(--ev-orange);"></i> Equipamentos Cadastrados</h2>
         <p style="color:var(--text3);font-size:0.88rem;margin-bottom:16px;">Catálogo de equipamentos disponíveis para adicionar ao checklist de qualquer evento.</p>
         <div class="equip-add-row" style="margin-bottom:16px;">
+          <input type="hidden" id="edit-global-equip-index" value="">
           <input type="text" id="new-global-equip-input" placeholder="Nome do equipamento..." style="flex:1;padding:12px 14px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.95rem;outline:none;">
-          <button class="btn" id="add-global-equip-btn" style="flex-shrink:0;background:var(--ev-orange);"><i class="fas fa-plus"></i> Cadastrar</button>
+          <button class="btn" id="add-global-equip-btn" style="flex-shrink:0;background:var(--ev-orange);"><i class="fas fa-plus"></i> <span id="add-global-equip-btn-label">Cadastrar</span></button>
+          <button class="btn btn-danger" id="cancel-edit-equip-btn" style="flex-shrink:0;display:none;padding:9px 12px;"><i class="fas fa-times"></i></button>
         </div>
         <div id="global-equipment-list" class="transactions-list-container"></div>
       </div>
@@ -4334,10 +4395,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   function updateNavState(activeTabId) {
-    document.getElementById('page-title').textContent = pageTitles[activeTabId] || 'FinancePro';
+    const titleEl = document.getElementById('page-title');
+    const brandEl = document.getElementById('top-bar-brand-logo');
+    const isDashboard = activeTabId === 'dashboard';
+    if (titleEl) { titleEl.textContent = pageTitles[activeTabId] || 'DJ Manager'; titleEl.style.display = isDashboard ? 'none' : 'block'; }
+    if (brandEl) { brandEl.style.display = isDashboard ? 'flex' : 'none'; }
     document.getElementById('back-button').style.display = activeTabId === 'dashboard' ? 'none' : 'block';
     // Main nav items: dashboard, transacoes, pedidos
-    const navTabMap = { 'transacoes': 'transacoes', 'pedidos': 'pedidos', 'dashboard': 'dashboard' };
     document.querySelectorAll('.bottom-nav-item[data-tab-target]').forEach(item => {
         const target = item.dataset.tabTarget;
         item.classList.remove('active');
@@ -4538,6 +4602,42 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
         showToast('Documentos removidos!', 'success');
       });
     });
+    document.getElementById('save-edit-doc-btn')?.addEventListener('click', () => {
+      const id = parseFloat(document.getElementById('edit-doc-id').value);
+      const newName = document.getElementById('edit-doc-name').value.trim();
+      if (!newName) { showToast('Digite um nome para o documento.', 'warning'); return; }
+      const idx = savedDocuments.findIndex(d => d.id === id);
+      if (idx > -1) {
+        savedDocuments[idx].name = newName;
+        saveData();
+        updateSavedDocumentsList();
+        document.getElementById('edit-saved-doc-modal').classList.remove('active');
+        showToast('Documento renomeado!', 'success');
+      }
+    });
+
+    // Doc Viewer Modal handlers
+    document.getElementById('doc-viewer-save-btn')?.addEventListener('click', () => {
+      const id = parseFloat(document.getElementById('doc-viewer-id').value);
+      const newName = document.getElementById('doc-viewer-name').value.trim();
+      if (!newName) { showToast('Digite um nome!', 'warning'); return; }
+      const idx = savedDocuments.findIndex(d => d.id === id);
+      if (idx > -1) {
+        savedDocuments[idx].name = newName;
+        saveData(); updateSavedDocumentsList();
+        document.getElementById('doc-viewer-title').textContent = newName;
+        showToast('Nome atualizado!', 'success');
+      }
+    });
+    document.getElementById('doc-viewer-download-btn')?.addEventListener('click', () => {
+      const id = parseFloat(document.getElementById('doc-viewer-id').value);
+      const doc = savedDocuments.find(d => d.id === id);
+      if (doc) { const a = document.createElement('a'); a.href = doc.data; a.download = doc.name + '.pdf'; a.click(); }
+    });
+    document.getElementById('doc-viewer-close-btn')?.addEventListener('click', () => {
+      document.getElementById('doc-viewer-modal').classList.remove('active');
+      document.getElementById('doc-viewer-iframe').src = '';
+    });
 
     // Photo upload init (called when modal opens)
     document.getElementById('maintenance-modal')?.addEventListener('transitionend', () => {});
@@ -4545,6 +4645,7 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
     initMaintenancePhotoUpload();
     document.getElementById('add-global-equip-btn')?.addEventListener('click', addGlobalEquipment);
     document.getElementById('new-global-equip-input')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addGlobalEquipment(); } });
+    document.getElementById('cancel-edit-equip-btn')?.addEventListener('click', cancelEditEquip);
 
     // Fuel config
     initFuelConfigPanel();
@@ -4806,6 +4907,9 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
                 a.download = doc.name + '.pdf';
                 a.click();
               }
+            },
+            'edit-saved-doc': () => {
+              openDocViewerModal(id);
             },
             'delete-saved-doc': () => {
               const idx = savedDocuments.findIndex(d => d.id === id);
@@ -6779,51 +6883,170 @@ function updateClientsList() {
     list.appendChild(grid);
   }
 
-  function addModernDocLayout(doc, title) {
-    const pageHeight = doc.internal.pageSize.height;
-    const pageWidth = doc.internal.pageSize.width;
-    const primaryColor = '#6a11cb';
-    const margin = 15;
+  // =====================================================
+  // PROFESSIONAL PDF DESIGN SYSTEM
+  // =====================================================
 
-    doc.setFillColor(primaryColor);
-    doc.rect(0, 0, pageWidth, 35, 'F');
+  const PDF_THEME = {
+    primary:    '#1a1a2e',   // Azul-marinho quase preto
+    accent:     '#C9A84C',   // Dourado elegante
+    accentLight:'#F0D98A',
+    text:       '#1a1a2e',
+    textSub:    '#4a4a6a',
+    textMuted:  '#8888aa',
+    line:       '#e0ddf0',
+    rowAlt:     '#F7F6FB',
+    headerBg:   '#1a1a2e',
+    headerText: '#FFFFFF',
+    footBg:     '#F0EEF8',
+    footText:   '#1a1a2e',
+    white:      '#FFFFFF',
+    success:    '#2d6a4f',
+  };
+
+  function buildProfessionalLayout(doc, docTypeLabel, docNumber, extraHeaderRight) {
+    const W = doc.internal.pageSize.width;
+    const H = doc.internal.pageSize.height;
+    const T = PDF_THEME;
+
+    // ── Background subtle texture strip at top ──
+    doc.setFillColor(T.primary);
+    doc.rect(0, 0, W, 42, 'F');
+
+    // ── Gold accent bar ──
+    doc.setFillColor(T.accent);
+    doc.rect(0, 42, W, 3, 'F');
+
+    // ── Logo / nome do DJ na esquerda ──
     if (userLogo) {
-      addLogoToPdf(doc, margin, 8, 70, 20);
+      try {
+        const img = new Image();
+        img.src = userLogo;
+        const ratio = Math.min(36 / img.width, 28 / img.height);
+        doc.addImage(userLogo, 'JPEG', 14, 7, img.width * ratio, img.height * ratio);
+      } catch(e) {}
+    } else {
+      // Iniciais em círculo dourado
+      doc.setFillColor(T.accent);
+      doc.circle(26, 21, 13, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(T.primary);
+      const initials = (userInfo.name || 'DJ').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+      doc.text(initials, 26, 25, { align: 'center' });
     }
 
-    doc.setFontSize(10);
-    doc.setTextColor('#FFFFFF');
-    doc.setFont(undefined, 'bold');
-    if (userInfo.name) {
-      doc.text(userInfo.name, pageWidth - margin, 17, { align: 'right' });
-    }
-    if (userInfo.cpf) {
-        doc.setFont(undefined, 'normal');
-        doc.setFontSize(9);
-        doc.text(userInfo.cpf, pageWidth - margin, 25, { align: 'right' });
-    }
+    // ── Nome e info do DJ ──
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.setTextColor(T.white);
+    doc.text(userInfo.name || 'DJ Manager Pro', 46, 19);
 
-    doc.setDrawColor(primaryColor);
-    doc.line(margin, pageHeight - 15, pageWidth - margin, pageHeight - 15);
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
-    doc.setTextColor('#888888');
-    doc.text(`Documento gerado por FinancePro em ${new Date().toLocaleDateString('pt-BR')}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
-    doc.setLineWidth(1.5);
-    doc.setDrawColor(primaryColor);
-    doc.rect(5, 5, pageWidth - 10, pageHeight - 10, 'S');
+    doc.setTextColor('#c8c8e8');
+    const subInfo = [userInfo.cpf, userInfo.phone, userInfo.email].filter(Boolean).join('  ·  ');
+    if (subInfo) doc.text(subInfo, 46, 28);
 
-    doc.setLineWidth(0.5);
-    doc.setDrawColor('#AAAAAA');
-    doc.rect(7, 7, pageWidth - 14, pageHeight - 14, 'S');
-    doc.setFontSize(18);
-    doc.setTextColor(primaryColor);
-    doc.setFont(undefined, 'bold');
-    doc.text(title, pageWidth / 2, 55, { align: 'center' });
+    // ── Tipo de documento (direita) ──
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.setTextColor(T.accent);
+    doc.text(docTypeLabel, W - 14, 20, { align: 'right' });
 
-    doc.setTextColor('#000000');
-    doc.setFont(undefined, 'normal');
-    doc.setDrawColor('#000000');
-    return { startY: 70 };
+    if (docNumber) {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor('#c8c8e8');
+      doc.text(docNumber, W - 14, 30, { align: 'right' });
+    }
+
+    if (extraHeaderRight) {
+      doc.setFontSize(7.5);
+      doc.setTextColor('#aaaacc');
+      doc.text(extraHeaderRight, W - 14, 38, { align: 'right' });
+    }
+
+    // ── Rodapé elegante ──
+    doc.setFillColor(T.primary);
+    doc.rect(0, H - 18, W, 18, 'F');
+    doc.setFillColor(T.accent);
+    doc.rect(0, H - 18, W, 1.5, 'F');
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor('#9090bb');
+    doc.text(`Documento gerado em ${new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' })}`, 14, H - 7);
+    doc.text('DJ Manager Pro', W - 14, H - 7, { align: 'right' });
+
+    // Reset
+    doc.setTextColor(T.text);
+    doc.setFont('helvetica', 'normal');
+    doc.setDrawColor(T.line);
+    doc.setLineWidth(0.3);
+
+    return { startY: 55, W, H, T, margin: 14 };
+  }
+
+  function pdfSectionTitle(doc, text, y, margin, W, T) {
+    // Linha dourada + título
+    doc.setFillColor(T.accent);
+    doc.rect(margin, y, 3, 5.5, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8.5);
+    doc.setTextColor(T.primary);
+    doc.text(text.toUpperCase(), margin + 6, y + 4.5);
+    // Linha tracejada
+    doc.setDrawColor(T.line);
+    doc.setLineWidth(0.3);
+    doc.line(margin + 6 + doc.getTextWidth(text.toUpperCase()) + 4, y + 2.5, W - margin, y + 2.5);
+    return y + 9;
+  }
+
+  function pdfInfoGrid(doc, fields, y, margin, W, T, cols = 2) {
+    const colW = (W - margin * 2) / cols;
+    let col = 0, rowY = y;
+    fields.forEach((f, i) => {
+      const x = margin + col * colW;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.2);
+      doc.setTextColor(T.textMuted);
+      doc.text((f.label || '').toUpperCase(), x, rowY);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
+      doc.setTextColor(T.text);
+      const valLines = doc.splitTextToSize(String(f.value || '—'), colW - 6);
+      doc.text(valLines, x, rowY + 4.5);
+      col++;
+      if (col >= cols) {
+        col = 0;
+        rowY += 12 + (Math.max(1, valLines.length) - 1) * 4;
+      }
+    });
+    if (col > 0) rowY += 12;
+    return rowY + 2;
+  }
+
+  function pdfDivider(doc, y, margin, W, T) {
+    doc.setDrawColor(T.line);
+    doc.setLineWidth(0.3);
+    doc.line(margin, y, W - margin, y);
+    return y + 4;
+  }
+
+  function checkNewPage(doc, y, needed, margin, W, H, T, docTypeLabel, docNumber) {
+    if (y + needed > H - 22) {
+      doc.addPage();
+      buildProfessionalLayout(doc, docTypeLabel, docNumber, null);
+      return 55;
+    }
+    return y;
+  }
+
+  function addModernDocLayout(doc, title) {
+    // Legacy shim — calls new professional layout
+    const { startY } = buildProfessionalLayout(doc, title, '', '');
+    return { startY };
   }
 
   function addLogoToPdf(doc, x, y, maxWidth, maxHeight) {
@@ -6846,138 +7069,117 @@ function updateClientsList() {
     const receipt = receipts.find(r => r.id === receiptId);
     if (!receipt) return;
     const client = clients.find(c => c.id === receipt.clientId) || {};
+    _renderReceiptPdf(receipt, client, null, null);
+  }
+
+  function _renderReceiptPdf(receipt, client, replaceId, nameOverride) {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const primaryColor = '#6a11cb';
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const recNum = String(receipt.id || Date.now()).slice(-6).toUpperCase();
+    let { startY, W, H, T, margin } = buildProfessionalLayout(doc, 'RECIBO', `Nº ${recNum}`, `Emitido em ${formatDate(receipt.date)}`);
+    let y = startY;
 
-    let { startY } = addModernDocLayout(doc, "RECIBO DE PAGAMENTO");
+    // ── Bloco de valor destaque ──
+    doc.setFillColor(T.primary);
+    doc.roundedRect(margin, y, W - margin * 2, 20, 3, 3, 'F');
+    doc.setFillColor(T.accent);
+    doc.roundedRect(margin, y, 5, 20, 3, 3, 'F');
+    doc.rect(margin + 3, y, 2, 20, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8.5);
+    doc.setTextColor('#c8c8e8');
+    doc.text('VALOR RECEBIDO', margin + 12, y + 6.5);
+    doc.setFontSize(17);
+    doc.setTextColor(T.accent);
+    doc.text(formatCurrency(receipt.amount), margin + 12, y + 15.5);
+    const valueWords = numberToWords(receipt.amount);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor('#aaaacc');
+    doc.text(valueWords, W - margin - 2, y + 15.5, { align: 'right', maxWidth: W - margin * 2 - 80 });
+    y += 26;
 
-    doc.setFontSize(10);
-    doc.text(`Recibo Nº: ${receipt.id.toString().slice(-4)}`, 15, startY);
-    doc.text(`Data de Emissão: ${formatDate(receipt.date)}`, doc.internal.pageSize.width - 15, startY, { align: 'right' });
-    startY += 10;
-    doc.setDrawColor('#DDDDDD');
-    doc.line(15, startY - 2, doc.internal.pageSize.width - 15, startY - 2);
-    
-    startY += 8;
-    const valueInWords = numberToWords(receipt.amount);
-    const receiptBodyText = `Recebemos de ${client.name || '(Cliente não informado)'}, portador(a) do documento ${client.document || '(não informado)'}, a importância de ${formatCurrency(receipt.amount)} (${valueInWords}), referente ao seguinte serviço:`;
-    
-    doc.setFontSize(11);
-    const splitText = doc.splitTextToSize(receiptBodyText, doc.internal.pageSize.width - 30);
-    doc.text(splitText, 15, startY);
-    startY += (splitText.length * 6) + 5;
+    // ── Dados do pagante ──
+    y = pdfSectionTitle(doc, 'Dados do Pagante', y, margin, W, T);
+    y = pdfInfoGrid(doc, [
+      { label: 'Nome', value: client.name || '—' },
+      { label: 'CPF / CNPJ', value: client.document || '—' },
+      { label: 'Telefone', value: client.phone || '—' },
+      { label: 'E-mail', value: client.email || '—' },
+    ], y, margin, W, T, 2);
+
+    y = pdfDivider(doc, y - 4, margin, W, T);
+
+    // ── Descrição do serviço ──
+    y = pdfSectionTitle(doc, 'Descrição do Serviço', y, margin, W, T);
+
     doc.autoTable({
-        startY: startY,
-        head: [['Descrição do Serviço', 'Valor']],
-        body: [[receipt.description, formatCurrency(receipt.amount)]],
-        theme: 'grid',
-        headStyles: { fillColor: primaryColor, textColor: '#FFFFFF', fontStyle: 'bold' },
-        footStyles: { fillColor: '#F5F5F5', textColor: '#000000', fontStyle: 'bold' },
-        foot: [['TOTAL', formatCurrency(receipt.amount)]],
-        margin: { left: 15, right: 15 },
+      startY: y,
+      head: [['Serviço / Descrição', 'Valor']],
+      body: [[receipt.description || '—', formatCurrency(receipt.amount)]],
+      foot: [['TOTAL RECEBIDO', formatCurrency(receipt.amount)]],
+      theme: 'plain',
+      styles: { font: 'helvetica', fontSize: 9, textColor: T.text, cellPadding: { top: 3, bottom: 3, left: 4, right: 4 } },
+      headStyles: { fillColor: T.primary, textColor: T.white, fontStyle: 'bold', fontSize: 8 },
+      bodyStyles: { fillColor: T.white, lineColor: T.line, lineWidth: 0.2 },
+      alternateRowStyles: { fillColor: T.rowAlt },
+      footStyles: { fillColor: T.accent, textColor: T.primary, fontStyle: 'bold', fontSize: 9.5 },
+      columnStyles: { 0: { cellWidth: 'auto' }, 1: { cellWidth: 38, halign: 'right' } },
+      margin: { left: margin, right: margin },
     });
-    
-    startY = doc.lastAutoTable.finalY + 30;
+    y = doc.lastAutoTable.finalY + 6;
 
-    doc.text('________________________________', doc.internal.pageSize.width / 2, startY, { align: 'center' });
-    startY += 7;
-    doc.setFontSize(10);
-    doc.text(userInfo.name, doc.internal.pageSize.width / 2, startY, { align: 'center' });
-    startY += 5;
-    doc.text(userInfo.cpf, doc.internal.pageSize.width / 2, startY, { align: 'center' });
-    
-    const receiptFilename = `Recibo_${receipt.id}_${(client.name || 'cliente').replace(/\s/g, '_')}`;
-    doc.save(receiptFilename + '.pdf');
-    try { const blob = doc.output('blob'); savePdfDocument('receipt', receiptFilename, blob); } catch(e) {}
+    y = pdfDivider(doc, y, margin, W, T);
+
+    // ── Declaração ──
+    y = pdfSectionTitle(doc, 'Declaração', y, margin, W, T);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(T.textSub);
+    const declaration = `Declaro para os devidos fins que recebi de ${client.name || '(pagante)'}, a quantia de ${formatCurrency(receipt.amount)} (${valueWords}), referente ao serviço descrito acima. O pagamento foi efetuado e este recibo quitado na data de emissão.`;
+    const declLines = doc.splitTextToSize(declaration, W - margin * 2);
+    doc.text(declLines, margin, y);
+    y += declLines.length * 4.8 + 10;
+
+    // ── Assinatura ──
+    const sigX = W / 2;
+    doc.setDrawColor(T.accent);
+    doc.setLineWidth(0.6);
+    doc.line(sigX - 40, y, sigX + 40, y);
+    y += 5;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(T.text);
+    doc.text(userInfo.name || 'Prestador de Serviços', sigX, y, { align: 'center' });
+    if (userInfo.cpf) {
+      y += 5;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(T.textMuted);
+      doc.text(userInfo.cpf, sigX, y, { align: 'center' });
+    }
+
+    const fname = nameOverride || `Recibo_${recNum}_${(client.name || 'cliente').replace(/[^a-zA-Z0-9]/g, '_')}`;
+    doc.save(fname + '.pdf');
+    try { const blob = doc.output('blob'); savePdfDocument('receipt', fname, blob, { receiptId: receipt.id }, replaceId); } catch(e) {}
   }
   
   function downloadDJContractAsPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('p', 'pt', 'a4');
-    const primaryColor = '#6a11cb';
-    const margin = 40;
-    const pageWidth = doc.internal.pageSize.width;
-    const usableWidth = pageWidth - (margin * 2);
-    
-    const baseFontSize = 9;
-    const titleFontSize = 10;
-    const headingFontSize = 14;
-    const lineSpacing = 11;
-    
-    addModernDocLayout(doc, "");
-    let y = 70;
-
-    doc.setFont(undefined, 'bold');
-    doc.setFontSize(headingFontSize);
-    doc.setTextColor('#333333');
-    doc.text("CONTRATO DE PRESTAÇÃO DE SERVIÇOS ARTÍSTICOS DE DJ", pageWidth / 2, y, { align: 'center' });
-    y += lineSpacing * 2;
-
-
-    const addClause = (title, text) => {
-        if (y > doc.internal.pageSize.height - 120) return;
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(titleFontSize);
-        doc.setTextColor(primaryColor);
-        doc.text(title, margin, y);
-        y += lineSpacing * 1.5;
-
-        doc.setFont(undefined, 'normal');
-        doc.setFontSize(baseFontSize);
-        doc.setTextColor('#333333');
-        const lines = doc.splitTextToSize(text, usableWidth);
-        doc.text(lines, margin, y);
-        y += (lines.length * lineSpacing) + (lineSpacing / 2);
+    const getEl = id => (document.getElementById(id) || {}).textContent || '';
+    const clauses = {
+      clientName:       getEl('contract-client-name'),
+      clientDoc:        getEl('contract-client-doc'),
+      clientAddress:    getEl('contract-client-address'),
+      companyName:      getEl('contract-company-name'),
+      companyCpf:       getEl('contract-company-doc'),
+      object:           `Prestação de serviços de Disc Jockey (DJ) para o evento em ${getEl('contract-event-location')}, no dia ${getEl('contract-event-date')}, das ${getEl('contract-event-start')} às ${getEl('contract-event-end')}.`,
+      obligationsDJ:    'O DJ se compromete a:\n• Fornecer equipamentos contratados e compatíveis com o porte do evento;\n• Comparecer ao local com antecedência para montagem e testes;\n• Executar o repertório musical alinhado previamente com o CONTRATANTE;\n• Manter conduta profissional e zelar pela qualidade técnica da apresentação.',
+      obligationsClient:'O CONTRATANTE se compromete a:\n• Disponibilizar local seguro e protegido de intempéries para a montagem dos equipamentos;\n• Garantir ponto de energia elétrica estável e exclusivo para os equipamentos do DJ;\n• Efetuar o pagamento do valor acordado na forma e prazos definidos na Cláusula 4ª.',
+      payment:          `O valor total dos serviços é de ${getEl('contract-total-value')} (${getEl('contract-total-value-extenso')}), pago da seguinte forma: ${getEl('contract-payment-1')}% na assinatura, ${getEl('contract-payment-2')}% até 7 dias antes do evento, e ${getEl('contract-payment-3')}% no dia do evento.`,
+      rescission:       'Em caso de cancelamento pelo CONTRATANTE, a multa será de 50% do valor total se cancelado com menos de 30 dias de antecedência. O não comparecimento injustificado do CONTRATADO implicará na devolução integral dos valores pagos, acrescido de multa de 50% sobre o valor do contrato.',
+      forum:            `Fica eleito o foro da comarca de ${getEl('contract-legal-place')} para dirimir quaisquer litígios oriundos deste contrato.`,
     };
-    const addList = (items) => {
-        doc.setFont(undefined, 'normal');
-        doc.setFontSize(baseFontSize);
-        doc.setTextColor('#333333');
-        items.forEach(item => {
-            const lines = doc.splitTextToSize(item, usableWidth - 10);
-            doc.text(`•`, margin, y + (lineSpacing/2) - 3);
-            doc.text(lines, margin + 10, y);
-            y += (lines.length * lineSpacing);
-        });
-        y += (lineSpacing / 2);
-    };
-    
-    doc.setFont(undefined, 'bold');
-    doc.setFontSize(titleFontSize);
-    doc.setTextColor(primaryColor);
-    doc.text("DAS PARTES", margin, y);
-    y += lineSpacing * 1.5;
-
-    let partesText = `CONTRATANTE: ${document.getElementById('contract-client-name').textContent}, CPF/CNPJ nº ${document.getElementById('contract-client-doc').textContent}, com endereço em ${document.getElementById('contract-client-address').textContent}.`;
-    addClause('', partesText);
-    partesText = `CONTRATADO: ${document.getElementById('contract-company-name').textContent}, CPF/CNPJ nº ${document.getElementById('contract-company-doc').textContent}, doravante denominado DJ.`;
-    const lines = doc.splitTextToSize(partesText, usableWidth);
-    doc.setFont(undefined, 'normal');
-    doc.setFontSize(baseFontSize);
-    doc.setTextColor('#333333');
-    doc.text(lines, margin, y);
-    y += (lines.length * lineSpacing) + lineSpacing;
-    addClause('CLÁUSULA 1ª - DO OBJETO', `Prestação de serviços de Disc Jockey (DJ) para o evento em ${document.getElementById('contract-event-location').textContent}, no dia ${document.getElementById('contract-event-date').textContent}, das ${document.getElementById('contract-event-start').textContent} às ${document.getElementById('contract-event-end').textContent}.`);
-    addClause('CLÁUSULA 2ª - OBRIGAÇÕES DO CONTRATADO', 'O DJ se compromete a:');
-    addList([ 'Fornecer equipamentos contratados e compatíveis com o porte do evento;', 'Comparecer ao local com antecedência para montagem e testes;', 'Executar o repertório musical alinhado previamente com o CONTRATANTE;', 'Manter conduta profissional e zelar pela qualidade técnica da apresentação.']);
-    addClause('CLÁUSULA 3ª - OBRIGAÇÕES DO CONTRATANTE', 'O CONTRATANTE se compromete a:');
-    addList([ 'Disponibilizar local seguro e protegido de intempéries para a montagem dos equipamentos;', 'Garantir ponto de energia elétrica estável e exclusivo para os equipamentos do DJ;', 'Efetuar o pagamento do valor acordado na forma e prazos definidos na Cláusula 4ª.']);
-    addClause('CLÁUSULA 4ª - DO VALOR E PAGAMENTO', `O valor total dos serviços é de ${document.getElementById('contract-total-value').textContent} (${document.getElementById('contract-total-value-extenso').textContent}), pago da seguinte forma: ${document.getElementById('contract-payment-1').textContent}% na assinatura, ${document.getElementById('contract-payment-2').textContent}% até 7 dias antes do evento, e ${document.getElementById('contract-payment-3').textContent}% no dia do evento.`);
-    addClause('CLÁUSULA 5ª - DA RESCISÃO', `Em caso de cancelamento pelo CONTRATANTE, a multa será de 50% do valor total se cancelado com menos de 30 dias de antecedência. O não comparecimento injustificado do CONTRATADO implicará na devolução integral dos valores pagos, acrescido de multa de 50% sobre o valor do contrato.`);
-    addClause('CLÁUSULA 6ª - DO FORO', `Fica eleito o foro da comarca de ${document.getElementById('contract-legal-place').textContent} para dirimir quaisquer litígios oriundos deste contrato.`);
-    y += lineSpacing * 2;
-    doc.text('E, por estarem justos e contratados, assinam o presente em duas vias de igual teor e forma.', margin, y);
-    y += lineSpacing * 4;
-    
-    const signatureWidth = usableWidth / 2 - 20;
-    doc.line(margin, y, margin + signatureWidth, y);
-    doc.line(pageWidth - margin - signatureWidth, y, pageWidth - margin, y);
-    y += lineSpacing;
-    doc.text('CONTRATANTE', margin, y);
-    doc.text('CONTRATADO', pageWidth - margin, y, { align: 'right' });
-    
-    doc.save(`Contrato_DJ_${document.getElementById('contract-client-name').textContent.replace(/\s/g, '_')}.pdf`);
+    _renderContractPdf(clauses, null, null);
   }
   
   function downloadEventOrderAsPDF() {
@@ -7026,84 +7228,82 @@ function updateClientsList() {
     generateOrderPdf(orderData);
   }
 
-  function generateOrderPdf(data) {
+  function generateOrderPdf(data, replaceId, nameOverride) {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const primaryColor = '#6a11cb';
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const orderNum = data.orderNumber || '—';
+    let { startY, W, H, T, margin } = buildProfessionalLayout(doc, 'PEDIDO DE SERVIÇOS', `Nº ${orderNum}`, `Data: ${data.eventDate || '—'}`);
+    let y = startY;
 
-    let { startY } = addModernDocLayout(doc, `PEDIDO DE SERVIÇOS Nº ${data.orderNumber}`);
-    const drawInfoSection = (title, info, initialY) => {
-        let currentY = initialY;
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'bold');
-        doc.setTextColor(primaryColor);
-        doc.text(title, 15, currentY);
-        currentY += 7;
+    // ── Dados do cliente ──
+    y = pdfSectionTitle(doc, 'Dados do Cliente', y, margin, W, T);
+    y = pdfInfoGrid(doc, [
+      { label: 'Nome', value: data.clientName },
+      { label: 'CPF / CNPJ', value: data.clientDoc },
+      { label: 'Telefone', value: data.clientPhone },
+      { label: 'E-mail', value: data.clientEmail },
+    ], y, margin, W, T, 2);
 
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        doc.setTextColor('#333333');
-        info.forEach(item => {
-            doc.setFont(undefined, 'bold');
-            doc.text(`${item.label}:`, 20, currentY);
-            doc.setFont(undefined, 'normal');
-            const valueLines = doc.splitTextToSize(String(item.value), 130);
-            doc.text(valueLines, 55, currentY);
-            currentY += (valueLines.length * 5) + 1;
-        });
-        return currentY + 6;
-    };
+    y = pdfDivider(doc, y, margin, W, T);
 
-    const clientData = [
-        { label: 'Cliente', value: data.clientName },
-        { label: 'Documento', value: data.clientDoc },
-        { label: 'Contato', value: `${data.clientPhone} | ${data.clientEmail}` },
-    ];
-    startY = drawInfoSection("INFORMAÇÕES DO CLIENTE", clientData, startY);
-    const eventData = [
-        { label: 'Evento', value: data.eventType },
-        { label: 'Data/Hora', value: `${data.eventDate} - ${data.eventTime}` },
-        { label: 'Local', value: data.eventLocation },
-        { label: 'Convidados', value: data.eventGuests },
-    ];
-    startY = drawInfoSection("DETALHES DO EVENTO", eventData, startY);
+    // ── Detalhes do evento ──
+    y = pdfSectionTitle(doc, 'Detalhes do Evento', y, margin, W, T);
+    y = pdfInfoGrid(doc, [
+      { label: 'Tipo de Evento', value: data.eventType },
+      { label: 'Data', value: data.eventDate },
+      { label: 'Horário', value: data.eventTime },
+      { label: 'Convidados', value: data.eventGuests },
+      { label: 'Local', value: data.eventLocation },
+    ], y, margin, W, T, 2);
 
+    y = pdfDivider(doc, y, margin, W, T);
+
+    // ── Tabela de serviços ──
+    y = pdfSectionTitle(doc, 'Serviços Contratados', y, margin, W, T);
+
+    const services = Array.isArray(data.services) ? data.services : [];
     doc.autoTable({
-        startY: startY,
-        head: [['Item', 'Descrição', 'Valor']],
-        body: data.services,
-        foot: [['', 'TOTAL', data.totalValue]],
-        theme: 'grid',
-        headStyles: { fillColor: primaryColor, textColor: '#FFFFFF', fontStyle: 'bold' },
-        footStyles: { fillColor: '#F5F5F5', textColor: '#000000', fontStyle: 'bold', halign: 'right'},
-        margin: { left: 15, right: 15 },
+      startY: y,
+      head: [['#', 'Descrição do Serviço', 'Valor']],
+      body: services.length > 0 ? services : [['—', '—', '—']],
+      foot: [['', 'TOTAL DO PEDIDO', data.totalValue]],
+      theme: 'plain',
+      styles: { font: 'helvetica', fontSize: 8.5, textColor: T.text, cellPadding: { top: 3, bottom: 3, left: 4, right: 4 } },
+      headStyles: { fillColor: T.primary, textColor: T.white, fontStyle: 'bold', fontSize: 8 },
+      bodyStyles: { lineColor: T.line, lineWidth: 0.2 },
+      alternateRowStyles: { fillColor: T.rowAlt },
+      footStyles: { fillColor: T.accent, textColor: T.primary, fontStyle: 'bold', fontSize: 9.5 },
+      columnStyles: { 0: { cellWidth: 10, halign: 'center' }, 1: { cellWidth: 'auto' }, 2: { cellWidth: 38, halign: 'right' } },
+      margin: { left: margin, right: margin },
     });
-    startY = doc.lastAutoTable.finalY + 10;
-    
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.setTextColor(primaryColor);
-    doc.text("CONDIÇÕES DE PAGAMENTO", 15, startY);
-    startY += 6;
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    doc.setTextColor('#333333');
-    doc.text(doc.splitTextToSize(data.paymentTerms, doc.internal.pageSize.width - 30), 15, startY);
-    startY = doc.lastAutoTable ? (doc.lastAutoTable.finalY > startY ? doc.lastAutoTable.finalY + 15 : startY + 15) : startY + 15;
+    y = doc.lastAutoTable.finalY + 5;
 
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.setTextColor(primaryColor);
-    doc.text("OBSERVAÇÕES", 15, startY);
-    startY += 6;
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    doc.setTextColor('#333333');
-    doc.text(doc.splitTextToSize(data.notes || 'Nenhuma.', doc.internal.pageSize.width - 30), 15, startY);
+    y = pdfDivider(doc, y, margin, W, T);
 
-    const orderFilename = `Pedido_${data.orderNumber}_${data.clientName.replace(/\s/g, '_')}`;
-    doc.save(orderFilename + '.pdf');
-    try { const blob = doc.output('blob'); savePdfDocument('order', orderFilename, blob); } catch(e) {}
+    // ── Condições de pagamento ──
+    if (data.paymentTerms) {
+      y = pdfSectionTitle(doc, 'Condições de Pagamento', y, margin, W, T);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(T.textSub);
+      const ptLines = doc.splitTextToSize(data.paymentTerms, W - margin * 2);
+      doc.text(ptLines, margin, y);
+      y += ptLines.length * 4.8 + 5;
+    }
+
+    if (data.notes) {
+      y = pdfSectionTitle(doc, 'Observações', y, margin, W, T);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(T.textSub);
+      const nLines = doc.splitTextToSize(data.notes, W - margin * 2);
+      doc.text(nLines, margin, y);
+      y += nLines.length * 4.8 + 5;
+    }
+
+    const fname = nameOverride || `Pedido_${orderNum}_${(data.clientName || 'cliente').replace(/[^a-zA-Z0-9]/g, '_')}`;
+    doc.save(fname + '.pdf');
+    try { const blob = doc.output('blob'); savePdfDocument('order', fname, blob, { orderData: data }, replaceId); } catch(e) {}
   }
 
   // Função para baixar orçamento existente por ID (chamada do modal de visualização)
@@ -7111,88 +7311,13 @@ function updateClientsList() {
     openClauseEditor('quote', quoteId);
   }
 
-  // Função de download de orçamento (template baseado em DOM - não usada no fluxo atual)
+  // Função de download de orçamento (template baseado em DOM)
   function downloadEventQuoteAsPDF(quoteId) {
     const realId = typeof quoteId === 'number' ? quoteId : null;
     const quote = realId ? eventQuotes.find(q => q.id === realId) : null;
     if (!quote) return;
-    const client = clients.find(c => c.id === quote.clientId) || {};
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const primaryColor = '#6a11cb';
-
-    let { startY } = addModernDocLayout(doc, `ORÇAMENTO DE SERVIÇOS Nº ${quote.quoteNumber}`);
-
-    const drawInfoSection = (title, info, initialY) => {
-        let currentY = initialY;
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'bold');
-        doc.setTextColor(primaryColor);
-        doc.text(title, 15, currentY);
-        currentY += 7;
-
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        doc.setTextColor('#333333');
-        info.forEach(item => {
-            doc.setFont(undefined, 'bold');
-            doc.text(`${item.label}:`, 20, currentY);
-            doc.setFont(undefined, 'normal');
-            const valueLines = doc.splitTextToSize(String(item.value), 130);
-            doc.text(valueLines, 55, currentY);
-            currentY += (valueLines.length * 5) + 1;
-        });
-        return currentY + 6;
-    };
-
-    const clientData = [
-        { label: 'Cliente', value: client.name || 'N/A' },
-        { label: 'Contato', value: `${client.phone || 'N/A'} | ${client.email || 'N/A'}` },
-    ];
-    startY = drawInfoSection("DADOS DO CLIENTE", clientData, startY);
-
-    const eventData = [
-        { label: 'Evento', value: quote.eventType },
-        { label: 'Data/Hora', value: `${formatDate(quote.eventDate)} - ${quote.eventTime}` },
-        { label: 'Local', value: quote.eventLocation },
-    ];
-    startY = drawInfoSection("DETALHES DO EVENTO", eventData, startY);
-
-    const tableData = quote.services.map(s => [s.description, formatCurrency(s.value)]);
-    const totalValue = quote.services.reduce((sum, s) => sum + s.value, 0);
-
-    doc.autoTable({
-      startY: startY,
-      head: [['Descrição do Serviço', 'Valor']],
-      body: tableData,
-      foot: [['TOTAL', formatCurrency(totalValue)]],
-      theme: 'grid',
-      headStyles: { fillColor: primaryColor, textColor: '#FFFFFF', fontStyle: 'bold' },
-      footStyles: { fillColor: '#F5F5F5', textColor: '#000000', fontStyle: 'bold', halign: 'right'},
-      margin: { left: 15, right: 15 },
-    });
-    startY = doc.lastAutoTable.finalY + 10;
-    
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.setTextColor(primaryColor);
-    doc.text("CONDIÇÕES GERAIS", 15, startY);
-    startY += 6;
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    doc.setTextColor('#333333');
-    const condText = `Este orçamento é válido por ${quote.validity} dias a partir da data de emissão (${formatDate(quote.emissionDate)}). O valor está sujeito a alterações após este período. A contratação do serviço se dará mediante a assinatura de contrato e/ou pagamento de sinal.`;
-    const condLines = doc.splitTextToSize(condText, doc.internal.pageSize.width - 30);
-    doc.text(condLines, 15, startY);
-    startY += condLines.length * 5 + 10;
-    
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'bold');
-    doc.text("Observações:", 15, startY);
-    doc.setFont(undefined, 'normal');
-    doc.text(doc.splitTextToSize(quote.notes || 'Nenhuma.', doc.internal.pageSize.width - 30), 45, startY);
-
-    doc.save(`Orcamento_${quote.quoteNumber}_${client.name.replace(/\s/g, '_')}.pdf`);
+    const validityNote = `Este orçamento é válido por ${quote.validity} dias a partir da data de emissão (${formatDate(quote.emissionDate)}). O valor está sujeito a alterações após este período. A contratação do serviço se dará mediante a assinatura de contrato e/ou pagamento de sinal.`;
+    generateQuotePdf(quote, validityNote, quote.notes || '', null, null);
   }
 
   function compressImage(base64Str, maxWidth = 800, maxHeight = 800) {
@@ -8224,159 +8349,266 @@ function showCommitmentsForDay(dateString) {
   // PDF GENERATION - Improved and Fixed Functions
   // ===================================================
 
-  function generateQuotePdf(quote, validityNote, notes) {
+  function generateQuotePdf(quote, validityNote, notes, replaceId, nameOverride) {
     const client = clients.find(c => c.id === quote.clientId) || {};
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const primaryColor = '#6a11cb';
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const quoteNum = quote.quoteNumber || '—';
+    let { startY, W, H, T, margin } = buildProfessionalLayout(doc, 'ORÇAMENTO', `Nº ${quoteNum}`, `Válido por ${quote.validity || 30} dias`);
+    let y = startY;
 
-    let { startY } = addModernDocLayout(doc, `ORÇAMENTO DE SERVIÇOS Nº ${quote.quoteNumber}`);
+    // ── Dados do cliente + evento ──
+    y = pdfSectionTitle(doc, 'Cliente', y, margin, W, T);
+    y = pdfInfoGrid(doc, [
+      { label: 'Nome', value: client.name || '—' },
+      { label: 'Telefone', value: client.phone || '—' },
+      { label: 'E-mail', value: client.email || '—' },
+      { label: 'CPF / CNPJ', value: client.document || '—' },
+    ], y, margin, W, T, 2);
 
-    const drawInfoSection = (title, info, initialY) => {
-      let currentY = initialY;
-      doc.setFontSize(12); doc.setFont(undefined, 'bold');
-      doc.setTextColor(primaryColor); doc.text(title, 15, currentY); currentY += 7;
-      doc.setFontSize(10); doc.setFont(undefined, 'normal'); doc.setTextColor('#333333');
-      info.forEach(item => {
-        doc.setFont(undefined, 'bold'); doc.text(`${item.label}:`, 20, currentY);
-        doc.setFont(undefined, 'normal');
-        const valueLines = doc.splitTextToSize(String(item.value || 'N/A'), 130);
-        doc.text(valueLines, 55, currentY); currentY += (valueLines.length * 5) + 1;
-      });
-      return currentY + 6;
-    };
+    y = pdfDivider(doc, y, margin, W, T);
 
-    startY = drawInfoSection("DADOS DO CLIENTE", [
-      { label: 'Cliente', value: client.name || 'N/A' },
-      { label: 'Contato', value: `${client.phone || 'N/A'} | ${client.email || 'N/A'}` },
-    ], startY);
+    y = pdfSectionTitle(doc, 'Detalhes do Evento', y, margin, W, T);
+    y = pdfInfoGrid(doc, [
+      { label: 'Tipo de Evento', value: quote.eventType || '—' },
+      { label: 'Data', value: formatDate(quote.eventDate) },
+      { label: 'Horário', value: quote.eventTime || '—' },
+      { label: 'Local', value: quote.eventLocation || '—' },
+    ], y, margin, W, T, 2);
 
-    startY = drawInfoSection("DETALHES DO EVENTO", [
-      { label: 'Evento', value: quote.eventType },
-      { label: 'Data/Hora', value: `${formatDate(quote.eventDate)} - ${quote.eventTime || ''}` },
-      { label: 'Local', value: quote.eventLocation },
-    ], startY);
+    y = pdfDivider(doc, y, margin, W, T);
 
-    const tableData = (quote.services || []).map(s => [s.description, formatCurrency(s.value)]);
-    const totalValue = (quote.services || []).reduce((sum, s) => sum + s.value, 0);
-
+    // ── Tabela de serviços ──
+    y = pdfSectionTitle(doc, 'Serviços e Valores', y, margin, W, T);
+    const services = quote.services || [];
+    const totalValue = services.reduce((s, sv) => s + sv.value, 0);
     doc.autoTable({
-      startY: startY,
+      startY: y,
       head: [['Descrição do Serviço', 'Valor']],
-      body: tableData,
-      foot: [['TOTAL', formatCurrency(totalValue)]],
-      theme: 'grid',
-      headStyles: { fillColor: primaryColor, textColor: '#FFFFFF', fontStyle: 'bold' },
-      footStyles: { fillColor: '#F5F5F5', textColor: '#000000', fontStyle: 'bold', halign: 'right' },
-      margin: { left: 15, right: 15 },
+      body: services.length > 0 ? services.map(s => [s.description, formatCurrency(s.value)]) : [['—', '—']],
+      foot: [['TOTAL DO ORÇAMENTO', formatCurrency(totalValue)]],
+      theme: 'plain',
+      styles: { font: 'helvetica', fontSize: 8.5, textColor: T.text, cellPadding: { top: 3, bottom: 3, left: 4, right: 4 } },
+      headStyles: { fillColor: T.primary, textColor: T.white, fontStyle: 'bold', fontSize: 8 },
+      bodyStyles: { lineColor: T.line, lineWidth: 0.2 },
+      alternateRowStyles: { fillColor: T.rowAlt },
+      footStyles: { fillColor: T.accent, textColor: T.primary, fontStyle: 'bold', fontSize: 10 },
+      columnStyles: { 0: { cellWidth: 'auto' }, 1: { cellWidth: 42, halign: 'right' } },
+      margin: { left: margin, right: margin },
     });
-    startY = doc.lastAutoTable.finalY + 10;
+    y = doc.lastAutoTable.finalY + 5;
 
-    doc.setFontSize(12); doc.setFont(undefined, 'bold');
-    doc.setTextColor(primaryColor); doc.text("CONDIÇÕES GERAIS", 15, startY);
-    startY += 6;
-    doc.setFontSize(10); doc.setFont(undefined, 'normal'); doc.setTextColor('#333333');
-    const condLines = doc.splitTextToSize(validityNote, doc.internal.pageSize.width - 30);
-    doc.text(condLines, 15, startY);
-    startY += condLines.length * 5 + 10;
+    y = pdfDivider(doc, y, margin, W, T);
+
+    // ── Condições gerais ──
+    y = pdfSectionTitle(doc, 'Condições Gerais', y, margin, W, T);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(T.textSub);
+    const condLines = doc.splitTextToSize(validityNote || '', W - margin * 2);
+    doc.text(condLines, margin, y);
+    y += condLines.length * 4.8 + 5;
 
     if (notes) {
-      doc.setFontSize(10); doc.setFont(undefined, 'bold');
-      doc.text("Observações:", 15, startY); startY += 6;
-      doc.setFont(undefined, 'normal');
-      const noteLines = doc.splitTextToSize(notes, doc.internal.pageSize.width - 30);
-      doc.text(noteLines, 15, startY);
+      y = pdfSectionTitle(doc, 'Observações', y, margin, W, T);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(T.textSub);
+      const nLines = doc.splitTextToSize(notes, W - margin * 2);
+      doc.text(nLines, margin, y);
+      y += nLines.length * 4.8 + 5;
     }
 
+    // ── Assinatura de aceite ──
+    y = checkNewPage(doc, y, 28, margin, W, H, T, 'ORÇAMENTO', `Nº ${quoteNum}`);
+    y = pdfDivider(doc, y, margin, W, T);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(T.textMuted);
+    doc.text('Concordo com os termos e valores descritos acima.', margin, y);
+    y += 11;
+    const sigW = 70;
+    doc.setDrawColor(T.accent);
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, margin + sigW, y);
+    doc.line(W - margin - sigW, y, W - margin, y);
+    y += 4;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(T.textMuted);
+    doc.text('Assinatura do Cliente / Data', margin, y);
+    doc.text(`${userInfo.name || 'Prestador'} — DJ`, W - margin, y, { align: 'right' });
+
     const clientNameSafe = (client.name || 'cliente').replace(/[^a-zA-Z0-9]/g, '_');
-    const quoteFilename = `Orcamento_${quote.quoteNumber}_${clientNameSafe}`;
-    doc.save(quoteFilename + '.pdf');
-    try { const blob = doc.output('blob'); savePdfDocument('quote', quoteFilename, blob); } catch(e) {}
+    const fname = nameOverride || `Orcamento_${quoteNum}_${clientNameSafe}`;
+    doc.save(fname + '.pdf');
+    try { const blob = doc.output('blob'); savePdfDocument('quote', fname, blob, { quoteId: quote.id, validityNote, notes }, replaceId); } catch(e) {}
   }
 
   function downloadDJContractWithClauses(clauses) {
+    _renderContractPdf(clauses, null, null);
+  }
+
+  function _renderContractPdf(clauses, replaceId, nameOverride) {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('p', 'pt', 'a4');
-    const primaryColor = '#6a11cb';
-    const margin = 40;
-    const pageWidth = doc.internal.pageSize.width;
-    const pageHeight = doc.internal.pageSize.height;
-    const usableWidth = pageWidth - (margin * 2);
-    const baseFontSize = 9;
-    const titleFontSize = 10;
-    const lineSpacing = 14;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const dateStr = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+    let { startY, W, H, T, margin } = buildProfessionalLayout(doc, 'CONTRATO', 'Prestação de Serviços', dateStr);
+    let y = startY;
 
-    addModernDocLayout(doc, "");
-    let y = 75;
+    // ── Título do contrato ──
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(T.primary);
+    doc.text('CONTRATO DE PRESTAÇÃO DE SERVIÇOS ARTÍSTICOS DE DJ', W / 2, y, { align: 'center' });
+    y += 6;
+    doc.setDrawColor(T.accent);
+    doc.setLineWidth(0.8);
+    doc.line(W / 2 - 55, y, W / 2 + 55, y);
+    y += 5;
 
-    const checkPageBreak = (neededSpace = 60) => {
-      if (y + neededSpace > pageHeight - 80) {
-        doc.addPage();
-        addModernDocLayout(doc, "");
-        y = 75;
-      }
-    };
+    // ── Partes ──
+    y = pdfSectionTitle(doc, 'Das Partes', y, margin, W, T);
 
-    doc.setFont(undefined, 'bold'); doc.setFontSize(13);
-    doc.setTextColor('#333333');
-    doc.text("CONTRATO DE PRESTAÇÃO DE SERVIÇOS ARTÍSTICOS DE DJ", pageWidth / 2, y, { align: 'center' });
-    y += lineSpacing * 2;
+    // Box contratante
+    const boxH = 16;
+    doc.setFillColor(T.rowAlt);
+    doc.roundedRect(margin, y, (W - margin * 2) / 2 - 3, boxH, 2, 2, 'F');
+    doc.setFillColor(T.accent);
+    doc.roundedRect(margin, y, 3, boxH, 1, 1, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6);
+    doc.setTextColor(T.textMuted);
+    doc.text('CONTRATANTE', margin + 6, y + 4.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(T.primary);
+    const cnLines = doc.splitTextToSize(clauses.clientName || '—', (W - margin * 2) / 2 - 12);
+    doc.text(cnLines, margin + 6, y + 9.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(6.5);
+    doc.setTextColor(T.textSub);
+    if (clauses.clientDoc) doc.text(`CPF/CNPJ: ${clauses.clientDoc}`, margin + 6, y + 14);
 
-    // Use captured data from clauses object
-    const contractClientName = clauses.clientName || '';
-    const contractClientDoc = clauses.clientDoc || '';
-    const contractClientAddr = clauses.clientAddress || '';
-    const contractCompanyName = clauses.companyName || userInfo.name || 'Prestador de Serviços';
-    const contractCompanyCpf = clauses.companyCpf || userInfo.cpf || '';
-    
-    // Parties section
-    doc.setFont(undefined, 'bold'); doc.setFontSize(titleFontSize); doc.setTextColor(primaryColor);
-    doc.text("DAS PARTES", margin, y); y += lineSpacing;
-    doc.setFont(undefined, 'normal'); doc.setFontSize(baseFontSize); doc.setTextColor('#333333');
-    const partesContratante = `CONTRATANTE: ${contractClientName}${contractClientDoc ? ', CPF/CNPJ nº ' + contractClientDoc : ''}${contractClientAddr ? ', com endereço em ' + contractClientAddr : ''}.`;
-    const linesC = doc.splitTextToSize(partesContratante, usableWidth);
-    doc.text(linesC, margin, y); y += linesC.length * lineSpacing;
-    const partesContratado = `CONTRATADO: ${contractCompanyName}${contractCompanyCpf ? ', CPF/CNPJ nº ' + contractCompanyCpf : ''}, doravante denominado DJ.`;
-    const linesD = doc.splitTextToSize(partesContratado, usableWidth);
-    doc.text(linesD, margin, y); y += linesD.length * lineSpacing + lineSpacing;
+    // Box contratado
+    const box2X = W / 2 + 3;
+    const box2W = (W - margin * 2) / 2 - 3;
+    doc.setFillColor(T.primary);
+    doc.roundedRect(box2X, y, box2W, boxH, 2, 2, 'F');
+    doc.setFillColor(T.accent);
+    doc.roundedRect(box2X, y, 3, boxH, 1, 1, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6);
+    doc.setTextColor('#aaaacc');
+    doc.text('CONTRATADO (DJ)', box2X + 6, y + 4.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(T.accent);
+    const djLines = doc.splitTextToSize(clauses.companyName || userInfo.name || '—', box2W - 10);
+    doc.text(djLines, box2X + 6, y + 9.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(6.5);
+    doc.setTextColor('#9090bb');
+    if (clauses.companyCpf) doc.text(`CPF/CNPJ: ${clauses.companyCpf}`, box2X + 6, y + 14);
+    y += boxH + 3;
 
-    // Clauses
-    const addClauseToDoc = (title, text) => {
-      checkPageBreak(60);
-      doc.setFont(undefined, 'bold'); doc.setFontSize(titleFontSize); doc.setTextColor(primaryColor);
-      doc.text(title, margin, y); y += lineSpacing * 1.3;
-      doc.setFont(undefined, 'normal'); doc.setFontSize(baseFontSize); doc.setTextColor('#333333');
-      const lines = doc.splitTextToSize(text, usableWidth);
-      lines.forEach(line => {
-        checkPageBreak(lineSpacing * 2);
-        doc.text(line, margin, y); y += lineSpacing;
-      });
-      y += lineSpacing * 0.5;
-    };
+    if (clauses.clientAddress) {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(T.textSub);
+      doc.text(`Endereço: ${clauses.clientAddress}`, margin, y);
+      y += 4;
+    }
 
-    addClauseToDoc('CLÁUSULA 1ª - DO OBJETO', clauses.object);
-    addClauseToDoc('CLÁUSULA 2ª - OBRIGAÇÕES DO CONTRATADO', clauses.obligationsDJ);
-    addClauseToDoc('CLÁUSULA 3ª - OBRIGAÇÕES DO CONTRATANTE', clauses.obligationsClient);
-    addClauseToDoc('CLÁUSULA 4ª - DO VALOR E PAGAMENTO', clauses.payment);
-    addClauseToDoc('CLÁUSULA 5ª - DA RESCISÃO', clauses.rescission);
-    addClauseToDoc('CLÁUSULA 6ª - DO FORO', clauses.forum);
+    y = pdfDivider(doc, y, margin, W, T);
 
-    checkPageBreak(80);
-    y += lineSpacing;
-    const closingText = 'E, por estarem justos e contratados, assinam o presente em duas vias de igual teor e forma.';
-    doc.setFontSize(baseFontSize); doc.setFont(undefined, 'normal'); doc.setTextColor('#333333');
-    doc.text(doc.splitTextToSize(closingText, usableWidth), margin, y); y += lineSpacing * 4;
+    // ── Cláusulas ──
+    const clausesList = [
+      { title: 'CLÁUSULA 1ª — DO OBJETO', text: clauses.object },
+      { title: 'CLÁUSULA 2ª — OBRIGAÇÕES DO CONTRATADO', text: clauses.obligationsDJ },
+      { title: 'CLÁUSULA 3ª — OBRIGAÇÕES DO CONTRATANTE', text: clauses.obligationsClient },
+      { title: 'CLÁUSULA 4ª — DO VALOR E PAGAMENTO', text: clauses.payment },
+      { title: 'CLÁUSULA 5ª — DA RESCISÃO', text: clauses.rescission },
+      { title: 'CLÁUSULA 6ª — DO FORO', text: clauses.forum },
+    ];
 
-    const signatureWidth = usableWidth / 2 - 20;
-    doc.line(margin, y, margin + signatureWidth, y);
-    doc.line(pageWidth - margin - signatureWidth, y, pageWidth - margin, y);
-    y += lineSpacing;
-    doc.text('CONTRATANTE', margin, y);
-    doc.text('CONTRATADO', pageWidth - margin, y, { align: 'right' });
+    clausesList.forEach((cl, idx) => {
+      if (!cl.text) return;
+      const textLines = doc.splitTextToSize(cl.text || '', W - margin * 2 - 6);
 
-    const contractFilename = `Contrato_DJ_${(clauses.clientName || 'contrato').replace(/[^a-zA-Z0-9]/g, '_')}`;
-    doc.save(contractFilename + '.pdf');
-    try { const blob = doc.output('blob'); savePdfDocument('contract', contractFilename, blob); } catch(e) {}
+      // badge
+      doc.setFillColor(T.primary);
+      doc.circle(margin + 3.5, y + 2.8, 3.2, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(6);
+      doc.setTextColor(T.accent);
+      doc.text(String(idx + 1), margin + 3.5, y + 4.4, { align: 'center' });
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.setTextColor(T.primary);
+      doc.text(cl.title, margin + 10, y + 4);
+      y += 6;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(T.textSub);
+      doc.text(textLines, margin + 6, y);
+      y += textLines.length * 4.2 + 2.5;
+    });
+
+    y = pdfDivider(doc, y, margin, W, T);
+
+    // ── Fecho ──
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(7);
+    doc.setTextColor(T.textSub);
+    const closing = 'E, por estarem de acordo com os termos acima, as partes assinam o presente instrumento em duas vias de igual teor e forma, na presença das testemunhas abaixo.';
+    const closingLines = doc.splitTextToSize(closing, W - margin * 2);
+    doc.text(closingLines, margin, y, { align: 'justify' });
+    y += closingLines.length * 4.2 + 2;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(T.textMuted);
+    doc.text(`Local e data: ___________________________________, ${dateStr}.`, margin, y);
+    y += 9;
+
+    // ── Assinaturas ──
+    const sigW = (W - margin * 2) / 2 - 8;
+    doc.setDrawColor(T.accent);
+    doc.setLineWidth(0.6);
+    doc.line(margin, y, margin + sigW, y);
+    doc.line(W - margin - sigW, y, W - margin, y);
+    y += 3;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7.5);
+    doc.setTextColor(T.text);
+    doc.text(clauses.clientName || 'CONTRATANTE', margin, y);
+    doc.text(clauses.companyName || userInfo.name || 'CONTRATADO', W - margin, y, { align: 'right' });
+    y += 3;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(6.5);
+    doc.setTextColor(T.textMuted);
+    doc.text('Contratante', margin, y);
+    doc.text('Contratado (DJ)', W - margin, y, { align: 'right' });
+    y += 9;
+
+    // Testemunhas
+    doc.setDrawColor(T.line);
+    doc.setLineWidth(0.4);
+    doc.line(margin, y, margin + sigW, y);
+    doc.line(W - margin - sigW, y, W - margin, y);
+    y += 3;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(6.5);
+    doc.setTextColor(T.textMuted);
+    doc.text('Testemunha 1', margin, y);
+    doc.text('Testemunha 2', W - margin, y, { align: 'right' });
+
+    const fname = nameOverride || `Contrato_DJ_${(clauses.clientName || 'contrato').replace(/[^a-zA-Z0-9]/g, '_')}`;
+    doc.save(fname + '.pdf');
+    try { const blob = doc.output('blob'); savePdfDocument('contract', fname, blob, { clauses }, replaceId); } catch(e) {}
   }
   // =====================================================
   // TOAST NOTIFICATION SYSTEM
@@ -9046,14 +9278,14 @@ function showCommitmentsForDay(dateString) {
 
     // ── Tabela
     doc.autoTable({
-      startY: 34,
+      startY: 32,
       head: [['Cliente', 'Telefone', 'Evento', 'Data/Hora', 'Status', 'Valor', 'Recebido', 'Saldo']],
       body: rows,
       margin: { left: marginX, right: marginX },
       styles: {
         font: 'helvetica',
-        fontSize: 7.5,
-        cellPadding: 3,
+        fontSize: 7,
+        cellPadding: 2.2,
         valign: 'middle',
         overflow: 'linebreak',
       },
@@ -9061,17 +9293,17 @@ function showCommitmentsForDay(dateString) {
         fillColor: [108, 99, 255],
         textColor: 255,
         fontStyle: 'bold',
-        fontSize: 8,
+        fontSize: 7.5,
       },
       alternateRowStyles: {
         fillColor: [247, 248, 255],
       },
       columnStyles: {
         0: { cellWidth: 32 },
-        1: { cellWidth: 26 },
+        1: { cellWidth: 24 },
         2: { cellWidth: 30 },
         3: { cellWidth: 28 },
-        4: { cellWidth: 20 },
+        4: { cellWidth: 19 },
         5: { cellWidth: 20, halign: 'right' },
         6: { cellWidth: 20, halign: 'right' },
         7: { cellWidth: 20, halign: 'right' },
@@ -9095,28 +9327,28 @@ function showCommitmentsForDay(dateString) {
       },
     });
 
-    const finalY = doc.lastAutoTable.finalY || 34;
+    const finalY = doc.lastAutoTable.finalY || 32;
 
     // ── Rodapé de totais
-    const totaisY = finalY + 6;
+    const totaisY = finalY + 4;
     doc.setFillColor(240, 242, 255);
-    doc.roundedRect(marginX, totaisY, pageW - marginX * 2, 22, 3, 3, 'F');
+    doc.roundedRect(marginX, totaisY, pageW - marginX * 2, 18, 3, 3, 'F');
 
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8.5);
+    doc.setFontSize(8);
     doc.setTextColor(26, 26, 46);
 
     const col1 = marginX + 4;
     const col2 = pageW / 2 - 15;
     const col3 = pageW - marginX - 4;
 
-    doc.text(`Total de Eventos: ${filtered.length}`, col1, totaisY + 8);
-    doc.text(`Total em Valor: ${formatCurrency(totalValor)}`, col2, totaisY + 8, { align: 'center' });
-    doc.text(`Total Recebido: ${formatCurrency(totalRecebido)}`, col3, totaisY + 8, { align: 'right' });
+    doc.text(`Total de Eventos: ${filtered.length}`, col1, totaisY + 7);
+    doc.text(`Total em Valor: ${formatCurrency(totalValor)}`, col2, totaisY + 7, { align: 'center' });
+    doc.text(`Total Recebido: ${formatCurrency(totalRecebido)}`, col3, totaisY + 7, { align: 'right' });
 
     const saldoGeral = totalValor - totalRecebido;
     doc.setTextColor(saldoGeral > 0 ? 239 : 6, saldoGeral > 0 ? 71 : 214, saldoGeral > 0 ? 111 : 160);
-    doc.text(`Saldo a Receber: ${formatCurrency(saldoGeral)}`, col3, totaisY + 16, { align: 'right' });
+    doc.text(`Saldo a Receber: ${formatCurrency(saldoGeral)}`, col3, totaisY + 14, { align: 'right' });
 
     // ── Rodapé de página
     doc.setFont('helvetica', 'normal');
@@ -9528,14 +9760,51 @@ function showCommitmentsForDay(dateString) {
 
   function addGlobalEquipment() {
     const input = document.getElementById('new-global-equip-input');
+    const idxInput = document.getElementById('edit-global-equip-index');
+    const btnLabel = document.getElementById('add-global-equip-btn-label');
+    const cancelBtn = document.getElementById('cancel-edit-equip-btn');
     const name = (input?.value || '').trim();
     if (!name) { showToast('Digite o nome do equipamento.', 'warning'); return; }
-    if (globalEquipments.includes(name)) { showToast('Equipamento já cadastrado.', 'warning'); return; }
-    globalEquipments.push(name);
-    saveData();
-    input.value = '';
-    updateGlobalEquipmentList();
-    showToast(`"${name}" cadastrado!`, 'success');
+    const editIdx = idxInput && idxInput.value !== '' ? parseInt(idxInput.value) : -1;
+    if (editIdx >= 0) {
+      // Modo edição
+      const oldName = globalEquipments[editIdx];
+      if (globalEquipments.some((n, i) => n === name && i !== editIdx)) {
+        showToast('Já existe um equipamento com este nome.', 'warning'); return;
+      }
+      globalEquipments[editIdx] = name;
+      // Atualiza checklists existentes com o novo nome
+      Object.keys(eventChecklists).forEach(eventId => {
+        const item = eventChecklists[eventId].find(i => i.name === oldName);
+        if (item) item.name = name;
+      });
+      saveData();
+      input.value = '';
+      idxInput.value = '';
+      btnLabel.textContent = 'Cadastrar';
+      cancelBtn.style.display = 'none';
+      updateGlobalEquipmentList();
+      showToast(`"${name}" atualizado!`, 'success');
+    } else {
+      // Modo criação
+      if (globalEquipments.includes(name)) { showToast('Equipamento já cadastrado.', 'warning'); return; }
+      globalEquipments.push(name);
+      saveData();
+      input.value = '';
+      updateGlobalEquipmentList();
+      showToast(`"${name}" cadastrado!`, 'success');
+    }
+  }
+
+  function cancelEditEquip() {
+    const input = document.getElementById('new-global-equip-input');
+    const idxInput = document.getElementById('edit-global-equip-index');
+    const btnLabel = document.getElementById('add-global-equip-btn-label');
+    const cancelBtn = document.getElementById('cancel-edit-equip-btn');
+    if (input) input.value = '';
+    if (idxInput) idxInput.value = '';
+    if (btnLabel) btnLabel.textContent = 'Cadastrar';
+    if (cancelBtn) cancelBtn.style.display = 'none';
   }
 
   function updateGlobalEquipmentList() {
@@ -9551,7 +9820,7 @@ function showCommitmentsForDay(dateString) {
       ? eventChecklists[currentEventId].map(i => i.name.toLowerCase())
       : [];
 
-    globalEquipments.forEach(name => {
+    globalEquipments.forEach((name, idx) => {
       const alreadyAdded = addedNames.includes(name.toLowerCase());
       const row = document.createElement('div');
       row.style.cssText = `display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid ${alreadyAdded ? 'rgba(6,214,160,0.3)' : 'var(--border-soft)'};margin-bottom:8px;transition:0.15s;`;
@@ -9560,6 +9829,9 @@ function showCommitmentsForDay(dateString) {
         <span style="flex:1;font-size:0.9rem;font-weight:500;${alreadyAdded ? 'color:var(--text3);text-decoration:line-through;' : ''}">${name}</span>
         <button class="btn btn-xs" style="background:${alreadyAdded ? 'var(--surface3)' : 'var(--ev-teal)'};" data-action="add-global-to-checklist" data-name="${name}" title="${alreadyAdded ? 'Já adicionado ao checklist' : 'Adicionar ao checklist atual'}" ${alreadyAdded ? 'disabled' : ''}>
           <i class="fas ${alreadyAdded ? 'fa-check' : 'fa-plus'}"></i>
+        </button>
+        <button class="btn btn-xs" style="background:var(--warning-bg);color:var(--warning);" data-action="edit-global-equip" data-name="${name}" data-idx="${idx}" title="Editar equipamento">
+          <i class="fas fa-pencil-alt"></i>
         </button>
         <button class="btn btn-xs btn-danger" data-action="delete-global-equip" data-name="${name}" title="Remover do catálogo">
           <i class="fas fa-trash"></i>
@@ -9576,10 +9848,22 @@ function showCommitmentsForDay(dateString) {
         renderChecklistForEvent(eventId);
         showToast(`"${name}" adicionado ao checklist!`, 'success');
       });
+      row.querySelector('[data-action="edit-global-equip"]').addEventListener('click', () => {
+        const input = document.getElementById('new-global-equip-input');
+        const idxInput = document.getElementById('edit-global-equip-index');
+        const btnLabel = document.getElementById('add-global-equip-btn-label');
+        const cancelBtn = document.getElementById('cancel-edit-equip-btn');
+        input.value = name;
+        idxInput.value = idx;
+        btnLabel.textContent = 'Salvar';
+        cancelBtn.style.display = '';
+        input.focus();
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
       row.querySelector('[data-action="delete-global-equip"]').addEventListener('click', () => {
         showConfirm(`Remover "${name}" do catálogo?`, 'Remover Equipamento', () => {
-          const idx = globalEquipments.indexOf(name);
-          if (idx > -1) { globalEquipments.splice(idx, 1); saveData(); updateGlobalEquipmentList(); }
+          const i = globalEquipments.indexOf(name);
+          if (i > -1) { globalEquipments.splice(i, 1); saveData(); updateGlobalEquipmentList(); }
         });
       });
       list.appendChild(row);
@@ -10009,14 +10293,22 @@ function showCommitmentsForDay(dateString) {
   // =====================================================
   // SAVED DOCUMENTS
   // =====================================================
-  function savePdfDocument(type, name, pdfBlob) {
+  function savePdfDocument(type, name, pdfBlob, rawData, replaceId) {
     try {
       const reader = new FileReader();
       reader.onload = function() {
         const b64 = reader.result;
-        const doc = { id: Date.now(), type, name, data: b64, createdAt: new Date().toISOString() };
+        if (replaceId) {
+          // Replace existing saved document (editing flow)
+          const idx = savedDocuments.findIndex(d => d.id === replaceId);
+          if (idx > -1) {
+            savedDocuments[idx] = { ...savedDocuments[idx], name, data: b64, rawData: rawData || null, updatedAt: new Date().toISOString() };
+            saveData(); updateSavedDocumentsList();
+            return;
+          }
+        }
+        const doc = { id: Date.now(), type, name, data: b64, rawData: rawData || null, createdAt: new Date().toISOString() };
         savedDocuments.push(doc);
-        // Limit to 20 most recent
         if (savedDocuments.length > 20) savedDocuments.splice(0, savedDocuments.length - 20);
         saveData();
         updateSavedDocumentsList();
@@ -10029,7 +10321,7 @@ function showCommitmentsForDay(dateString) {
     const list = document.getElementById('saved-documents-list');
     if (!list) return;
     if (!savedDocuments || savedDocuments.length === 0) {
-      list.innerHTML = `<div class="empty-state" style="padding:20px;"><div class="empty-state-icon"><i class="fas fa-folder-open"></i></div><h4>Nenhum documento salvo</h4><p>Os documentos gerados aparecerão aqui para download posterior</p></div>`;
+      list.innerHTML = `<div class="empty-state" style="padding:20px;"><div class="empty-state-icon"><i class="fas fa-folder-open"></i></div><h4>Nenhum documento salvo</h4><p>Os documentos gerados aparecerão aqui automaticamente</p></div>`;
       return;
     }
     const typeIcon = { contract: 'fa-file-contract', order: 'fa-clipboard-list', quote: 'fa-file-alt', receipt: 'fa-file-invoice' };
@@ -10053,16 +10345,184 @@ function showCommitmentsForDay(dateString) {
             <div style="font-size:0.62rem;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:0.04em;">${label}</div>
           </div>
         </div>
-        <div style="font-size:0.78rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${doc.name}</div>
+        <div style="font-size:0.78rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="doc-name-display-${doc.id}">${doc.name}</div>
         <div style="font-size:0.68rem;color:var(--text3);">${new Date(doc.createdAt).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</div>
         <div style="display:flex;gap:4px;">
           <button class="btn btn-xs" style="flex:1;font-size:0.72rem;" data-action="download-saved-doc" data-id="${doc.id}"><i class="fas fa-download"></i> Baixar</button>
+          <button class="btn btn-xs" style="padding:5px 8px;background:var(--primary);color:#fff;" data-action="edit-saved-doc" data-id="${doc.id}" title="Editar conteúdo do documento"><i class="fas fa-edit"></i></button>
           <button class="btn btn-xs btn-danger" style="padding:5px 8px;" data-action="delete-saved-doc" data-id="${doc.id}"><i class="fas fa-trash"></i></button>
         </div>`;
       grid.appendChild(card);
     });
     list.innerHTML = '';
     list.appendChild(grid);
+  }
+
+  function openEditSavedDocModal(id) {
+    const doc = savedDocuments.find(d => d.id === id);
+    if (!doc) return;
+    document.getElementById('edit-doc-id').value = id;
+    document.getElementById('edit-doc-name').value = doc.name;
+    document.getElementById('edit-saved-doc-modal').classList.add('active');
+    setTimeout(() => document.getElementById('edit-doc-name').focus(), 100);
+  }
+
+  function openDocViewerModal(id) {
+    // Always open the full content editor
+    openDocEditor(id);
+  }
+
+  function openDocEditor(savedId) {
+    const savedDoc = savedDocuments.find(d => d.id === savedId);
+    if (!savedDoc) return;
+
+    const modal = document.getElementById('clause-editor-modal');
+    const body = document.getElementById('clause-editor-body');
+    body.innerHTML = '';
+    clauseEditorCallback = null;
+
+    const raw = savedDoc.rawData || {};
+    const type = savedDoc.type;
+
+    if (type === 'contract') {
+      const cl = raw.clauses || raw;
+      const clauseData = [
+        { id: 'c_client_name', label: 'Nome do Contratante', value: cl.clientName || '' },
+        { id: 'c_client_doc', label: 'CPF/CNPJ do Contratante', value: cl.clientDoc || '' },
+        { id: 'c_client_address', label: 'Endereço do Contratante', value: cl.clientAddress || '' },
+        { id: 'c_company_name', label: 'Nome do Contratado (DJ)', value: cl.companyName || userInfo.name || '' },
+        { id: 'c_company_cpf', label: 'CPF/CNPJ do Contratado', value: cl.companyCpf || userInfo.cpf || '' },
+        { id: 'c_object', label: 'Cláusula 1ª - Do Objeto', value: cl.object || '' },
+        { id: 'c_obligations_dj', label: 'Cláusula 2ª - Obrigações do Contratado', value: cl.obligationsDJ || 'O DJ se compromete a:\n• Fornecer equipamentos contratados e compatíveis com o porte do evento;\n• Comparecer ao local com antecedência para montagem e testes;\n• Executar o repertório musical alinhado previamente com o CONTRATANTE;\n• Manter conduta profissional e zelar pela qualidade técnica da apresentação.' },
+        { id: 'c_obligations_client', label: 'Cláusula 3ª - Obrigações do Contratante', value: cl.obligationsClient || 'O CONTRATANTE se compromete a:\n• Disponibilizar local seguro e protegido de intempéries para a montagem dos equipamentos;\n• Garantir ponto de energia elétrica estável e exclusivo para os equipamentos do DJ;\n• Efetuar o pagamento do valor acordado na forma e prazos definidos na Cláusula 4ª.' },
+        { id: 'c_payment', label: 'Cláusula 4ª - Do Valor e Pagamento', value: cl.payment || '' },
+        { id: 'c_rescission', label: 'Cláusula 5ª - Da Rescisão', value: cl.rescission || 'Em caso de cancelamento pelo CONTRATANTE, a multa será de 50% do valor total se cancelado com menos de 30 dias de antecedência. O não comparecimento injustificado do CONTRATADO implicará na devolução integral dos valores pagos, acrescido de multa de 50%.' },
+        { id: 'c_forum', label: 'Cláusula 6ª - Do Foro', value: cl.forum || '' },
+      ];
+      renderClauseFields(body, clauseData);
+      clauseEditorCallback = () => {
+        const editedClauses = {
+          clientName: document.getElementById('c_client_name').value,
+          clientDoc: document.getElementById('c_client_doc').value,
+          clientAddress: document.getElementById('c_client_address').value,
+          companyName: document.getElementById('c_company_name').value,
+          companyCpf: document.getElementById('c_company_cpf').value,
+          object: document.getElementById('c_object').value,
+          obligationsDJ: document.getElementById('c_obligations_dj').value,
+          obligationsClient: document.getElementById('c_obligations_client').value,
+          payment: document.getElementById('c_payment').value,
+          rescission: document.getElementById('c_rescission').value,
+          forum: document.getElementById('c_forum').value,
+        };
+        modal.classList.remove('active');
+        downloadDJContractWithClausesAndReplace(editedClauses, savedId, savedDoc.name);
+      };
+
+    } else if (type === 'quote') {
+      const quoteId = raw.quoteId || null;
+      const quote = quoteId ? eventQuotes.find(q => q.id === quoteId) : null;
+      const clauseData = [
+        { id: 'c_validity_note', label: 'Condições Gerais / Validade', value: raw.validityNote || (quote ? `Este orçamento é válido por ${quote.validity} dias a partir da data de emissão (${formatDate(quote.emissionDate)}). O valor está sujeito a alterações após este período. A contratação do serviço se dará mediante a assinatura de contrato e/ou pagamento de sinal.` : 'Este orçamento é válido por 30 dias a partir da data de emissão. O valor está sujeito a alterações após este período.') },
+        { id: 'c_notes', label: 'Observações', value: raw.notes || (quote ? (quote.notes || '') : '') },
+      ];
+      renderClauseFields(body, clauseData);
+      clauseEditorCallback = () => {
+        const validityNote = document.getElementById('c_validity_note').value;
+        const notes = document.getElementById('c_notes').value;
+        modal.classList.remove('active');
+        if (quote) {
+          generateQuotePdfAndReplace({ ...quote, notes }, validityNote, notes, savedId, savedDoc.name);
+        } else {
+          showToast('Orçamento original não encontrado nos dados. Apenas condições textuais podem ser editadas sem os dados do evento.', 'warning');
+        }
+      };
+
+    } else if (type === 'order') {
+      const od = raw.orderData || {};
+      const clauseData = [
+        { id: 'c_client_name', label: 'Nome do Cliente', value: od.clientName || '' },
+        { id: 'c_client_doc', label: 'Documento do Cliente', value: od.clientDoc || '' },
+        { id: 'c_client_phone', label: 'Telefone', value: od.clientPhone || '' },
+        { id: 'c_client_email', label: 'E-mail', value: od.clientEmail || '' },
+        { id: 'c_event_type', label: 'Tipo de Evento', value: od.eventType || '' },
+        { id: 'c_event_date', label: 'Data do Evento', value: od.eventDate || '' },
+        { id: 'c_event_time', label: 'Horário', value: od.eventTime || '' },
+        { id: 'c_event_location', label: 'Local do Evento', value: od.eventLocation || '' },
+        { id: 'c_event_guests', label: 'Convidados', value: od.eventGuests || '' },
+        { id: 'c_payment_terms', label: 'Condições de Pagamento', value: od.paymentTerms || '' },
+        { id: 'c_notes', label: 'Observações', value: od.notes || '' },
+      ];
+      renderClauseFields(body, clauseData);
+      clauseEditorCallback = () => {
+        const editedData = {
+          ...od,
+          clientName: document.getElementById('c_client_name').value,
+          clientDoc: document.getElementById('c_client_doc').value,
+          clientPhone: document.getElementById('c_client_phone').value,
+          clientEmail: document.getElementById('c_client_email').value,
+          eventType: document.getElementById('c_event_type').value,
+          eventDate: document.getElementById('c_event_date').value,
+          eventTime: document.getElementById('c_event_time').value,
+          eventLocation: document.getElementById('c_event_location').value,
+          eventGuests: document.getElementById('c_event_guests').value,
+          paymentTerms: document.getElementById('c_payment_terms').value,
+          notes: document.getElementById('c_notes').value,
+        };
+        modal.classList.remove('active');
+        generateOrderPdfAndReplace(editedData, savedId, savedDoc.name);
+      };
+
+    } else if (type === 'receipt') {
+      const receiptId = raw.receiptId || null;
+      const receipt = receiptId ? receipts.find(r => r.id === receiptId) : null;
+      const client = receipt ? (clients.find(c => c.id === receipt.clientId) || {}) : {};
+      const clauseData = [
+        { id: 'c_client_name', label: 'Nome do Cliente', value: client.name || '' },
+        { id: 'c_client_doc', label: 'Documento do Cliente', value: client.document || '' },
+        { id: 'c_amount', label: 'Valor (número, ex: 1500.00)', value: receipt ? String(receipt.amount) : '' },
+        { id: 'c_description', label: 'Descrição do Serviço', value: receipt ? receipt.description : '' },
+        { id: 'c_date', label: 'Data de Emissão (AAAA-MM-DD)', value: receipt ? receipt.date : '' },
+      ];
+      renderClauseFields(body, clauseData);
+      clauseEditorCallback = () => {
+        const editedReceipt = receipt ? { ...receipt } : { id: Date.now() };
+        editedReceipt.description = document.getElementById('c_description').value;
+        editedReceipt.amount = parseFloat(document.getElementById('c_amount').value) || 0;
+        editedReceipt.date = document.getElementById('c_date').value;
+        const editedClient = {
+          name: document.getElementById('c_client_name').value,
+          document: document.getElementById('c_client_doc').value,
+        };
+        modal.classList.remove('active');
+        downloadReceiptAsPDFFromData(editedReceipt, editedClient, savedId, savedDoc.name);
+      };
+
+    } else {
+      showToast('Tipo de documento não suportado para edição.', 'warning');
+      return;
+    }
+
+    // Update modal title to show editing mode
+    const h2 = modal.querySelector('h2');
+    if (h2) h2.innerHTML = '<i class="fas fa-edit"></i> Editar Documento Salvo';
+    modal.classList.add('active');
+  }
+
+  // Regenerate PDFs replacing the saved entry — delegates to base renderers
+  function downloadDJContractWithClausesAndReplace(clauses, replaceId, name) {
+    _renderContractPdf(clauses, replaceId, name);
+  }
+
+  function generateQuotePdfAndReplace(quote, validityNote, notes, replaceId, name) {
+    generateQuotePdf(quote, validityNote, notes, replaceId, name);
+  }
+
+  function generateOrderPdfAndReplace(data, replaceId, name) {
+    generateOrderPdf(data, replaceId, name);
+  }
+
+  function downloadReceiptAsPDFFromData(receipt, client, replaceId, name) {
+    _renderReceiptPdf(receipt, client, replaceId, name);
   }
 
   // =====================================================
@@ -10334,6 +10794,46 @@ function showCommitmentsForDay(dateString) {
           <button type="submit" class="btn" style="background:linear-gradient(135deg,var(--danger),#ff6b9d);">Salvar Nota</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Modal Editar Documento Salvo -->
+  <div id="edit-saved-doc-modal" class="modal">
+    <div class="modal-content"><div class="modal-handle"></div>
+      <span class="close-button" data-action="close-modal">&times;</span>
+      <h2><i class="fas fa-pencil-alt" style="color:var(--primary);"></i> Editar Documento</h2>
+      <p style="color:var(--text2);font-size:0.88rem;margin-bottom:18px;">Edite o nome do documento salvo. O arquivo PDF não será alterado.</p>
+      <input type="hidden" id="edit-doc-id">
+      <div class="form-group">
+        <label for="edit-doc-name">Nome do Documento</label>
+        <input type="text" id="edit-doc-name" placeholder="Ex: Contrato_Casamento_Joao" style="width:100%;padding:12px 14px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.95rem;outline:none;">
+      </div>
+      <div class="btn-container">
+        <button type="button" class="btn btn-danger" data-action="close-modal">Cancelar</button>
+        <button type="button" class="btn" id="save-edit-doc-btn"><i class="fas fa-save"></i> Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Visualizador de Documento Salvo -->
+  <div id="doc-viewer-modal" class="modal">
+    <div class="modal-content">
+      <div class="doc-viewer-header">
+        <button class="doc-viewer-back" id="doc-viewer-close-btn" title="Fechar"><i class="fas fa-arrow-left"></i></button>
+        <span id="doc-viewer-title">Documento</span>
+        <input type="hidden" id="doc-viewer-id">
+      </div>
+      <div class="doc-viewer-iframe-wrap">
+        <iframe id="doc-viewer-iframe" title="Visualização do documento"></iframe>
+      </div>
+      <div class="doc-viewer-footer">
+        <div class="doc-viewer-name-wrap">
+          <i class="fas fa-pencil-alt"></i>
+          <input type="text" id="doc-viewer-name" placeholder="Nome do documento">
+        </div>
+        <button class="btn btn-xs" id="doc-viewer-save-btn" style="height:40px;padding:0 12px;white-space:nowrap;" title="Renomear"><i class="fas fa-save"></i></button>
+        <button class="btn btn-xs" id="doc-viewer-download-btn" style="height:40px;padding:0 12px;background:var(--success);white-space:nowrap;" title="Baixar PDF"><i class="fas fa-download"></i></button>
+      </div>
     </div>
   </div>
 
