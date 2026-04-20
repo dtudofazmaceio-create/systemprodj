@@ -8841,16 +8841,26 @@ function showCommitmentsForDay(dateString) {
   function initSignatureCanvas() {
     sigCanvas = document.getElementById('signature-canvas');
     if (!sigCanvas) return;
-    // Ajusta tamanho real do canvas ao tamanho CSS
-    const rect = sigCanvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    sigCanvas.width = rect.width * dpr;
-    sigCanvas.height = Math.max(rect.width * 0.38, 120) * dpr;
-    sigCanvas.style.height = Math.max(rect.width * 0.38, 120) + 'px';
+
+    // Remove listeners anteriores para evitar duplicatas a cada abertura do modal
+    sigCanvas.replaceWith(sigCanvas.cloneNode(false));
+    sigCanvas = document.getElementById('signature-canvas');
+
+    // Usa offsetWidth do pai para garantir largura real no mobile
+    const parent = sigCanvas.parentElement;
+    const cssW = parent ? parent.clientWidth || 300 : 300;
+    const cssH = Math.max(cssW * 0.42, 140);
+
+    // NÃO usar devicePixelRatio no scale do contexto — causa o desvio no iOS
+    // Em vez disso, trabalhar em coordenadas CSS puras
+    sigCanvas.width = cssW;
+    sigCanvas.height = cssH;
+    sigCanvas.style.width = cssW + 'px';
+    sigCanvas.style.height = cssH + 'px';
+
     sigCtx = sigCanvas.getContext('2d');
-    sigCtx.scale(dpr, dpr);
     sigCtx.fillStyle = '#ffffff';
-    sigCtx.fillRect(0, 0, sigCanvas.width, sigCanvas.height);
+    sigCtx.fillRect(0, 0, cssW, cssH);
     sigCtx.lineCap = 'round';
     sigCtx.lineJoin = 'round';
     sigStrokes = [];
@@ -8860,35 +8870,41 @@ function showCommitmentsForDay(dateString) {
     if (userSignature) {
       const img = new Image();
       img.onload = () => {
-        const ph = Math.max(rect.width * 0.38, 120);
-        const scaleX = rect.width / img.width;
-        const scaleY = ph / img.height;
+        const scaleX = cssW / img.width;
+        const scaleY = cssH / img.height;
         const sc = Math.min(scaleX, scaleY, 1);
-        const dx = (rect.width - img.width * sc) / 2;
-        const dy = (ph - img.height * sc) / 2;
+        const dx = (cssW - img.width * sc) / 2;
+        const dy = (cssH - img.height * sc) / 2;
         sigCtx.drawImage(img, dx, dy, img.width * sc, img.height * sc);
       };
       img.src = userSignature;
     }
 
-    // Hint
-    const hint = document.getElementById('sig-canvas-hint');
-
-    // Touch events
-    sigCanvas.addEventListener('pointerdown', sigOnDown);
-    sigCanvas.addEventListener('pointermove', sigOnMove);
+    // Touch/pointer events — usar offsetX/offsetY quando disponível (mais preciso)
+    sigCanvas.addEventListener('pointerdown', sigOnDown, { passive: false });
+    sigCanvas.addEventListener('pointermove', sigOnMove, { passive: false });
     sigCanvas.addEventListener('pointerup', sigOnUp);
     sigCanvas.addEventListener('pointerleave', sigOnUp);
     sigCanvas.addEventListener('pointercancel', sigOnUp);
   }
 
   function getSigPos(e) {
-    const rect = sigCanvas.getBoundingClientRect();
+    // offsetX/offsetY são relativos ao elemento — sem interferência de scroll ou DPR
+    // Fallback para clientX/clientY - getBoundingClientRect se offsetX não disponível
+    let x, y;
+    if (e.offsetX !== undefined && e.offsetY !== undefined) {
+      x = e.offsetX;
+      y = e.offsetY;
+    } else {
+      const rect = sigCanvas.getBoundingClientRect();
+      x = (e.clientX ?? e.touches?.[0]?.clientX ?? 0) - rect.left;
+      y = (e.clientY ?? e.touches?.[0]?.clientY ?? 0) - rect.top;
+    }
     return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
+      x,
+      y,
       t: Date.now(),
-      pressure: e.pressure > 0 ? e.pressure : 0.5
+      pressure: (e.pressure > 0 && e.pressure < 1) ? e.pressure : 0.5
     };
   }
 
@@ -8896,6 +8912,8 @@ function showCommitmentsForDay(dateString) {
     e.preventDefault();
     sigDrawing = true;
     sigCurrentStroke = [];
+    // setPointerCapture garante que o move continue sendo recebido mesmo saindo do canvas
+    try { sigCanvas.setPointerCapture(e.pointerId); } catch(_) {}
     const pos = getSigPos(e);
     sigLastPoint = pos;
     sigLastTime = pos.t;
