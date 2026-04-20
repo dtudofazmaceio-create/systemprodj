@@ -8815,11 +8815,13 @@ function showCommitmentsForDay(dateString) {
 
   // --- Canvas de desenho ---
   let sigCanvas, sigCtx;
+  let sigDpr = 1;        // devicePixelRatio real — armazenado para conversão de coords
+  let sigCssW = 300;     // largura CSS do canvas
+  let sigCssH = 150;     // altura CSS do canvas
   let sigDrawing = false;
   let sigColor = '#1a1a2e';
   let sigLineWidth = 2.5;
-  let sigPoints = []; // histórico de pontos para undo
-  let sigStrokes = []; // cada stroke é um array de pontos
+  let sigStrokes = [];
   let sigCurrentStroke = [];
   let sigLastPoint = null;
   let sigLastTime = null;
@@ -8829,8 +8831,11 @@ function showCommitmentsForDay(dateString) {
     const modal = document.getElementById('signature-capture-modal');
     if (!modal) return;
     modal.classList.add('active');
-    // Aguarda o modal renderizar para inicializar o canvas
-    setTimeout(initSignatureCanvas, 100);
+    // Scroll do modal para o topo antes de inicializar
+    const mc = modal.querySelector('.modal-content');
+    if (mc) mc.scrollTop = 0;
+    // Aguarda layout completo (2 frames) antes de medir o canvas
+    requestAnimationFrame(() => requestAnimationFrame(() => initSignatureCanvas()));
   }
 
   function closeSignatureModal() {
@@ -8839,185 +8844,201 @@ function showCommitmentsForDay(dateString) {
   }
 
   function initSignatureCanvas() {
-    sigCanvas = document.getElementById('signature-canvas');
-    if (!sigCanvas) return;
+    // Recria o elemento canvas do zero para limpar todos os listeners
+    const old = document.getElementById('signature-canvas');
+    if (!old) return;
+    const fresh = document.createElement('canvas');
+    fresh.id = 'signature-canvas';
+    fresh.style.cssText = 'display:block;width:100%;cursor:crosshair;touch-action:none;-webkit-user-select:none;user-select:none;';
+    old.parentNode.replaceChild(fresh, old);
+    sigCanvas = fresh;
 
-    // Remove listeners anteriores para evitar duplicatas a cada abertura do modal
-    sigCanvas.replaceWith(sigCanvas.cloneNode(false));
-    sigCanvas = document.getElementById('signature-canvas');
+    // Mede o tamanho CSS real DEPOIS que o elemento foi inserido no DOM
+    sigDpr = Math.min(window.devicePixelRatio || 1, 3);
+    sigCssW = sigCanvas.parentElement.clientWidth || 300;
+    sigCssH = Math.max(Math.round(sigCssW * 0.44), 150);
 
-    // Usa offsetWidth do pai para garantir largura real no mobile
-    const parent = sigCanvas.parentElement;
-    const cssW = parent ? parent.clientWidth || 300 : 300;
-    const cssH = Math.max(cssW * 0.42, 140);
-
-    // NÃO usar devicePixelRatio no scale do contexto — causa o desvio no iOS
-    // Em vez disso, trabalhar em coordenadas CSS puras
-    sigCanvas.width = cssW;
-    sigCanvas.height = cssH;
-    sigCanvas.style.width = cssW + 'px';
-    sigCanvas.style.height = cssH + 'px';
+    // canvas interno em pixels físicos (DPR) para nitidez em telas Retina
+    sigCanvas.width  = Math.round(sigCssW * sigDpr);
+    sigCanvas.height = Math.round(sigCssH * sigDpr);
+    sigCanvas.style.width  = sigCssW + 'px';
+    sigCanvas.style.height = sigCssH + 'px';
 
     sigCtx = sigCanvas.getContext('2d');
+    // O scale faz com que 1 unidade de desenho = 1 pixel CSS
+    sigCtx.scale(sigDpr, sigDpr);
     sigCtx.fillStyle = '#ffffff';
-    sigCtx.fillRect(0, 0, cssW, cssH);
-    sigCtx.lineCap = 'round';
+    sigCtx.fillRect(0, 0, sigCssW, sigCssH);
+    sigCtx.lineCap  = 'round';
     sigCtx.lineJoin = 'round';
+
     sigStrokes = [];
     sigCurrentStroke = [];
 
-    // Se já tem assinatura, exibe ela no canvas para edição
+    // Exibe assinatura existente para edição
     if (userSignature) {
       const img = new Image();
       img.onload = () => {
-        const scaleX = cssW / img.width;
-        const scaleY = cssH / img.height;
-        const sc = Math.min(scaleX, scaleY, 1);
-        const dx = (cssW - img.width * sc) / 2;
-        const dy = (cssH - img.height * sc) / 2;
+        const sc = Math.min(sigCssW / img.width, sigCssH / img.height, 1);
+        const dx = (sigCssW - img.width  * sc) / 2;
+        const dy = (sigCssH - img.height * sc) / 2;
         sigCtx.drawImage(img, dx, dy, img.width * sc, img.height * sc);
       };
       img.src = userSignature;
     }
 
-    // Touch/pointer events — usar offsetX/offsetY quando disponível (mais preciso)
-    sigCanvas.addEventListener('pointerdown', sigOnDown, { passive: false });
-    sigCanvas.addEventListener('pointermove', sigOnMove, { passive: false });
-    sigCanvas.addEventListener('pointerup', sigOnUp);
-    sigCanvas.addEventListener('pointerleave', sigOnUp);
-    sigCanvas.addEventListener('pointercancel', sigOnUp);
+    // ── Eventos de toque/mouse ──
+    // Usamos touchstart/touchmove em vez de pointer events no iOS
+    // A posição é calculada subtraindo getBoundingClientRect() a cada evento
+    // (não cacheado — o rect pode mudar se o modal rolar)
+    sigCanvas.addEventListener('touchstart',  sigTouchStart,  { passive: false });
+    sigCanvas.addEventListener('touchmove',   sigTouchMove,   { passive: false });
+    sigCanvas.addEventListener('touchend',    sigTouchEnd,    { passive: false });
+    sigCanvas.addEventListener('touchcancel', sigTouchEnd,    { passive: false });
+    // Mouse (desktop)
+    sigCanvas.addEventListener('mousedown',   sigMouseDown);
+    sigCanvas.addEventListener('mousemove',   sigMouseMove);
+    sigCanvas.addEventListener('mouseup',     sigMouseUp);
+    sigCanvas.addEventListener('mouseleave',  sigMouseUp);
   }
 
-  function getSigPos(e) {
-    // offsetX/offsetY são relativos ao elemento — sem interferência de scroll ou DPR
-    // Fallback para clientX/clientY - getBoundingClientRect se offsetX não disponível
-    let x, y;
-    if (e.offsetX !== undefined && e.offsetY !== undefined) {
-      x = e.offsetX;
-      y = e.offsetY;
-    } else {
-      const rect = sigCanvas.getBoundingClientRect();
-      x = (e.clientX ?? e.touches?.[0]?.clientX ?? 0) - rect.left;
-      y = (e.clientY ?? e.touches?.[0]?.clientY ?? 0) - rect.top;
-    }
+  // Converte coordenada de cliente (viewport) para coordenada CSS do canvas
+  function sigClientToCanvas(clientX, clientY) {
+    // getBoundingClientRect() chamado aqui, não cacheado
+    const r = sigCanvas.getBoundingClientRect();
+    // scaleX/scaleY compensam se o canvas CSS foi esticado por CSS
+    const scaleX = sigCssW / r.width;
+    const scaleY = sigCssH / r.height;
     return {
-      x,
-      y,
-      t: Date.now(),
-      pressure: (e.pressure > 0 && e.pressure < 1) ? e.pressure : 0.5
+      x: (clientX - r.left) * scaleX,
+      y: (clientY - r.top)  * scaleY
     };
   }
 
-  function sigOnDown(e) {
-    e.preventDefault();
-    sigDrawing = true;
-    sigCurrentStroke = [];
-    // setPointerCapture garante que o move continue sendo recebido mesmo saindo do canvas
-    try { sigCanvas.setPointerCapture(e.pointerId); } catch(_) {}
-    const pos = getSigPos(e);
-    sigLastPoint = pos;
-    sigLastTime = pos.t;
-    sigLastVelocity = 0;
-    sigCurrentStroke.push(pos);
+  function makeSigPoint(x, y, pressure) {
+    return { x, y, t: Date.now(), pressure: pressure || 0.5 };
+  }
 
-    // Oculta hint
+  // ── Touch handlers ──
+  function sigTouchStart(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const t = e.changedTouches[0];
+    const { x, y } = sigClientToCanvas(t.clientX, t.clientY);
+    const pressure = (t.force > 0) ? t.force : 0.5;
+    sigBeginStroke(makeSigPoint(x, y, pressure));
+  }
+  function sigTouchMove(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!sigDrawing) return;
+    const t = e.changedTouches[0];
+    const { x, y } = sigClientToCanvas(t.clientX, t.clientY);
+    const pressure = (t.force > 0) ? t.force : 0.5;
+    sigContinueStroke(makeSigPoint(x, y, pressure));
+  }
+  function sigTouchEnd(e) {
+    e.preventDefault();
+    sigEndStroke();
+  }
+
+  // ── Mouse handlers ──
+  function sigMouseDown(e) {
+    const { x, y } = sigClientToCanvas(e.clientX, e.clientY);
+    sigBeginStroke(makeSigPoint(x, y, 0.5));
+  }
+  function sigMouseMove(e) {
+    if (!sigDrawing) return;
+    const { x, y } = sigClientToCanvas(e.clientX, e.clientY);
+    sigContinueStroke(makeSigPoint(x, y, 0.5));
+  }
+  function sigMouseUp() { sigEndStroke(); }
+
+  // ── Lógica de desenho ──
+  function sigBeginStroke(pos) {
+    sigDrawing = true;
+    sigCurrentStroke = [pos];
+    sigLastPoint    = pos;
+    sigLastTime     = pos.t;
+    sigLastVelocity = 0;
     const hint = document.getElementById('sig-canvas-hint');
     if (hint) hint.style.display = 'none';
-
+    // Ponto inicial
     sigCtx.beginPath();
-    sigCtx.arc(pos.x, pos.y, sigLineWidth / 2, 0, Math.PI * 2);
+    sigCtx.arc(pos.x, pos.y, sigLineWidth * 0.5, 0, Math.PI * 2);
     sigCtx.fillStyle = sigColor;
     sigCtx.fill();
   }
 
-  function sigOnMove(e) {
-    if (!sigDrawing) return;
-    e.preventDefault();
-    const pos = getSigPos(e);
+  function sigContinueStroke(pos) {
     sigCurrentStroke.push(pos);
-
     if (sigCurrentStroke.length < 3) return;
 
-    // Calcular velocidade para simular variação de espessura (traço natural)
-    const dt = Math.max(pos.t - sigLastTime, 1);
-    const dx = pos.x - sigLastPoint.x;
-    const dy = pos.y - sigLastPoint.y;
+    const dt   = Math.max(pos.t - sigLastTime, 1);
+    const dx   = pos.x - sigLastPoint.x;
+    const dy   = pos.y - sigLastPoint.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    const velocity = dist / dt;
-    const smoothVelocity = sigLastVelocity * 0.7 + velocity * 0.3;
-    sigLastVelocity = smoothVelocity;
+    const vel  = dist / dt;
+    sigLastVelocity = sigLastVelocity * 0.6 + vel * 0.4;
 
-    // Quanto mais rápido, mais fino o traço (naturalidade máxima)
-    const speedFactor = Math.max(0.4, Math.min(1.6, 1 - smoothVelocity * 0.8));
-    const strokeW = sigLineWidth * speedFactor * (pos.pressure * 1.2 + 0.3);
+    // Velocidade → espessura (rápido = fino, devagar = grosso)
+    const speed   = Math.max(0.35, Math.min(1.5, 1 - sigLastVelocity * 0.9));
+    const strokeW = sigLineWidth * speed * (pos.pressure * 1.1 + 0.4);
 
-    // Usar Bezier quadrático entre os pontos para suavidade
     const len = sigCurrentStroke.length;
-    const p0 = sigCurrentStroke[len - 3];
-    const p1 = sigCurrentStroke[len - 2];
-    const p2 = sigCurrentStroke[len - 1];
-    const cpx = (p0.x + p2.x) / 2;
-    const cpy = (p0.y + p2.y) / 2;
+    const p0  = sigCurrentStroke[len - 3];
+    const p1  = sigCurrentStroke[len - 2];
+    const p2  = sigCurrentStroke[len - 1];
 
     sigCtx.beginPath();
     sigCtx.moveTo((p0.x + p1.x) / 2, (p0.y + p1.y) / 2);
-    sigCtx.quadraticCurveTo(p1.x, p1.y, cpx, cpy);
+    sigCtx.quadraticCurveTo(p1.x, p1.y, (p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
     sigCtx.strokeStyle = sigColor;
-    sigCtx.lineWidth = strokeW;
-    sigCtx.lineCap = 'round';
-    sigCtx.lineJoin = 'round';
+    sigCtx.lineWidth   = strokeW;
+    sigCtx.lineCap     = 'round';
+    sigCtx.lineJoin    = 'round';
     sigCtx.stroke();
 
     sigLastPoint = pos;
-    sigLastTime = pos.t;
+    sigLastTime  = pos.t;
   }
 
-  function sigOnUp(e) {
+  function sigEndStroke() {
     if (!sigDrawing) return;
     sigDrawing = false;
-    if (sigCurrentStroke.length > 0) {
-      sigStrokes.push([...sigCurrentStroke]);
-    }
+    if (sigCurrentStroke.length > 0) sigStrokes.push([...sigCurrentStroke]);
     sigCurrentStroke = [];
   }
 
-  // Undo — redesenha todos os strokes exceto o último
+  // Undo
   document.getElementById('sig-undo-btn')?.addEventListener('click', () => {
     if (!sigCtx || sigStrokes.length === 0) return;
     sigStrokes.pop();
-    redrawAllStrokes();
+    sigRedrawAll();
   });
 
-  function redrawAllStrokes() {
-    if (!sigCtx || !sigCanvas) return;
-    const rect = sigCanvas.getBoundingClientRect();
+  function sigRedrawAll() {
+    if (!sigCtx) return;
     sigCtx.fillStyle = '#ffffff';
-    sigCtx.fillRect(0, 0, sigCanvas.width, sigCanvas.height);
+    sigCtx.fillRect(0, 0, sigCssW, sigCssH);
     sigStrokes.forEach(stroke => {
-      if (stroke.length === 0) return;
-      for (let i = 0; i < stroke.length; i++) {
-        if (i === 0) {
-          sigCtx.beginPath();
-          sigCtx.arc(stroke[i].x, stroke[i].y, sigLineWidth / 2, 0, Math.PI * 2);
-          sigCtx.fillStyle = sigColor;
-          sigCtx.fill();
-          continue;
-        }
-        if (stroke.length < 3 || i < 2) continue;
-        const p0 = stroke[i - 2];
-        const p1 = stroke[i - 1];
-        const p2 = stroke[i];
+      if (!stroke.length) return;
+      sigCtx.beginPath();
+      sigCtx.arc(stroke[0].x, stroke[0].y, sigLineWidth * 0.5, 0, Math.PI * 2);
+      sigCtx.fillStyle = sigColor;
+      sigCtx.fill();
+      for (let i = 2; i < stroke.length; i++) {
+        const p0 = stroke[i - 2], p1 = stroke[i - 1], p2 = stroke[i];
         const dt = Math.max(p2.t - p1.t, 1);
-        const dist = Math.sqrt((p2.x-p1.x)**2 + (p2.y-p1.y)**2);
-        const vel = Math.min(dist / dt, 2);
-        const sw = sigLineWidth * Math.max(0.5, 1 - vel * 0.5);
+        const d  = Math.sqrt((p2.x-p1.x)**2 + (p2.y-p1.y)**2);
+        const sw = sigLineWidth * Math.max(0.4, 1 - (d / dt) * 0.7);
         sigCtx.beginPath();
         sigCtx.moveTo((p0.x+p1.x)/2, (p0.y+p1.y)/2);
         sigCtx.quadraticCurveTo(p1.x, p1.y, (p1.x+p2.x)/2, (p1.y+p2.y)/2);
         sigCtx.strokeStyle = sigColor;
-        sigCtx.lineWidth = sw;
-        sigCtx.lineCap = 'round';
-        sigCtx.lineJoin = 'round';
+        sigCtx.lineWidth   = sw;
+        sigCtx.lineCap     = 'round';
+        sigCtx.lineJoin    = 'round';
         sigCtx.stroke();
       }
     });
@@ -9025,10 +9046,10 @@ function showCommitmentsForDay(dateString) {
 
   // Limpar canvas
   document.getElementById('sig-clear-canvas-btn')?.addEventListener('click', () => {
-    if (!sigCtx || !sigCanvas) return;
+    if (!sigCtx) return;
     sigStrokes = [];
     sigCtx.fillStyle = '#ffffff';
-    sigCtx.fillRect(0, 0, sigCanvas.width, sigCanvas.height);
+    sigCtx.fillRect(0, 0, sigCssW, sigCssH);
     const hint = document.getElementById('sig-canvas-hint');
     if (hint) hint.style.display = 'flex';
   });
@@ -9080,10 +9101,12 @@ function showCommitmentsForDay(dateString) {
   document.getElementById('close-signature-modal')?.addEventListener('click', closeSignatureModal);
 
   // Trim canvas — remove bordas em branco para assinatura compacta
+  // Leva em conta DPR: canvas.width = cssW * dpr, mas ctx foi escalado por scale(dpr,dpr)
+  // então getImageData opera no espaço de pixels físicos
   function trimSignatureCanvas(canvas) {
     const ctx = canvas.getContext('2d');
-    const w = canvas.width;
-    const h = canvas.height;
+    const w = canvas.width;   // pixels físicos
+    const h = canvas.height;  // pixels físicos
     const data = ctx.getImageData(0, 0, w, h).data;
     let top = h, bottom = 0, left = w, right = 0;
     let hasContent = false;
@@ -9091,32 +9114,36 @@ function showCommitmentsForDay(dateString) {
       for (let x = 0; x < w; x++) {
         const idx = (y * w + x) * 4;
         const r = data[idx], g = data[idx+1], b = data[idx+2], a = data[idx+3];
-        // Pixel não é branco/transparente
         if (a > 10 && !(r > 240 && g > 240 && b > 240)) {
-          if (y < top) top = y;
+          if (y < top)    top    = y;
           if (y > bottom) bottom = y;
-          if (x < left) left = x;
-          if (x > right) right = x;
+          if (x < left)   left   = x;
+          if (x > right)  right  = x;
           hasContent = true;
         }
       }
     }
     if (!hasContent) return null;
-    const pad = 10;
-    top = Math.max(0, top - pad);
-    bottom = Math.min(h, bottom + pad);
-    left = Math.max(0, left - pad);
-    right = Math.min(w, right + pad);
+    const dpr = sigDpr || 1;
+    const padPx = Math.round(14 * dpr); // padding em pixels físicos
+    top    = Math.max(0, top    - padPx);
+    bottom = Math.min(h, bottom + padPx);
+    left   = Math.max(0, left   - padPx);
+    right  = Math.min(w, right  + padPx);
     const tw = right - left;
     const th = bottom - top;
     if (tw < 5 || th < 5) return null;
+    // Salva em tamanho CSS (divide pelo DPR) para imagem compacta no PDF
+    const outW = Math.round(tw / dpr);
+    const outH = Math.round(th / dpr);
     const tmpCanvas = document.createElement('canvas');
-    tmpCanvas.width = tw;
-    tmpCanvas.height = th;
+    tmpCanvas.width  = outW;
+    tmpCanvas.height = outH;
     const tmpCtx = tmpCanvas.getContext('2d');
     tmpCtx.fillStyle = '#ffffff';
-    tmpCtx.fillRect(0, 0, tw, th);
-    tmpCtx.drawImage(canvas, left, top, tw, th, 0, 0, tw, th);
+    tmpCtx.fillRect(0, 0, outW, outH);
+    tmpCtx.drawImage(canvas, left, top, tw, th, 0, 0, outW, outH);
+    return tmpCanvas.toDataURL('image/png');
     return tmpCanvas.toDataURL('image/png');
   }
 
