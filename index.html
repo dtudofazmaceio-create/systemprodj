@@ -3027,7 +3027,20 @@
         </div>
     </div>
 
-    <div class="tab-content" id="usuario-content"><div class="card"><form id="user-info-form"><h2>Minhas Informações</h2><div class="form-group"><label for="user-name">Nome</label><input type="text" id="user-name"/></div><div class="form-group"><label for="user-cpf">CPF/CNPJ</label><input type="text" id="user-cpf"/></div><div class="form-group"><label for="user-logo">Logo da Empresa (recomendado: imagem pequena)</label><input type="file" id="user-logo" accept="image/*"/> <img id="logo-preview" src="#" alt="Prévia da Logo" style="display: none;"/></div><div style="text-align:right;"><button type="submit" class="btn">Salvar</button></div><div id="user-info-message"></div></form></div></div>
+    <div class="tab-content" id="usuario-content"><div class="card"><form id="user-info-form"><h2>Minhas Informações</h2><div class="form-group"><label for="user-name">Nome</label><input type="text" id="user-name"/></div><div class="form-group"><label for="user-cpf">CPF/CNPJ</label><input type="text" id="user-cpf"/></div><div class="form-group"><label for="user-logo">Logo da Empresa (recomendado: imagem pequena)</label><input type="file" id="user-logo" accept="image/*"/> <img id="logo-preview" src="#" alt="Prévia da Logo" style="display: none;"/></div>
+<div class="form-group">
+  <label><i class="fas fa-signature" style="color:var(--primary);margin-right:5px;"></i> Minha Assinatura (usada em todos os documentos)</label>
+  <div id="signature-preview-box" style="border:1.5px solid var(--input-border);border-radius:var(--r-md);padding:12px;background:var(--input-bg);min-height:80px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--t-fast);position:relative;">
+    <img id="signature-preview-img" src="#" alt="Assinatura" style="display:none;max-height:70px;max-width:100%;object-fit:contain;filter:var(--sig-filter,none);">
+    <div id="signature-preview-placeholder" style="text-align:center;color:var(--text3);">
+      <i class="fas fa-pen-nib" style="font-size:1.8rem;display:block;margin-bottom:6px;"></i>
+      <span style="font-size:0.82rem;">Toque para criar sua assinatura</span>
+    </div>
+    <button type="button" id="signature-clear-btn" style="display:none;position:absolute;top:6px;right:6px;background:var(--danger-bg);color:var(--danger);border:none;border-radius:var(--r-sm);padding:3px 9px;font-size:0.75rem;cursor:pointer;font-family:var(--font-body);"><i class="fas fa-times"></i></button>
+  </div>
+  <button type="button" id="open-signature-modal-btn" class="btn" style="margin-top:8px;width:100%;background:linear-gradient(135deg,var(--primary),var(--accent));"><i class="fas fa-pen-nib"></i> Criar / Editar Assinatura</button>
+</div>
+<div style="text-align:right;"><button type="submit" class="btn">Salvar</button></div><div id="user-info-message"></div></form></div></div>
     <div class="tab-content" id="backup-content"><div class="card"><h2>Backup e Restauração</h2><p>Exporte seus dados para um arquivo seguro ou importe um backup para restaurar suas informações.</p><div style="margin-top:20px; display:flex; gap: 15px;"><button class="btn" id="export-backup-btn">Exportar Dados</button><button class="btn" id="import-trigger-btn">Importar Dados</button><input type="file" id="import-backup-input" accept=".json" style="display:none;"/></div><div id="backup-message" style="margin-top:15px; font-weight:500;"></div></div></div>
     
     <div class="tab-content" id="recibos-content">
@@ -6615,6 +6628,7 @@ function openCommitmentModal(mode, id = null, date = null) {
         logoPreview.style.display = 'none';
         logoPreview.src = '#';
     }
+    updateSignaturePreview();
   }
   
   function updateBalanceDetailModal() {
@@ -7143,6 +7157,18 @@ function updateClientsList() {
 
     // ── Assinatura ──
     const sigX = W / 2;
+    // Inserir imagem de assinatura acima da linha
+    if (userSignature) {
+      try {
+        const sigImg = new Image(); sigImg.src = userSignature;
+        const sigAspect = (sigImg.naturalWidth || 200) / Math.max(sigImg.naturalHeight || 60, 1);
+        const sigMaxW = 72; const sigMaxH = 14;
+        let siW = Math.min(sigMaxW, sigMaxH * sigAspect); let siH = siW / sigAspect;
+        if (siH > sigMaxH) { siH = sigMaxH; siW = siH * sigAspect; }
+        doc.addImage(userSignature, 'PNG', sigX - siW / 2, y - siH - 1, siW, siH);
+        y += 2;
+      } catch(e) {}
+    }
     doc.setDrawColor(T.accent);
     doc.setLineWidth(0.6);
     doc.line(sigX - 40, y, sigX + 40, y);
@@ -7300,6 +7326,32 @@ function updateClientsList() {
       doc.text(nLines, margin, y);
       y += nLines.length * 4.8 + 5;
     }
+
+    // ── Assinaturas ──
+    y = pdfDivider(doc, y - 3, margin, W, T);
+    const ordSigW = 70;
+    // Assinatura do prestador (direita) com imagem
+    if (userSignature) {
+      try {
+        const sigImg = new Image(); sigImg.src = userSignature;
+        const sigAspect = (sigImg.naturalWidth || 200) / Math.max(sigImg.naturalHeight || 60, 1);
+        const sigMaxH = 12;
+        let siW = Math.min(ordSigW - 4, sigMaxH * sigAspect); let siH = siW / sigAspect;
+        if (siH > sigMaxH) { siH = sigMaxH; siW = siH * sigAspect; }
+        const siX = (W - margin - ordSigW) + (ordSigW - siW) / 2;
+        doc.addImage(userSignature, 'PNG', siX, y - siH - 1, siW, siH);
+      } catch(e) {}
+    }
+    doc.setDrawColor(T.accent);
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, margin + ordSigW, y);
+    doc.line(W - margin - ordSigW, y, W - margin, y);
+    y += 4;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(T.textMuted);
+    doc.text('Assinatura do Cliente / Data', margin, y);
+    doc.text(userInfo.name || 'Prestador de Serviços', W - margin, y, { align: 'right' });
 
     const fname = nameOverride || `Pedido_${orderNum}_${(data.clientName || 'cliente').replace(/[^a-zA-Z0-9]/g, '_')}`;
     doc.save(fname + '.pdf');
@@ -8420,14 +8472,26 @@ function showCommitmentsForDay(dateString) {
     }
 
     // ── Assinatura de aceite ──
-    y = checkNewPage(doc, y, 28, margin, W, H, T, 'ORÇAMENTO', `Nº ${quoteNum}`);
+    y = checkNewPage(doc, y, 32, margin, W, H, T, 'ORÇAMENTO', `Nº ${quoteNum}`);
     y = pdfDivider(doc, y, margin, W, T);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7.5);
     doc.setTextColor(T.textMuted);
     doc.text('Concordo com os termos e valores descritos acima.', margin, y);
-    y += 11;
+    y += 13;
     const sigW = 70;
+    // Inserir assinatura do usuário (Prestador) acima da linha direita
+    if (userSignature) {
+      try {
+        const sigImg = new Image(); sigImg.src = userSignature;
+        const sigAspect = (sigImg.naturalWidth || 200) / Math.max(sigImg.naturalHeight || 60, 1);
+        const sigMaxW = sigW - 4; const sigMaxH = 12;
+        let siW = Math.min(sigMaxW, sigMaxH * sigAspect); let siH = siW / sigAspect;
+        if (siH > sigMaxH) { siH = sigMaxH; siW = siH * sigAspect; }
+        const siX = (W - margin - sigW) + (sigW - siW) / 2;
+        doc.addImage(userSignature, 'PNG', siX, y - siH - 1, siW, siH);
+      } catch(e) {}
+    }
     doc.setDrawColor(T.accent);
     doc.setLineWidth(0.5);
     doc.line(margin, y, margin + sigW, y);
@@ -8576,6 +8640,18 @@ function showCommitmentsForDay(dateString) {
 
     // ── Assinaturas ──
     const sigW = (W - margin * 2) / 2 - 8;
+    // Inserir imagem de assinatura do usuário (Contratado) acima da linha
+    if (userSignature) {
+      try {
+        const sigImg = new Image(); sigImg.src = userSignature;
+        const sigAspect = (sigImg.naturalWidth || 200) / Math.max(sigImg.naturalHeight || 60, 1);
+        const sigMaxW = sigW - 4; const sigMaxH = 14;
+        let siW = Math.min(sigMaxW, sigMaxH * sigAspect); let siH = siW / sigAspect;
+        if (siH > sigMaxH) { siH = sigMaxH; siW = siH * sigAspect; }
+        const siX = (W - margin) - sigW + (sigW - siW) / 2;
+        doc.addImage(userSignature, 'PNG', siX, y - siH - 1, siW, siH);
+      } catch(e) {}
+    }
     doc.setDrawColor(T.accent);
     doc.setLineWidth(0.6);
     doc.line(margin, y, margin + sigW, y);
@@ -8592,7 +8668,7 @@ function showCommitmentsForDay(dateString) {
     doc.setTextColor(T.textMuted);
     doc.text('Contratante', margin, y);
     doc.text('Contratado (DJ)', W - margin, y, { align: 'right' });
-    y += 9;
+    y += 10;
 
     // Testemunhas
     doc.setDrawColor(T.line);
@@ -8699,6 +8775,355 @@ function showCommitmentsForDay(dateString) {
     if (btn) btn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
   }
   document.getElementById('theme-toggle-btn')?.addEventListener('click', toggleTheme);
+
+  // =====================================================
+  // SISTEMA DE ASSINATURA DIGITAL
+  // Técnica: Bezier Curves + Velocity-based stroke width
+  // para máxima naturalidade da assinatura
+  // =====================================================
+  let userSignature = localStorage.getItem('fp_user_signature') || null; // base64 PNG
+
+  // --- Inicializar preview no perfil ---
+  function updateSignaturePreview() {
+    const img = document.getElementById('signature-preview-img');
+    const placeholder = document.getElementById('signature-preview-placeholder');
+    const clearBtn = document.getElementById('signature-clear-btn');
+    if (!img) return;
+    if (userSignature) {
+      img.src = userSignature;
+      img.style.display = 'block';
+      if (placeholder) placeholder.style.display = 'none';
+      if (clearBtn) clearBtn.style.display = 'block';
+    } else {
+      img.src = '#';
+      img.style.display = 'none';
+      if (placeholder) placeholder.style.display = 'block';
+      if (clearBtn) clearBtn.style.display = 'none';
+    }
+  }
+
+  // Click no box de preview abre o modal de assinatura
+  document.getElementById('signature-preview-box')?.addEventListener('click', openSignatureModal);
+  document.getElementById('open-signature-modal-btn')?.addEventListener('click', openSignatureModal);
+  document.getElementById('signature-clear-btn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    userSignature = null;
+    localStorage.removeItem('fp_user_signature');
+    updateSignaturePreview();
+    showToast('Assinatura removida', 'info', 2000);
+  });
+
+  // --- Canvas de desenho ---
+  let sigCanvas, sigCtx;
+  let sigDrawing = false;
+  let sigColor = '#1a1a2e';
+  let sigLineWidth = 2.5;
+  let sigPoints = []; // histórico de pontos para undo
+  let sigStrokes = []; // cada stroke é um array de pontos
+  let sigCurrentStroke = [];
+  let sigLastPoint = null;
+  let sigLastTime = null;
+  let sigLastVelocity = 0;
+
+  function openSignatureModal() {
+    const modal = document.getElementById('signature-capture-modal');
+    if (!modal) return;
+    modal.classList.add('active');
+    // Aguarda o modal renderizar para inicializar o canvas
+    setTimeout(initSignatureCanvas, 100);
+  }
+
+  function closeSignatureModal() {
+    const modal = document.getElementById('signature-capture-modal');
+    if (modal) modal.classList.remove('active');
+  }
+
+  function initSignatureCanvas() {
+    sigCanvas = document.getElementById('signature-canvas');
+    if (!sigCanvas) return;
+    // Ajusta tamanho real do canvas ao tamanho CSS
+    const rect = sigCanvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    sigCanvas.width = rect.width * dpr;
+    sigCanvas.height = Math.max(rect.width * 0.38, 120) * dpr;
+    sigCanvas.style.height = Math.max(rect.width * 0.38, 120) + 'px';
+    sigCtx = sigCanvas.getContext('2d');
+    sigCtx.scale(dpr, dpr);
+    sigCtx.fillStyle = '#ffffff';
+    sigCtx.fillRect(0, 0, sigCanvas.width, sigCanvas.height);
+    sigCtx.lineCap = 'round';
+    sigCtx.lineJoin = 'round';
+    sigStrokes = [];
+    sigCurrentStroke = [];
+
+    // Se já tem assinatura, exibe ela no canvas para edição
+    if (userSignature) {
+      const img = new Image();
+      img.onload = () => {
+        const ph = Math.max(rect.width * 0.38, 120);
+        const scaleX = rect.width / img.width;
+        const scaleY = ph / img.height;
+        const sc = Math.min(scaleX, scaleY, 1);
+        const dx = (rect.width - img.width * sc) / 2;
+        const dy = (ph - img.height * sc) / 2;
+        sigCtx.drawImage(img, dx, dy, img.width * sc, img.height * sc);
+      };
+      img.src = userSignature;
+    }
+
+    // Hint
+    const hint = document.getElementById('sig-canvas-hint');
+
+    // Touch events
+    sigCanvas.addEventListener('pointerdown', sigOnDown);
+    sigCanvas.addEventListener('pointermove', sigOnMove);
+    sigCanvas.addEventListener('pointerup', sigOnUp);
+    sigCanvas.addEventListener('pointerleave', sigOnUp);
+    sigCanvas.addEventListener('pointercancel', sigOnUp);
+  }
+
+  function getSigPos(e) {
+    const rect = sigCanvas.getBoundingClientRect();
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      t: Date.now(),
+      pressure: e.pressure > 0 ? e.pressure : 0.5
+    };
+  }
+
+  function sigOnDown(e) {
+    e.preventDefault();
+    sigDrawing = true;
+    sigCurrentStroke = [];
+    const pos = getSigPos(e);
+    sigLastPoint = pos;
+    sigLastTime = pos.t;
+    sigLastVelocity = 0;
+    sigCurrentStroke.push(pos);
+
+    // Oculta hint
+    const hint = document.getElementById('sig-canvas-hint');
+    if (hint) hint.style.display = 'none';
+
+    sigCtx.beginPath();
+    sigCtx.arc(pos.x, pos.y, sigLineWidth / 2, 0, Math.PI * 2);
+    sigCtx.fillStyle = sigColor;
+    sigCtx.fill();
+  }
+
+  function sigOnMove(e) {
+    if (!sigDrawing) return;
+    e.preventDefault();
+    const pos = getSigPos(e);
+    sigCurrentStroke.push(pos);
+
+    if (sigCurrentStroke.length < 3) return;
+
+    // Calcular velocidade para simular variação de espessura (traço natural)
+    const dt = Math.max(pos.t - sigLastTime, 1);
+    const dx = pos.x - sigLastPoint.x;
+    const dy = pos.y - sigLastPoint.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const velocity = dist / dt;
+    const smoothVelocity = sigLastVelocity * 0.7 + velocity * 0.3;
+    sigLastVelocity = smoothVelocity;
+
+    // Quanto mais rápido, mais fino o traço (naturalidade máxima)
+    const speedFactor = Math.max(0.4, Math.min(1.6, 1 - smoothVelocity * 0.8));
+    const strokeW = sigLineWidth * speedFactor * (pos.pressure * 1.2 + 0.3);
+
+    // Usar Bezier quadrático entre os pontos para suavidade
+    const len = sigCurrentStroke.length;
+    const p0 = sigCurrentStroke[len - 3];
+    const p1 = sigCurrentStroke[len - 2];
+    const p2 = sigCurrentStroke[len - 1];
+    const cpx = (p0.x + p2.x) / 2;
+    const cpy = (p0.y + p2.y) / 2;
+
+    sigCtx.beginPath();
+    sigCtx.moveTo((p0.x + p1.x) / 2, (p0.y + p1.y) / 2);
+    sigCtx.quadraticCurveTo(p1.x, p1.y, cpx, cpy);
+    sigCtx.strokeStyle = sigColor;
+    sigCtx.lineWidth = strokeW;
+    sigCtx.lineCap = 'round';
+    sigCtx.lineJoin = 'round';
+    sigCtx.stroke();
+
+    sigLastPoint = pos;
+    sigLastTime = pos.t;
+  }
+
+  function sigOnUp(e) {
+    if (!sigDrawing) return;
+    sigDrawing = false;
+    if (sigCurrentStroke.length > 0) {
+      sigStrokes.push([...sigCurrentStroke]);
+    }
+    sigCurrentStroke = [];
+  }
+
+  // Undo — redesenha todos os strokes exceto o último
+  document.getElementById('sig-undo-btn')?.addEventListener('click', () => {
+    if (!sigCtx || sigStrokes.length === 0) return;
+    sigStrokes.pop();
+    redrawAllStrokes();
+  });
+
+  function redrawAllStrokes() {
+    if (!sigCtx || !sigCanvas) return;
+    const rect = sigCanvas.getBoundingClientRect();
+    sigCtx.fillStyle = '#ffffff';
+    sigCtx.fillRect(0, 0, sigCanvas.width, sigCanvas.height);
+    sigStrokes.forEach(stroke => {
+      if (stroke.length === 0) return;
+      for (let i = 0; i < stroke.length; i++) {
+        if (i === 0) {
+          sigCtx.beginPath();
+          sigCtx.arc(stroke[i].x, stroke[i].y, sigLineWidth / 2, 0, Math.PI * 2);
+          sigCtx.fillStyle = sigColor;
+          sigCtx.fill();
+          continue;
+        }
+        if (stroke.length < 3 || i < 2) continue;
+        const p0 = stroke[i - 2];
+        const p1 = stroke[i - 1];
+        const p2 = stroke[i];
+        const dt = Math.max(p2.t - p1.t, 1);
+        const dist = Math.sqrt((p2.x-p1.x)**2 + (p2.y-p1.y)**2);
+        const vel = Math.min(dist / dt, 2);
+        const sw = sigLineWidth * Math.max(0.5, 1 - vel * 0.5);
+        sigCtx.beginPath();
+        sigCtx.moveTo((p0.x+p1.x)/2, (p0.y+p1.y)/2);
+        sigCtx.quadraticCurveTo(p1.x, p1.y, (p1.x+p2.x)/2, (p1.y+p2.y)/2);
+        sigCtx.strokeStyle = sigColor;
+        sigCtx.lineWidth = sw;
+        sigCtx.lineCap = 'round';
+        sigCtx.lineJoin = 'round';
+        sigCtx.stroke();
+      }
+    });
+  }
+
+  // Limpar canvas
+  document.getElementById('sig-clear-canvas-btn')?.addEventListener('click', () => {
+    if (!sigCtx || !sigCanvas) return;
+    sigStrokes = [];
+    sigCtx.fillStyle = '#ffffff';
+    sigCtx.fillRect(0, 0, sigCanvas.width, sigCanvas.height);
+    const hint = document.getElementById('sig-canvas-hint');
+    if (hint) hint.style.display = 'flex';
+  });
+
+  // Seletor de cor
+  document.querySelectorAll('.sig-color-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sig-color-btn').forEach(b => b.style.border = '2px solid transparent');
+      btn.style.border = '2px solid var(--primary)';
+      sigColor = btn.dataset.color;
+    });
+  });
+
+  // Seletor de espessura
+  document.querySelectorAll('.sig-size-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sig-size-btn').forEach(b => {
+        b.style.border = '1.5px solid var(--border)';
+        b.style.background = 'var(--surface2)';
+        b.style.color = 'var(--text2)';
+        b.style.fontWeight = '400';
+      });
+      btn.style.border = '1.5px solid var(--primary)';
+      btn.style.background = 'var(--primary-glow)';
+      btn.style.color = 'var(--primary)';
+      btn.style.fontWeight = '600';
+      sigLineWidth = parseFloat(btn.dataset.size);
+    });
+  });
+
+  // Salvar assinatura
+  document.getElementById('save-signature-btn')?.addEventListener('click', () => {
+    if (!sigCanvas) return;
+    // Cortar espaço em branco da assinatura
+    const trimmed = trimSignatureCanvas(sigCanvas);
+    if (!trimmed) {
+      showToast('Por favor, faça sua assinatura primeiro', 'warning');
+      return;
+    }
+    userSignature = trimmed;
+    localStorage.setItem('fp_user_signature', userSignature);
+    updateSignaturePreview();
+    closeSignatureModal();
+    showToast('Assinatura salva com sucesso!', 'success');
+  });
+
+  // Cancelar
+  document.getElementById('cancel-signature-btn')?.addEventListener('click', closeSignatureModal);
+  document.getElementById('close-signature-modal')?.addEventListener('click', closeSignatureModal);
+
+  // Trim canvas — remove bordas em branco para assinatura compacta
+  function trimSignatureCanvas(canvas) {
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const h = canvas.height;
+    const data = ctx.getImageData(0, 0, w, h).data;
+    let top = h, bottom = 0, left = w, right = 0;
+    let hasContent = false;
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const idx = (y * w + x) * 4;
+        const r = data[idx], g = data[idx+1], b = data[idx+2], a = data[idx+3];
+        // Pixel não é branco/transparente
+        if (a > 10 && !(r > 240 && g > 240 && b > 240)) {
+          if (y < top) top = y;
+          if (y > bottom) bottom = y;
+          if (x < left) left = x;
+          if (x > right) right = x;
+          hasContent = true;
+        }
+      }
+    }
+    if (!hasContent) return null;
+    const pad = 10;
+    top = Math.max(0, top - pad);
+    bottom = Math.min(h, bottom + pad);
+    left = Math.max(0, left - pad);
+    right = Math.min(w, right + pad);
+    const tw = right - left;
+    const th = bottom - top;
+    if (tw < 5 || th < 5) return null;
+    const tmpCanvas = document.createElement('canvas');
+    tmpCanvas.width = tw;
+    tmpCanvas.height = th;
+    const tmpCtx = tmpCanvas.getContext('2d');
+    tmpCtx.fillStyle = '#ffffff';
+    tmpCtx.fillRect(0, 0, tw, th);
+    tmpCtx.drawImage(canvas, left, top, tw, th, 0, 0, tw, th);
+    return tmpCanvas.toDataURL('image/png');
+  }
+
+  // Inicializar preview ao carregar a página
+  setTimeout(updateSignaturePreview, 300);
+
+  // --- INJETAR ASSINATURA NOS PDFs ---
+  // Função auxiliar para inserir a imagem de assinatura no PDF jsPDF
+  // Retorna nova posição y após inserção
+  function pdfAddUserSignature(doc, x, y, maxW, maxH, T) {
+    if (!userSignature) return y;
+    try {
+      const img = new Image();
+      img.src = userSignature;
+      const aspect = img.naturalWidth / Math.max(img.naturalHeight, 1);
+      let sw = Math.min(maxW, img.naturalWidth / 3.78); // px → mm
+      let sh = sw / aspect;
+      if (sh > maxH) { sh = maxH; sw = sh * aspect; }
+      if (sw < 5) sw = 30;
+      // Posição centralizada no espaço dado
+      const cx = x + (maxW - sw) / 2;
+      doc.addImage(userSignature, 'PNG', cx, y - sh - 1, sw, sh);
+      return y;
+    } catch(err) { return y; }
+  }
 
   // =====================================================
   // FAB BUTTON
@@ -10811,6 +11236,49 @@ function showCommitmentsForDay(dateString) {
       <div class="btn-container">
         <button type="button" class="btn btn-danger" data-action="close-modal">Cancelar</button>
         <button type="button" class="btn" id="save-edit-doc-btn"><i class="fas fa-save"></i> Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       MODAL CAPTURA DE ASSINATURA
+  ============================================ -->
+  <div id="signature-capture-modal" class="modal" style="z-index:700;">
+    <div class="modal-content" style="max-width:500px;">
+      <div class="modal-handle"></div>
+      <span class="close-button" id="close-signature-modal">&times;</span>
+      <h2 style="margin-bottom:4px;"><i class="fas fa-pen-nib" style="color:var(--primary);"></i> Criar Assinatura</h2>
+      <p style="color:var(--text2);font-size:0.83rem;margin-bottom:14px;">Assine com o dedo ou mouse no campo abaixo. Sua assinatura será inserida automaticamente em todos os documentos gerados.</p>
+
+      <!-- Toolbar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px;flex-wrap:wrap;">
+        <div style="display:flex;gap:6px;align-items:center;">
+          <label style="font-size:0.78rem;color:var(--text2);font-weight:600;">Cor:</label>
+          <button type="button" class="sig-color-btn active" data-color="#1a1a2e" style="background:#1a1a2e;width:26px;height:26px;border-radius:50%;border:2px solid var(--primary);cursor:pointer;"></button>
+          <button type="button" class="sig-color-btn" data-color="#1d4ed8" style="background:#1d4ed8;width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer;"></button>
+          <button type="button" class="sig-color-btn" data-color="#1a472a" style="background:#1a472a;width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer;"></button>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <label style="font-size:0.78rem;color:var(--text2);font-weight:600;">Espessura:</label>
+          <button type="button" class="sig-size-btn" data-size="1.5" style="font-size:0.72rem;padding:3px 8px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;">Fina</button>
+          <button type="button" class="sig-size-btn active" data-size="2.5" style="font-size:0.72rem;padding:3px 8px;border-radius:var(--r-sm);border:1.5px solid var(--primary);background:var(--primary-glow);color:var(--primary);cursor:pointer;font-weight:600;">Média</button>
+          <button type="button" class="sig-size-btn" data-size="3.8" style="font-size:0.72rem;padding:3px 8px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;">Grossa</button>
+        </div>
+        <button type="button" id="sig-undo-btn" style="background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-sm);color:var(--text2);padding:5px 10px;cursor:pointer;font-size:0.8rem;font-family:var(--font-body);"><i class="fas fa-undo"></i></button>
+        <button type="button" id="sig-clear-canvas-btn" style="background:var(--danger-bg);border:none;border-radius:var(--r-sm);color:var(--danger);padding:5px 10px;cursor:pointer;font-size:0.8rem;font-family:var(--font-body);"><i class="fas fa-trash"></i> Limpar</button>
+      </div>
+
+      <!-- Canvas -->
+      <div style="position:relative;border-radius:var(--r-md);overflow:hidden;border:2px solid var(--primary);background:#fff;touch-action:none;">
+        <canvas id="signature-canvas" style="display:block;width:100%;cursor:crosshair;touch-action:none;"></canvas>
+        <div id="sig-canvas-hint" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0.35;">
+          <span style="font-size:0.85rem;color:#94a3b8;font-style:italic;">Assine aqui...</span>
+        </div>
+      </div>
+
+      <div class="btn-container" style="margin-top:16px;">
+        <button type="button" class="btn btn-danger" id="cancel-signature-btn">Cancelar</button>
+        <button type="button" class="btn" id="save-signature-btn" style="background:linear-gradient(135deg,var(--primary),var(--accent));"><i class="fas fa-check"></i> Salvar Assinatura</button>
       </div>
     </div>
   </div>
