@@ -2656,6 +2656,415 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
+  /* ==========================================
+     MELHORIAS GLOBAIS — v2 UPGRADE
+  ========================================== */
+
+  /* ── Dashboard Hero melhorado ── */
+  .dashboard-hero {
+    background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #7c3aed 100%) !important;
+    box-shadow: 0 8px 32px rgba(37,99,235,0.35) !important;
+  }
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: var(--space-md);
+    padding-top: var(--space-md);
+    border-top: 1px solid rgba(255,255,255,0.18);
+  }
+  .hero-stat {
+    background: rgba(255,255,255,0.1);
+    border-radius: var(--r-sm);
+    padding: 8px 10px;
+    text-align: center;
+  }
+  .hero-stat-value { font-size: 0.95rem !important; }
+
+  /* ── Dashboard: Próximos Eventos lista melhorada ── */
+  .upcoming-event-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border-radius: var(--r-md);
+    background: var(--surface2);
+    border: 1px solid var(--border-soft);
+    cursor: pointer;
+    transition: var(--t-fast);
+    margin-bottom: 8px;
+  }
+  .upcoming-event-item:hover, .upcoming-event-item:active { background: var(--primary-glow); border-color: rgba(59,130,246,0.2); transform: translateX(2px); }
+  .upcoming-event-date-badge {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    width: 42px; height: 42px; flex-shrink: 0;
+    background: var(--primary); color: white;
+    border-radius: var(--r-sm);
+    font-family: var(--font-display);
+  }
+  .upcoming-event-date-badge .day { font-size: 1.1rem; font-weight: 800; line-height: 1; }
+  .upcoming-event-date-badge .mon { font-size: 0.58rem; font-weight: 600; opacity: 0.85; text-transform: uppercase; }
+  .upcoming-event-info { flex: 1; min-width: 0; }
+  .upcoming-event-title { font-weight: 700; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .upcoming-event-meta { font-size: 0.75rem; color: var(--text3); margin-top: 1px; }
+  .upcoming-event-value { font-size: 0.82rem; font-weight: 700; color: var(--success); flex-shrink: 0; }
+
+  /* ── Countdown badge no dashboard ── */
+  .countdown-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 0.68rem; font-weight: 700;
+    padding: 3px 8px;
+    border-radius: var(--r-full);
+    background: var(--warning-bg);
+    color: var(--warning);
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .countdown-badge.today { background: var(--danger-bg); color: var(--danger); animation: pulse-badge 1.5s infinite; }
+  .countdown-badge.soon { background: rgba(139,92,246,0.12); color: var(--accent); }
+  @keyframes pulse-badge { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+  /* ── Melhorias Dashboard Summary Cards ── */
+  .summary-card { transition: var(--t-normal) !important; }
+  .summary-card:hover { transform: translateY(-2px); box-shadow: var(--card-shadow-hover) !important; }
+
+  /* ── Receita Anual no hero ── */
+  .hero-annual-row {
+    display: flex; gap: 10px; margin-top: 10px;
+  }
+  .hero-annual-item {
+    flex: 1; background: rgba(255,255,255,0.12); border-radius: var(--r-sm); padding: 8px 10px;
+  }
+  .hero-annual-label { font-size: 0.65rem; opacity: 0.75; text-transform: uppercase; letter-spacing: 0.05em; }
+  .hero-annual-value { font-size: 0.95rem; font-weight: 800; margin-top: 2px; }
+
+  /* ── Clientes: melhor layout ── */
+  .client-card-v2 {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 14px;
+    background: var(--surface);
+    border-radius: var(--r-md);
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--card-shadow);
+    cursor: pointer;
+    transition: var(--t-fast);
+    margin-bottom: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  .client-card-v2:hover { box-shadow: var(--card-shadow-hover); transform: translateX(2px); }
+  .client-avatar {
+    width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; font-weight: 800; color: white;
+    font-family: var(--font-display);
+  }
+  .client-info { flex: 1; min-width: 0; }
+  .client-name { font-weight: 700; font-size: 0.93rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .client-sub { font-size: 0.76rem; color: var(--text3); margin-top: 1px; }
+  .client-stats { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; }
+  .client-event-count { font-size: 0.7rem; font-weight: 600; color: var(--primary); background: var(--primary-glow); padding: 2px 7px; border-radius: var(--r-full); }
+  .client-total-val { font-size: 0.82rem; font-weight: 700; color: var(--success); }
+
+  /* ── Recibos: layout melhorado ── */
+  .receipt-card-v2 {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border-radius: var(--r-md);
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--card-shadow);
+    cursor: pointer;
+    transition: var(--t-fast);
+    margin-bottom: 8px;
+  }
+  .receipt-card-v2:hover { box-shadow: var(--card-shadow-hover); }
+  .receipt-icon-circle {
+    width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    background: var(--success-bg); color: var(--success);
+  }
+  .receipt-icon-circle.pendente { background: var(--warning-bg); color: var(--warning); }
+  .receipt-info { flex: 1; min-width: 0; }
+  .receipt-desc { font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .receipt-meta { font-size: 0.75rem; color: var(--text3); margin-top: 1px; }
+  .receipt-amount { font-weight: 800; font-size: 1rem; color: var(--success); flex-shrink: 0; }
+
+  /* ── Transações: melhorado ── */
+  .tx-item-v2 {
+    display: flex; align-items: center; gap: 11px;
+    padding: 11px 12px;
+    border-radius: var(--r-md);
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--card-shadow);
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: var(--t-fast);
+  }
+  .tx-item-v2:hover { transform: translateX(2px); box-shadow: var(--card-shadow-hover); }
+  .tx-category-dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  }
+  .tx-icon { width: 36px; height: 36px; border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.9rem; }
+  .tx-info { flex: 1; min-width: 0; }
+  .tx-desc { font-weight: 600; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tx-meta { font-size: 0.73rem; color: var(--text3); margin-top: 1px; }
+  .tx-amount { font-weight: 800; font-size: 0.95rem; flex-shrink: 0; text-align: right; }
+  .tx-amount.receita { color: var(--success); }
+  .tx-amount.despesa { color: var(--danger); }
+
+  /* ── Pedidos: melhorado ── */
+  .order-card-v2 {
+    background: var(--surface);
+    border-radius: var(--r-md);
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--card-shadow);
+    padding: 14px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: var(--t-fast);
+    position: relative;
+    overflow: hidden;
+  }
+  .order-card-v2::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  }
+  .order-card-v2.confirmado::before { background: var(--success); }
+  .order-card-v2.agendado::before { background: var(--warning); }
+  .order-card-v2.realizado::before { background: var(--accent); }
+  .order-card-v2.cancelado::before { background: var(--danger); }
+  .order-card-v2:hover { box-shadow: var(--card-shadow-hover); transform: translateY(-1px); }
+
+  /* ── Agenda: evento item melhorado ── */
+  .commitment-card-v2 {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border-radius: var(--r-md);
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--card-shadow);
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: var(--t-fast);
+    position: relative;
+    overflow: hidden;
+  }
+  .commitment-card-v2:hover { box-shadow: var(--card-shadow-hover); }
+  .commitment-date-col { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+  .commitment-day { font-size: 1.3rem; font-weight: 800; line-height: 1; font-family: var(--font-display); }
+  .commitment-month { font-size: 0.62rem; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; }
+  .commitment-time-badge { font-size: 0.65rem; font-weight: 700; margin-top: 3px; padding: 2px 6px; border-radius: var(--r-full); background: var(--primary-glow); color: var(--primary); }
+  .commitment-body { flex: 1; min-width: 0; }
+  .commitment-title-v2 { font-weight: 700; font-size: 0.92rem; }
+  .commitment-meta-v2 { font-size: 0.75rem; color: var(--text3); margin-top: 2px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .commitment-meta-v2 span { display: flex; align-items: center; gap: 3px; }
+  .commitment-status-badge {
+    font-size: 0.65rem; font-weight: 700; padding: 3px 9px;
+    border-radius: var(--r-full); flex-shrink: 0; align-self: flex-start;
+  }
+
+  /* ── Quick Stats bar no dashboard ── */
+  .dash-quick-stats {
+    display: grid; grid-template-columns: repeat(2,1fr); gap: 10px;
+  }
+  .dash-qs-card {
+    background: var(--surface); border-radius: var(--r-md);
+    border: 1px solid var(--border-soft); box-shadow: var(--card-shadow);
+    padding: 12px 14px; cursor: pointer; transition: var(--t-fast);
+  }
+  .dash-qs-card:hover { box-shadow: var(--card-shadow-hover); transform: translateY(-2px); }
+  .dash-qs-label { font-size: 0.7rem; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+  .dash-qs-value { font-size: 1.2rem; font-weight: 800; font-family: var(--font-display); }
+  .dash-qs-sub { font-size: 0.7rem; color: var(--text3); margin-top: 2px; }
+
+  /* ── Metas: progress melhorado ── */
+  .goal-card-v2 {
+    background: var(--surface); border-radius: var(--r-md);
+    border: 1px solid var(--border-soft); box-shadow: var(--card-shadow);
+    padding: 14px; margin-bottom: 10px; transition: var(--t-fast);
+  }
+  .goal-card-v2:hover { box-shadow: var(--card-shadow-hover); }
+  .goal-progress-bar { height: 8px; border-radius: var(--r-full); background: var(--surface3); overflow: hidden; margin: 10px 0 4px; }
+  .goal-progress-fill { height: 100%; border-radius: var(--r-full); transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1); }
+
+  /* ── Modal melhorado ── */
+  .modal-content {
+    scroll-behavior: smooth;
+  }
+
+  /* ── Backup card melhorado ── */
+  .backup-action-card {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px; background: var(--surface2);
+    border-radius: var(--r-md); border: 1px solid var(--border-soft);
+    margin-bottom: 10px; cursor: pointer; transition: var(--t-fast);
+  }
+  .backup-action-card:hover { background: var(--primary-glow); border-color: rgba(59,130,246,0.25); }
+  .backup-action-icon { width: 46px; height: 46px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+  .backup-action-body { flex: 1; }
+  .backup-action-title { font-weight: 700; font-size: 0.92rem; }
+  .backup-action-desc { font-size: 0.78rem; color: var(--text3); margin-top: 2px; }
+
+  /* ── Perfil: melhorado ── */
+  .profile-header-card {
+    background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+    border-radius: var(--r-lg); padding: 24px 20px; color: white;
+    display: flex; align-items: center; gap: 16px; margin-bottom: 4px;
+    box-shadow: 0 8px 32px rgba(37,99,235,0.3);
+  }
+  .profile-avatar {
+    width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 800;
+    border: 3px solid rgba(255,255,255,0.4); flex-shrink: 0;
+  }
+  .profile-name { font-size: 1.2rem; font-weight: 800; }
+  .profile-doc { font-size: 0.82rem; opacity: 0.82; margin-top: 2px; }
+
+  /* ── Pacotes: card melhorado ── */
+  .package-card-v2 {
+    background: var(--surface); border-radius: var(--r-md);
+    border: 1px solid var(--border-soft); box-shadow: var(--card-shadow);
+    padding: 14px; margin-bottom: 8px; transition: var(--t-fast);
+    position: relative; overflow: hidden;
+  }
+  .package-card-v2::before { content:''; position:absolute; top:0; right:0; width:60px; height:60px; background:var(--primary-glow); border-radius: 0 var(--r-md) 0 60px; }
+  .package-card-v2:hover { box-shadow: var(--card-shadow-hover); }
+  .package-tag { font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:var(--r-full); background:var(--primary-glow); color:var(--primary); display:inline-flex; align-items:center; gap:4px; }
+
+  /* ── Empty state melhorado ── */
+  .empty-state {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 32px 20px; text-align: center;
+  }
+  .empty-state-icon {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: var(--surface3); display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; color: var(--text3); margin-bottom: 12px;
+    border: 2px dashed var(--border);
+  }
+  .empty-state h4 { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .empty-state p { font-size: 0.83rem; color: var(--text3); line-height: 1.5; }
+
+  /* ── PDF stamp visual na lista de documentos ── */
+  .doc-saved-card {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; background: var(--surface2);
+    border-radius: var(--r-md); border: 1px solid var(--border-soft);
+    margin-bottom: 6px; cursor: pointer; transition: var(--t-fast);
+  }
+  .doc-saved-card:hover { background: var(--primary-glow); border-color: rgba(59,130,246,0.2); }
+  .doc-type-badge { width: 38px; height: 38px; border-radius: var(--r-sm); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 800; }
+
+  /* ── Animações de entrada suave para cards ── */
+  @keyframes slideInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .tab-content.active > * {
+    animation: slideInUp 0.3s ease both;
+  }
+  .tab-content.active > *:nth-child(1) { animation-delay: 0.00s; }
+  .tab-content.active > *:nth-child(2) { animation-delay: 0.04s; }
+  .tab-content.active > *:nth-child(3) { animation-delay: 0.08s; }
+  .tab-content.active > *:nth-child(4) { animation-delay: 0.12s; }
+  .tab-content.active > *:nth-child(5) { animation-delay: 0.16s; }
+
+  /* ── Melhoria visual nos gráficos ── */
+  .chart-container { border-radius: var(--r-sm); overflow: hidden; }
+
+  /* ── Badge de notificação urgente ── */
+  .urgent-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 0.65rem; font-weight: 700; padding: 2px 7px;
+    border-radius: var(--r-full); background: var(--danger-bg); color: var(--danger);
+    animation: pulse-badge 2s infinite;
+  }
+
+  /* ── Saldo a receber no dashboard hero ── */
+  .hero-balance-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 14px; padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,0.18);
+  }
+  .hero-balance-item { flex: 1; }
+  .hero-balance-item + .hero-balance-item { border-left: 1px solid rgba(255,255,255,0.18); padding-left: 12px; }
+  .hero-balance-label { font-size: 0.68rem; opacity: 0.72; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+  .hero-balance-val { font-size: 1.1rem; font-weight: 800; font-family: var(--font-display); margin-top: 3px; }
+
+  /* ── Tabela melhorada ── */
+  .table-wrapper table thead th {
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+    color: var(--text3) !important;
+    background: var(--surface2) !important;
+    border-bottom: 2px solid var(--border) !important;
+    padding: 10px 12px !important;
+  }
+  .table-wrapper table tbody tr:hover { background: var(--surface2); }
+  .table-wrapper table tbody td { padding: 11px 12px !important; font-size: 0.86rem !important; }
+
+  /* ── Checklist progress melhorado ── */
+  .checklist-progress { height: 10px !important; border-radius: var(--r-full) !important; overflow: hidden; background: var(--surface3) !important; margin: 10px 0 !important; }
+  .checklist-progress-bar { background: linear-gradient(90deg, var(--success), #34d399) !important; border-radius: var(--r-full) !important; transition: width 0.5s cubic-bezier(0.34,1.56,0.64,1) !important; }
+
+  /* ── Evento com saldo em aberto — destaque ── */
+  .saldo-aberto-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 0.67rem; font-weight: 700; padding: 2px 7px; border-radius: var(--r-full); background: var(--danger-bg); color: var(--danger); }
+  .saldo-ok-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 0.67rem; font-weight: 700; padding: 2px 7px; border-radius: var(--r-full); background: var(--success-bg); color: var(--success); }
+
+  /* ── Manutenção: card melhorado ── */
+  .maint-card-v2 {
+    background: var(--surface); border-radius: var(--r-md);
+    border: 1px solid var(--border-soft); box-shadow: var(--card-shadow);
+    overflow: hidden; margin-bottom: 10px; transition: var(--t-fast);
+  }
+  .maint-card-v2:hover { box-shadow: var(--card-shadow-hover); }
+  .maint-card-header { display: flex; align-items: center; gap: 10px; padding: 12px 14px; }
+  .maint-sev-bar { width: 4px; align-self: stretch; flex-shrink: 0; border-radius: 2px; }
+  .maint-sev-bar.alta { background: var(--danger); }
+  .maint-sev-bar.media { background: var(--warning); }
+  .maint-sev-bar.baixa { background: var(--success); }
+  .maint-card-body { padding: 0 14px 12px 14px; }
+  .maint-card-footer { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: var(--surface2); border-top: 1px solid var(--border-soft); }
+
+  /* ── Scroll suave no conteúdo ── */
+  .transactions-list-container { scroll-behavior: smooth; }
+
+  /* ── Input focus melhorado ── */
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px var(--input-focus) !important;
+  }
+
+  /* ── Btn loading state ── */
+  .btn.loading { opacity: 0.7; pointer-events: none; }
+  .btn.loading::after { content: ''; display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; margin-left: 8px; vertical-align: middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Dashboard: Saldo a Receber de Eventos ── */
+  .dash-ar-card {
+    background: linear-gradient(135deg, #065f46, #059669);
+    border-radius: var(--r-md); padding: 14px 16px; color: white;
+    box-shadow: 0 4px 16px rgba(5,150,105,0.25);
+  }
+  .dash-ar-label { font-size: 0.72rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+  .dash-ar-value { font-size: 1.5rem; font-weight: 800; font-family: var(--font-display); margin-top: 4px; }
+  .dash-ar-sub { font-size: 0.72rem; opacity: 0.75; margin-top: 4px; }
+
+  /* ── Highlight row when table item has linked order ── */
+  #event-type-report-results tr:hover td { background: transparent !important; }
+
+  /* ── Responsive grid para KPIs (2 col → 4 col em telas maiores) ── */
+  @media (min-width: 480px) {
+    #report-kpi-strip { grid-template-columns: repeat(4,1fr); }
+    .dash-quick-stats { grid-template-columns: repeat(4,1fr); }
+    .summary-cards { grid-template-columns: repeat(4,1fr); }
+  }
+
 </style>
 
 </head>
@@ -2683,14 +3092,72 @@
       <div class="dashboard-hero">
         <div class="hero-greeting" id="hero-greeting">Bom dia 👋</div>
         <div class="hero-name" id="hero-username">FinancePro</div>
-        <div id="hero-today-event-section" style="margin-top:12px;">
-          <div style="font-size:0.75rem;opacity:0.75;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;font-weight:600;">📅 Eventos de Hoje</div>
+        <!-- 3 métricas financeiras rápidas -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.18);">
+          <div style="background:rgba(255,255,255,0.1);border-radius:var(--r-sm);padding:9px 10px;">
+            <div style="font-size:0.62rem;opacity:0.72;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;">Receita Mês</div>
+            <div style="font-size:1rem;font-weight:800;margin-top:3px;font-family:var(--font-display);" id="hero-receitas-month">R$ 0</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.1);border-radius:var(--r-sm);padding:9px 10px;">
+            <div style="font-size:0.62rem;opacity:0.72;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;">A Receber</div>
+            <div style="font-size:1rem;font-weight:800;margin-top:3px;font-family:var(--font-display);color:#fde047;" id="hero-ar-events">R$ 0</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.1);border-radius:var(--r-sm);padding:9px 10px;">
+            <div style="font-size:0.62rem;opacity:0.72;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;">Saldo Contas</div>
+            <div style="font-size:1rem;font-weight:800;margin-top:3px;font-family:var(--font-display);" id="hero-saldo-contas">R$ 0</div>
+          </div>
+        </div>
+        <div id="hero-today-event-section" style="margin-top:14px;">
+          <div style="font-size:0.72rem;opacity:0.75;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;font-weight:700;">📅 Eventos de Hoje</div>
           <div id="hero-today-events-list"></div>
+        </div>
+      </div>
+
+      <!-- Quick Stats Grid -->
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;" id="dash-quick-stats-grid">
+        <div class="summary-card" style="cursor:pointer;" data-tab-target="pedidos">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+            <div style="width:32px;height:32px;border-radius:var(--r-sm);background:rgba(59,130,246,0.12);display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:0.9rem;flex-shrink:0;"><i class="fas fa-clipboard-check"></i></div>
+            <h3 style="font-size:0.7rem;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Pedidos Ativos</h3>
+          </div>
+          <div class="value" id="dash-qs-pedidos" style="color:var(--primary);font-size:1.5rem;">0</div>
+          <div class="trend" id="dash-qs-pedidos-sub">confirmados + agendados</div>
+        </div>
+        <div class="summary-card" style="cursor:pointer;" data-tab-target="Agenda">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+            <div style="width:32px;height:32px;border-radius:var(--r-sm);background:rgba(139,92,246,0.12);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:0.9rem;flex-shrink:0;"><i class="fas fa-calendar-alt"></i></div>
+            <h3 style="font-size:0.7rem;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Eventos / 30 dias</h3>
+          </div>
+          <div class="value" id="dash-qs-events" style="color:var(--accent);font-size:1.5rem;">0</div>
+          <div class="trend">próximos 30 dias</div>
+        </div>
+        <div class="summary-card" style="cursor:pointer;" data-tab-target="clientes">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+            <div style="width:32px;height:32px;border-radius:var(--r-sm);background:rgba(6,182,212,0.12);display:flex;align-items:center;justify-content:center;color:var(--info);font-size:0.9rem;flex-shrink:0;"><i class="fas fa-users"></i></div>
+            <h3 style="font-size:0.7rem;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Clientes</h3>
+          </div>
+          <div class="value" id="dash-qs-clients" style="color:var(--info);font-size:1.5rem;">0</div>
+          <div class="trend" id="dash-qs-clients-sub">cadastrados</div>
+        </div>
+        <div class="summary-card" style="cursor:pointer;" data-tab-target="manutencao">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+            <div style="width:32px;height:32px;border-radius:var(--r-sm);background:rgba(239,68,68,0.12);display:flex;align-items:center;justify-content:center;color:var(--danger);font-size:0.9rem;flex-shrink:0;"><i class="fas fa-tools"></i></div>
+            <h3 style="font-size:0.7rem;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Manutenção</h3>
+          </div>
+          <div class="value" id="dash-qs-maint" style="color:var(--danger);font-size:1.5rem;">0</div>
+          <div class="trend">pendentes</div>
         </div>
       </div>
 
       <!-- Notifications -->
       <div class="notifications-container" id="notifications-container"></div>
+
+      <!-- Saldo a Receber de Eventos -->
+      <div id="dash-ar-events-card" style="display:none;background:linear-gradient(135deg,#065f46,#059669);border-radius:var(--r-md);padding:14px 16px;color:white;box-shadow:0 4px 16px rgba(5,150,105,0.25);">
+        <div style="font-size:0.7rem;opacity:0.8;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;margin-bottom:4px;"><i class="fas fa-hand-holding-usd" style="margin-right:5px;"></i>Saldo a Receber — Pedidos em Aberto</div>
+        <div style="font-size:1.6rem;font-weight:800;font-family:var(--font-display);" id="dash-ar-value">R$ 0,00</div>
+        <div style="font-size:0.72rem;opacity:0.75;margin-top:4px;" id="dash-ar-sub">de <span id="dash-ar-count">0</span> pedido(s) com saldo em aberto · <span style="cursor:pointer;text-decoration:underline;" data-tab-target="pedidos">Ver pedidos →</span></div>
+      </div>
 
       <!-- Ações Rápidas -->
       <div>
@@ -2698,7 +3165,6 @@
         <div class="feature-grid quick-actions-grid">
           <div class="feature-item quick-action-item" data-action="add-new" data-type="receita"><i class="fas fa-arrow-down"></i><span>+ Receita</span></div>
           <div class="feature-item quick-action-item" data-action="add-new" data-type="despesa"><i class="fas fa-arrow-up"></i><span>+ Despesa</span></div>
-
           <div class="feature-item quick-action-item" id="add-new-receipt-btn"><i class="fas fa-file-invoice"></i><span>+ Recibo</span></div>
           <div class="feature-item quick-action-item" id="add-new-client-btn"><i class="fas fa-user-plus"></i><span>+ Cliente</span></div>
           <div class="feature-item quick-action-item" id="add-new-commitment-btn"><i class="fas fa-handshake"></i><span>+ Compromisso</span></div>
@@ -2727,9 +3193,12 @@
       <!-- Próximos Eventos -->
       <div class="card">
         <div class="card-accent-top"></div>
-        <h2><i class="fas fa-calendar-check"></i> Próximos Eventos</h2>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <h2 style="margin-bottom:0;"><i class="fas fa-calendar-check"></i> Próximos Eventos</h2>
+          <button class="btn btn-ghost btn-sm" data-tab-target="Agenda" style="font-size:0.75rem;padding:5px 10px;">Ver agenda <i class="fas fa-chevron-right" style="font-size:0.65rem;margin-left:3px;"></i></button>
+        </div>
         <div id="dashboard-upcoming-events">
-          <div class="empty-state">
+          <div class="empty-state" style="padding:24px 0;">
             <div class="empty-state-icon"><i class="fas fa-calendar"></i></div>
             <h4>Nenhum evento próximo</h4>
             <p>Adicione compromissos para vê-los aqui</p>
@@ -2740,16 +3209,16 @@
       <!-- Transações Recentes -->
       <div class="card">
         <div class="card-accent-top"></div>
-        <h2 style="margin-bottom:12px;"><i class="fas fa-clock"></i> Recentes <span style="font-size:0.78rem;color:var(--text3);font-weight:500;margin-left:4px;">(últimas 5)</span></h2>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <h2 style="margin-bottom:0;"><i class="fas fa-clock"></i> Transações Recentes</h2>
+          <button class="btn btn-ghost btn-sm" data-tab-target="transacoes" style="font-size:0.75rem;padding:5px 10px;">Ver todas <i class="fas fa-chevron-right" style="font-size:0.65rem;margin-left:3px;"></i></button>
+        </div>
         <div id="dashboard-recent-transactions">
-          <div class="empty-state" style="padding:20px;">
+          <div class="empty-state" style="padding:20px 0;">
             <div class="empty-state-icon"><i class="fas fa-receipt"></i></div>
             <h4>Sem transações</h4>
           </div>
         </div>
-        <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:12px;" data-tab-target="transacoes">
-          <i class="fas fa-list"></i> Ver todas as transações
-        </button>
       </div>
 
     </div>
@@ -2998,50 +3467,215 @@
 
     
     <div class="tab-content" id="relatorios-content">
-        <div class="card"><div class="chart-container"><canvas id="overview-chart"></canvas></div></div>
-        <div class="card"><div class="chart-container"><canvas id="monthly-report-chart"></canvas></div></div>
-        <div class="card"><div class="chart-container"><canvas id="category-report-chart"></canvas></div></div>
-        <div class="card"><div class="chart-container"><canvas id="annual-report-chart"></canvas></div></div>
 
-        <div class="card">
-          <h2><i class="fas fa-calendar-check"></i> Relatório por Tipo de Evento</h2>
-          <div class="form-group">
-            <label for="event-type-report-filter">Selecione o Tipo de Evento</label>
-            <select id="event-type-report-filter">
+      <!-- ── KPI Strip de Relatórios ── -->
+      <div id="report-kpi-strip" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+        <div class="summary-card receita" style="cursor:default;">
+          <h3><i class="fas fa-calendar-check" style="color:var(--success);margin-right:4px;"></i> Eventos</h3>
+          <div class="value" id="rpt-kpi-total-events" style="font-size:1.5rem;">0</div>
+          <div class="trend" id="rpt-kpi-events-label">total cadastrados</div>
+        </div>
+        <div class="summary-card despesa" style="cursor:default;background:var(--surface);">
+          <h3><i class="fas fa-dollar-sign" style="color:var(--primary);margin-right:4px;"></i> Receita</h3>
+          <div class="value" id="rpt-kpi-total-value" style="font-size:1.1rem;color:var(--primary);">R$ 0</div>
+          <div class="trend" id="rpt-kpi-recebido-label">R$ 0 recebido</div>
+        </div>
+        <div class="summary-card" style="cursor:default;background:var(--surface);">
+          <h3><i class="fas fa-clock" style="color:var(--warning);margin-right:4px;"></i> Pendente</h3>
+          <div class="value" id="rpt-kpi-pending" style="font-size:1.1rem;color:var(--warning);">R$ 0</div>
+          <div class="trend">a receber</div>
+        </div>
+        <div class="summary-card" style="cursor:default;background:var(--surface);">
+          <h3><i class="fas fa-percentage" style="color:var(--accent);margin-right:4px;"></i> Recebido</h3>
+          <div class="value" id="rpt-kpi-percent" style="font-size:1.5rem;color:var(--accent);">0%</div>
+          <div class="trend">do total</div>
+        </div>
+      </div>
+
+      <!-- ── Gráficos ── -->
+      <div class="card"><div class="chart-container"><canvas id="overview-chart"></canvas></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="card" style="padding:12px;"><div class="chart-container" style="height:180px;"><canvas id="monthly-report-chart"></canvas></div></div>
+        <div class="card" style="padding:12px;"><div class="chart-container" style="height:180px;"><canvas id="category-report-chart"></canvas></div></div>
+      </div>
+      <div class="card"><div class="chart-container"><canvas id="annual-report-chart"></canvas></div></div>
+
+      <!-- ── Painel de Eventos ── -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+          <h2 style="margin-bottom:0;"><i class="fas fa-calendar-check"></i> Eventos por Tipo</h2>
+          <button class="btn" id="rpt-download-pdf-btn" style="background:linear-gradient(135deg,#ef4444,#dc2626);font-size:0.82rem;padding:8px 14px;gap:6px;">
+            <i class="fas fa-file-pdf"></i> Baixar Relatório PDF
+          </button>
+        </div>
+
+        <!-- Filtros -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="event-type-report-filter" style="font-size:0.76rem;">Tipo de Evento</label>
+            <select id="event-type-report-filter" style="font-size:0.85rem;">
               <option value="">-- Todos --</option>
             </select>
           </div>
-          <div class="table-wrapper" style="margin-top: 20px;">
-            <table id="event-type-report-table">
-                <thead>
-                    <tr>
-                        <th>Cliente</th>
-                        <th>Data do Evento</th>
-                        <th>Valor do Pedido</th>
-                    </tr>
-                </thead>
-                <tbody id="event-type-report-results">
-                    </tbody>
-            </table>
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="rpt-status-filter" style="font-size:0.76rem;">Status</label>
+            <select id="rpt-status-filter" style="font-size:0.85rem;">
+              <option value="">Todos</option>
+              <option value="agendado">Agendado</option>
+              <option value="confirmado">Confirmado</option>
+              <option value="realizado">Realizado</option>
+              <option value="cancelado">Cancelado</option>
+            </select>
           </div>
         </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="rpt-date-start" style="font-size:0.76rem;">Data início</label>
+            <input type="date" id="rpt-date-start" style="font-size:0.85rem;width:100%;padding:8px 10px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);outline:none;">
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="rpt-date-end" style="font-size:0.76rem;">Data fim</label>
+            <input type="date" id="rpt-date-end" style="font-size:0.85rem;width:100%;padding:8px 10px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);outline:none;">
+          </div>
+        </div>
+
+        <!-- Pesquisa rápida -->
+        <div style="position:relative;margin-bottom:14px;">
+          <i class="fas fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:0.85rem;pointer-events:none;"></i>
+          <input type="text" id="rpt-search-input" placeholder="Buscar por cliente ou tipo de evento..." style="width:100%;padding:9px 12px 9px 34px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.85rem;outline:none;">
+        </div>
+
+        <!-- Contagem -->
+        <div id="rpt-count-badge" style="font-size:0.78rem;color:var(--text3);margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+          <i class="fas fa-list-ul" style="color:var(--primary);"></i>
+          <span id="rpt-count-text">0 eventos encontrados</span>
+        </div>
+
+        <!-- Tabela -->
+        <div class="table-wrapper">
+          <table id="event-type-report-table">
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Tipo / Data</th>
+                <th>Status</th>
+                <th>Valor</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="event-type-report-results"></tbody>
+          </table>
+        </div>
+
+        <!-- Hint clique -->
+        <p style="font-size:0.73rem;color:var(--text3);margin-top:8px;text-align:center;">
+          <i class="fas fa-hand-pointer" style="margin-right:4px;"></i>Toque em uma linha para abrir o pedido
+        </p>
+      </div>
+
     </div>
 
-    <div class="tab-content" id="usuario-content"><div class="card"><form id="user-info-form"><h2>Minhas Informações</h2><div class="form-group"><label for="user-name">Nome</label><input type="text" id="user-name"/></div><div class="form-group"><label for="user-cpf">CPF/CNPJ</label><input type="text" id="user-cpf"/></div><div class="form-group"><label for="user-logo">Logo da Empresa (recomendado: imagem pequena)</label><input type="file" id="user-logo" accept="image/*"/> <img id="logo-preview" src="#" alt="Prévia da Logo" style="display: none;"/></div>
-<div class="form-group">
-  <label><i class="fas fa-signature" style="color:var(--primary);margin-right:5px;"></i> Minha Assinatura (usada em todos os documentos)</label>
-  <div id="signature-preview-box" style="border:1.5px solid var(--input-border);border-radius:var(--r-md);padding:12px;background:var(--input-bg);min-height:80px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--t-fast);position:relative;">
-    <img id="signature-preview-img" src="#" alt="Assinatura" style="display:none;max-height:70px;max-width:100%;object-fit:contain;filter:var(--sig-filter,none);">
-    <div id="signature-preview-placeholder" style="text-align:center;color:var(--text3);">
-      <i class="fas fa-pen-nib" style="font-size:1.8rem;display:block;margin-bottom:6px;"></i>
-      <span style="font-size:0.82rem;">Toque para criar sua assinatura</span>
+    <div class="tab-content" id="usuario-content">
+      <!-- Profile header visual -->
+      <div style="background:linear-gradient(135deg,#1d4ed8 0%,#7c3aed 100%);border-radius:var(--r-lg);padding:22px 20px;color:white;box-shadow:0 8px 32px rgba(37,99,235,0.3);display:flex;align-items:center;gap:16px;">
+        <div id="profile-avatar-circle" style="width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:800;border:3px solid rgba(255,255,255,0.4);flex-shrink:0;font-family:var(--font-display);">DJ</div>
+        <div>
+          <div style="font-size:1.15rem;font-weight:800;font-family:var(--font-display);" id="profile-display-name">Seu Nome</div>
+          <div style="font-size:0.8rem;opacity:0.8;margin-top:3px;" id="profile-display-doc">CPF/CNPJ não definido</div>
+          <div style="font-size:0.72rem;opacity:0.65;margin-top:2px;">DJ Manager Pro</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <form id="user-info-form">
+          <h2 style="margin-bottom:18px;"><i class="fas fa-user-circle"></i> Minhas Informações</h2>
+
+          <div class="form-group">
+            <label for="user-name"><i class="fas fa-user" style="color:var(--primary);margin-right:5px;"></i>Nome / Nome da Empresa</label>
+            <input type="text" id="user-name" placeholder="Ex: DJ João Silva"/>
+          </div>
+          <div class="form-group">
+            <label for="user-cpf"><i class="fas fa-id-card" style="color:var(--primary);margin-right:5px;"></i>CPF/CNPJ</label>
+            <input type="text" id="user-cpf" placeholder="000.000.000-00"/>
+          </div>
+          <div class="form-group">
+            <label for="user-logo"><i class="fas fa-image" style="color:var(--primary);margin-right:5px;"></i>Logo da Empresa</label>
+            <div style="border:2px dashed var(--input-border);border-radius:var(--r-md);padding:16px;text-align:center;background:var(--input-bg);position:relative;cursor:pointer;" onclick="document.getElementById('user-logo').click()">
+              <img id="logo-preview" src="#" alt="Prévia da Logo" style="display:none;max-height:80px;max-width:160px;object-fit:contain;border-radius:var(--r-sm);margin:0 auto;"/>
+              <div id="logo-upload-placeholder">
+                <i class="fas fa-cloud-upload-alt" style="font-size:1.5rem;color:var(--text3);display:block;margin-bottom:6px;"></i>
+                <span style="font-size:0.82rem;color:var(--text3);">Toque para selecionar a logo</span>
+              </div>
+              <input type="file" id="user-logo" accept="image/*" style="display:none;"/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label><i class="fas fa-signature" style="color:var(--primary);margin-right:5px;"></i>Minha Assinatura</label>
+            <p style="font-size:0.78rem;color:var(--text3);margin-bottom:8px;">Inserida automaticamente em contratos, pedidos e recibos gerados.</p>
+            <div id="signature-preview-box" style="border:1.5px solid var(--input-border);border-radius:var(--r-md);padding:12px;background:var(--input-bg);min-height:80px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--t-fast);position:relative;">
+              <img id="signature-preview-img" src="#" alt="Assinatura" style="display:none;max-height:70px;max-width:100%;object-fit:contain;filter:var(--sig-filter,none);">
+              <div id="signature-preview-placeholder" style="text-align:center;color:var(--text3);">
+                <i class="fas fa-pen-nib" style="font-size:1.8rem;display:block;margin-bottom:6px;"></i>
+                <span style="font-size:0.82rem;">Toque para criar sua assinatura</span>
+              </div>
+              <button type="button" id="signature-clear-btn" style="display:none;position:absolute;top:6px;right:6px;background:var(--danger-bg);color:var(--danger);border:none;border-radius:var(--r-sm);padding:3px 9px;font-size:0.75rem;cursor:pointer;font-family:var(--font-body);"><i class="fas fa-times"></i></button>
+            </div>
+            <button type="button" id="open-signature-modal-btn" class="btn" style="margin-top:8px;width:100%;background:linear-gradient(135deg,var(--primary),var(--accent));"><i class="fas fa-pen-nib"></i> Criar / Editar Assinatura</button>
+          </div>
+
+          <div style="margin-top:4px;">
+            <button type="submit" class="btn" style="width:100%;background:linear-gradient(135deg,var(--primary),var(--primary-dark));font-size:0.95rem;padding:13px;"><i class="fas fa-save" style="margin-right:6px;"></i>Salvar Informações</button>
+          </div>
+          <div id="user-info-message" style="margin-top:10px;"></div>
+        </form>
+      </div>
     </div>
-    <button type="button" id="signature-clear-btn" style="display:none;position:absolute;top:6px;right:6px;background:var(--danger-bg);color:var(--danger);border:none;border-radius:var(--r-sm);padding:3px 9px;font-size:0.75rem;cursor:pointer;font-family:var(--font-body);"><i class="fas fa-times"></i></button>
-  </div>
-  <button type="button" id="open-signature-modal-btn" class="btn" style="margin-top:8px;width:100%;background:linear-gradient(135deg,var(--primary),var(--accent));"><i class="fas fa-pen-nib"></i> Criar / Editar Assinatura</button>
-</div>
-<div style="text-align:right;"><button type="submit" class="btn">Salvar</button></div><div id="user-info-message"></div></form></div></div>
-    <div class="tab-content" id="backup-content"><div class="card"><h2>Backup e Restauração</h2><p>Exporte seus dados para um arquivo seguro ou importe um backup para restaurar suas informações.</p><div style="margin-top:20px; display:flex; gap: 15px;"><button class="btn" id="export-backup-btn">Exportar Dados</button><button class="btn" id="import-trigger-btn">Importar Dados</button><input type="file" id="import-backup-input" accept=".json" style="display:none;"/></div><div id="backup-message" style="margin-top:15px; font-weight:500;"></div></div></div>
+    <div class="tab-content" id="backup-content">
+      <div style="background:linear-gradient(135deg,#1d4ed8,#7c3aed);border-radius:var(--r-lg);padding:20px;color:white;margin-bottom:4px;box-shadow:0 4px 20px rgba(29,78,216,0.25);">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;"><i class="fas fa-database"></i></div>
+          <div>
+            <div style="font-size:1.05rem;font-weight:800;font-family:var(--font-display);">Backup & Restauração</div>
+            <div style="font-size:0.8rem;opacity:0.8;margin-top:2px;">Proteja todos os seus dados com exportação segura</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2 style="margin-bottom:16px;"><i class="fas fa-shield-alt" style="color:var(--primary);"></i> Seus Dados</h2>
+
+        <!-- Export Card -->
+        <div style="display:flex;align-items:center;gap:14px;padding:16px;background:rgba(16,185,129,0.07);border-radius:var(--r-md);border:1px solid rgba(16,185,129,0.2);margin-bottom:10px;cursor:pointer;transition:var(--t-fast);" id="export-backup-btn" onmouseenter="this.style.background='rgba(16,185,129,0.13)'" onmouseleave="this.style.background='rgba(16,185,129,0.07)'">
+          <div style="width:46px;height:46px;border-radius:var(--r-md);background:var(--success-bg);color:var(--success);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;"><i class="fas fa-download"></i></div>
+          <div style="flex:1;">
+            <div style="font-weight:700;font-size:0.95rem;color:var(--text);">Exportar Dados</div>
+            <div style="font-size:0.78rem;color:var(--text3);margin-top:2px;">Salve um arquivo .json com todos os seus dados: clientes, pedidos, transações, recibos e configurações.</div>
+          </div>
+          <i class="fas fa-chevron-right" style="color:var(--success);font-size:0.9rem;flex-shrink:0;"></i>
+        </div>
+
+        <!-- Import Card -->
+        <div style="display:flex;align-items:center;gap:14px;padding:16px;background:rgba(59,130,246,0.07);border-radius:var(--r-md);border:1px solid rgba(59,130,246,0.2);cursor:pointer;transition:var(--t-fast);margin-bottom:10px;" id="import-trigger-btn" onmouseenter="this.style.background='rgba(59,130,246,0.13)'" onmouseleave="this.style.background='rgba(59,130,246,0.07)'">
+          <div style="width:46px;height:46px;border-radius:var(--r-md);background:var(--primary-glow);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;"><i class="fas fa-upload"></i></div>
+          <div style="flex:1;">
+            <div style="font-weight:700;font-size:0.95rem;color:var(--text);">Importar Dados</div>
+            <div style="font-size:0.78rem;color:var(--text3);margin-top:2px;">Restaure a partir de um backup .json. <strong style="color:var(--warning);">Atenção:</strong> os dados atuais serão substituídos.</div>
+          </div>
+          <i class="fas fa-chevron-right" style="color:var(--primary);font-size:0.9rem;flex-shrink:0;"></i>
+        </div>
+        <input type="file" id="import-backup-input" accept=".json" style="display:none;"/>
+
+        <!-- Info box -->
+        <div style="background:var(--surface2);border-radius:var(--r-md);padding:14px;display:flex;gap:10px;align-items:flex-start;margin-top:6px;">
+          <i class="fas fa-info-circle" style="color:var(--info);margin-top:2px;flex-shrink:0;"></i>
+          <div style="font-size:0.8rem;color:var(--text2);line-height:1.6;">
+            <strong>Dica:</strong> Faça backups regulares especialmente antes de grandes eventos. Todos os seus dados (clientes, pedidos, transações, recibos, metas, contratos) são armazenados localmente no seu dispositivo e serão incluídos no arquivo exportado.
+          </div>
+        </div>
+
+        <div id="backup-message" style="margin-top:14px;font-weight:500;"></div>
+      </div>
+    </div>
     
     <div class="tab-content" id="recibos-content">
       <div class="card">
@@ -5196,13 +5830,17 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
     const logoFile = document.getElementById('user-logo').files[0];
     const msgEl = document.getElementById('user-info-message');
     const saveAndNotify = (message) => {
-        saveData(); 
-        msgEl.textContent = message;
-        msgEl.style.color = 'var(--success)';
-        setTimeout(() => { msgEl.textContent = ''; }, 3000);
-        updateUserInfoForm(); 
-        document.getElementById('contract-company-name').textContent = userInfo.name || 'Sua Empresa de Eventos';
-        document.getElementById('contract-company-doc').textContent = userInfo.cpf || 'Seu CPF/CNPJ';
+        saveData();
+        msgEl.innerHTML = `<div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--success-bg);border-radius:var(--r-sm);color:var(--success);font-size:0.88rem;"><i class="fas fa-check-circle"></i>${message}</div>`;
+        setTimeout(() => { msgEl.innerHTML = ''; }, 3000);
+        updateUserInfoForm();
+        updateProfileAvatar();
+        updateDashboardHero();
+        showToast(message, 'success');
+        const cn = document.getElementById('contract-company-name');
+        const cd = document.getElementById('contract-company-doc');
+        if (cn) cn.textContent = userInfo.name || 'Sua Empresa de Eventos';
+        if (cd) cd.textContent = userInfo.cpf || 'Seu CPF/CNPJ';
     };
 
     if (logoFile) {
@@ -5212,6 +5850,11 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
                 const originalBase64 = event.target.result;
                 const compressedBase64 = await compressImage(originalBase64);
                 userLogo = compressedBase64;
+                // Show logo preview
+                const prev = document.getElementById('logo-preview');
+                const ph   = document.getElementById('logo-upload-placeholder');
+                if (prev) { prev.src = compressedBase64; prev.style.display = 'block'; }
+                if (ph)   { ph.style.display = 'none'; }
                 saveAndNotify('Informações e logo salvas com sucesso!');
             } catch (error) {
                 console.error("Erro ao comprimir a imagem:", error);
@@ -6499,15 +7142,36 @@ function openCommitmentModal(mode, id = null, date = null) {
       return;
     }
     
-    const grid = document.createElement('div');
-    grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:10px;';
-    filteredTransactions.forEach(t => grid.appendChild(createTransactionCard(t)));
-    list.appendChild(grid);
+    // Group by date for better readability
+    const groups = {};
+    filteredTransactions.forEach(t => {
+      const key = t.date;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(t);
+    });
+    
+    Object.entries(groups)
+      .sort(([a],[b]) => new Date(b) - new Date(a))
+      .forEach(([date, txs]) => {
+        const dayTotal = txs.reduce((s,t) => t.type==='receita' ? s+t.amount : t.type==='despesa' ? s-t.amount : s, 0);
+        const dateObj = new Date(date + 'T00:00:00');
+        const isToday = date === today;
+        const isYesterday = date === new Date(Date.now()-86400000).toISOString().split('T')[0];
+        const dateLabel = isToday ? 'Hoje' : isYesterday ? 'Ontem' : dateObj.toLocaleDateString('pt-BR', {weekday:'short', day:'2-digit', month:'short'});
+        
+        const separator = document.createElement('div');
+        separator.style.cssText = 'display:flex;align-items:center;gap:10px;margin:10px 0 6px;';
+        separator.innerHTML = `
+          <span style="font-size:0.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap;">${dateLabel}</span>
+          <div style="flex:1;height:1px;background:var(--border-soft);"></div>
+          <span style="font-size:0.72rem;font-weight:700;color:${dayTotal>=0?'var(--success)':'var(--danger)'};white-space:nowrap;">${dayTotal>=0?'+':''}${formatCurrency(Math.abs(dayTotal))}</span>`;
+        list.appendChild(separator);
+        txs.forEach(t => list.appendChild(createTransactionCard(t)));
+      });
   }
 
   function createTransactionCard(t) {
     const card = document.createElement('div');
-    card.className = `transaction-card ${t.type}`;
     const isReceita = t.type === 'receita';
     const isDespesa = t.type === 'despesa';
     const isTransfer = t.type === 'transferencia';
@@ -6515,30 +7179,31 @@ function openCommitmentModal(mode, id = null, date = null) {
     const iconName = isDespesa ? 'fa-arrow-up' : isReceita ? 'fa-arrow-down' : 'fa-exchange-alt';
     const iconBg = isDespesa ? 'var(--danger-bg)' : isReceita ? 'var(--success-bg)' : 'var(--info-bg)';
     const confirmed = t.status === 'confirmada';
-    const statusColor = confirmed ? 'var(--success)' : 'var(--warning)';
-    card.style.cssText = 'background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border-soft);padding:12px;box-shadow:var(--card-shadow);display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden;';
+    const sign = isReceita ? '+' : isDespesa ? '-' : '';
+    
+    card.style.cssText = 'background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border-soft);padding:11px 14px;box-shadow:var(--card-shadow);display:flex;align-items:center;gap:11px;margin-bottom:6px;cursor:pointer;transition:all 0.15s;position:relative;overflow:hidden;';
     card.innerHTML = `
-      <div style="position:absolute;top:0;left:0;width:3px;height:100%;background:${valueColor};border-radius:4px 0 0 4px;"></div>
-      <div style="padding-left:6px;display:flex;align-items:flex-start;gap:8px;">
-        <div style="width:32px;height:32px;border-radius:50%;background:${iconBg};color:${valueColor};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.8rem;">
-          <i class="fas ${iconName}"></i>
-        </div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-weight:700;font-size:0.82rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.description}${t.linkedReceiptId ? ' <i class="fas fa-link" style="font-size:0.7rem;color:var(--text3);"></i>' : ''}</div>
-          <div style="font-size:0.7rem;color:var(--text3);margin-top:2px;">${t.category} · ${formatDate(t.date)}</div>
+      <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:${valueColor};border-radius:4px 0 0 4px;"></div>
+      <div style="width:36px;height:36px;border-radius:var(--r-sm);background:${iconBg};color:${valueColor};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.88rem;">
+        <i class="fas ${iconName}"></i>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:600;font-size:0.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.description}</div>
+        <div style="font-size:0.72rem;color:var(--text3);margin-top:1px;display:flex;align-items:center;gap:6px;">
+          <span>${t.category||'—'}</span>
+          ${!confirmed ? `<span style="background:var(--warning-bg);color:var(--warning);padding:1px 5px;border-radius:var(--r-full);font-weight:700;font-size:0.62rem;">Pendente</span>` : ''}
         </div>
       </div>
-      <div style="padding-left:6px;display:flex;align-items:center;justify-content:space-between;gap:6px;">
-        <div>
-          <div style="font-family:var(--font-display);font-weight:800;font-size:0.95rem;color:${valueColor};">${formatCurrency(t.amount)}</div>
-          <div style="font-size:0.65rem;font-weight:700;color:${statusColor};">${confirmed ? '✓ Confirmada' : '⏳ Pendente'}</div>
-        </div>
-        <div style="display:flex;gap:4px;">
-          <button class="btn btn-xs btn-ghost" style="padding:5px 8px;" data-action="edit-transaction" data-id="${t.id}"><i class="fas fa-edit"></i></button>
-          <button class="btn btn-xs btn-danger" style="padding:5px 8px;" data-action="delete-transaction" data-id="${t.id}"><i class="fas fa-trash"></i></button>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">
+        <div style="font-weight:800;font-size:0.95rem;color:${valueColor};">${sign}${formatCurrency(t.amount)}</div>
+        <div style="display:flex;gap:3px;">
+          <button class="btn btn-xs btn-ghost" style="padding:3px 7px;font-size:0.65rem;" data-action="edit-transaction" data-id="${t.id}"><i class="fas fa-edit"></i></button>
+          <button class="btn btn-xs btn-danger" style="padding:3px 7px;font-size:0.65rem;" data-action="delete-transaction" data-id="${t.id}"><i class="fas fa-trash"></i></button>
         </div>
       </div>
     `;
+    card.addEventListener('mouseenter', () => { card.style.boxShadow='var(--card-shadow-hover)'; card.style.transform='translateX(2px)'; });
+    card.addEventListener('mouseleave', () => { card.style.boxShadow='var(--card-shadow)'; card.style.transform=''; });
     return card;
   }
 
@@ -6563,30 +7228,54 @@ function openCommitmentModal(mode, id = null, date = null) {
     const container = document.getElementById('goals-list');
     container.innerHTML = '';
     if (goals.length === 0) {
-        container.innerHTML = `<p style="text-align:center; color: var(--gray);">Nenhuma meta cadastrada.</p>`;
-        return;
+      container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-bullseye"></i></div><h4>Nenhuma meta cadastrada</h4><p>Defina metas financeiras para acompanhar seu progresso</p></div>`;
+      return;
     }
-    goals.forEach(goal => {
-        const progress = (goal.targetAmount > 0) ? (goal.currentAmount / goal.targetAmount) * 100 : 0;
+    const goalColors = ['#3b82f6','#7c3aed','#059669','#d97706','#dc2626','#0891b2'];
+    goals.forEach((goal, idx) => {
+        const progress = (goal.targetAmount > 0) ? Math.min((goal.currentAmount / goal.targetAmount) * 100, 100) : 0;
+        const remaining = goal.targetAmount - goal.currentAmount;
+        const color = goalColors[idx % goalColors.length];
+        const isComplete = progress >= 100;
+        const targetDate = goal.targetDate ? new Date(goal.targetDate + 'T00:00:00') : null;
+        const now = new Date(); now.setHours(0,0,0,0);
+        const daysLeft = targetDate ? Math.ceil((targetDate - now) / 86400000) : null;
+        
         const card = document.createElement('div');
-        card.className = 'card';
+        card.style.cssText = 'background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border-soft);box-shadow:var(--card-shadow);padding:16px;margin-bottom:10px;transition:var(--t-fast);position:relative;overflow:hidden;';
         card.innerHTML = `
-            <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <h4 style="margin:0;">${goal.name}</h4>
-                <div>
-                  <button class="btn btn-xs" data-action="edit-goal" data-id="${goal.id}"><i class="fas fa-edit"></i></button>
-                  <button class="btn btn-xs btn-danger" data-action="delete-goal" data-id="${goal.id}"><i class="fas fa-trash"></i></button>
+          <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${color};border-radius:var(--r-md) var(--r-md) 0 0;"></div>
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;">
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                <div style="width:32px;height:32px;border-radius:50%;background:${color}18;color:${color};display:flex;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0;">
+                  <i class="fas fa-${isComplete?'check-circle':'bullseye'}"></i>
                 </div>
+                <div>
+                  <div style="font-weight:700;font-size:0.95rem;">${goal.name}</div>
+                  ${daysLeft !== null ? `<div style="font-size:0.7rem;color:${daysLeft<0?'var(--danger)':daysLeft<=7?'var(--warning)':'var(--text3)'};">${daysLeft<0?'Prazo vencido':daysLeft===0?'Vence hoje':`${daysLeft} dias restantes`}</div>` : ''}
+                </div>
+              </div>
             </div>
-            
-            <p style="margin: 5px 0; font-size: 0.9rem;">
-                ${formatCurrency(goal.currentAmount)} / <strong>${formatCurrency(goal.targetAmount)}</strong>
-            </p>
-            <div class="progress-bar">
-               <div style="width: ${progress.toFixed(2)}%;"></div>
+            <div style="display:flex;gap:5px;flex-shrink:0;">
+              <button class="btn btn-xs btn-ghost" style="padding:5px 8px;" data-action="edit-goal" data-id="${goal.id}"><i class="fas fa-edit"></i></button>
+              <button class="btn btn-xs btn-danger" style="padding:5px 8px;" data-action="delete-goal" data-id="${goal.id}"><i class="fas fa-trash"></i></button>
             </div>
-            <p style="margin-top: 5px; font-size: 0.8rem; color: var(--gray);">Data limite: ${formatDate(goal.targetDate)}</p>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:0.8rem;color:var(--text3);">Acumulado</span>
+            <span style="font-size:0.8rem;font-weight:700;color:${color};">${formatCurrency(goal.currentAmount)} <span style="color:var(--text3);font-weight:400;">/ ${formatCurrency(goal.targetAmount)}</span></span>
+          </div>
+          <div style="height:10px;background:var(--surface3);border-radius:var(--r-full);overflow:hidden;margin-bottom:6px;">
+            <div style="height:100%;width:${progress.toFixed(1)}%;background:${isComplete?'var(--success)':color};border-radius:var(--r-full);transition:width 0.6s cubic-bezier(0.34,1.56,0.64,1);"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="font-size:0.72rem;color:var(--text3);">${isComplete?'✅ Meta alcançada!':remaining>0?'Faltam '+formatCurrency(remaining):'Concluído'}</span>
+            <span style="font-size:0.72rem;font-weight:700;color:${color};">${progress.toFixed(0)}%</span>
+          </div>
         `;
+        card.addEventListener('mouseenter', () => { card.style.boxShadow='var(--card-shadow-hover)'; card.style.transform='translateY(-1px)'; });
+        card.addEventListener('mouseleave', () => { card.style.boxShadow='var(--card-shadow)'; card.style.transform=''; });
         container.appendChild(card);
     });
   }
@@ -6621,14 +7310,18 @@ function openCommitmentModal(mode, id = null, date = null) {
     document.getElementById('user-name').value = userInfo.name || '';
     document.getElementById('user-cpf').value = userInfo.cpf || '';
     const logoPreview = document.getElementById('logo-preview');
+    const logoPh      = document.getElementById('logo-upload-placeholder');
     if (userLogo) {
         logoPreview.src = userLogo;
         logoPreview.style.display = 'block';
+        if (logoPh) logoPh.style.display = 'none';
     } else {
         logoPreview.style.display = 'none';
         logoPreview.src = '#';
+        if (logoPh) logoPh.style.display = 'block';
     }
     updateSignaturePreview();
+    updateProfileAvatar();
   }
   
   function updateBalanceDetailModal() {
@@ -6673,37 +7366,48 @@ function openCommitmentModal(mode, id = null, date = null) {
       return;
     }
 
-    const grid = document.createElement('div');
-    grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:10px;';
-    
     receipts.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(receipt => {
       const client = clients.find(c => c.id === receipt.clientId) || { name: 'N/A' };
-      const statusMap = { emitido: ['Emitido','var(--info)'], pago: ['Pago','var(--success)'], cancelado: ['Cancelado','var(--danger)'] };
-      const [statusLabel, statusColor] = statusMap[receipt.status] || ['—','var(--text3)'];
-      
+      const statusMap = {
+        emitido:   { label: 'Emitido',   color: 'var(--info)',    bg: 'rgba(6,182,212,0.1)'  },
+        pago:      { label: 'Pago',      color: 'var(--success)', bg: 'var(--success-bg)'    },
+        cancelado: { label: 'Cancelado', color: 'var(--danger)',  bg: 'var(--danger-bg)'     },
+      };
+      const st = statusMap[receipt.status] || { label: '—', color: 'var(--text3)', bg: 'var(--surface3)' };
+
+      // Linked order info
+      let linkedHtml = '';
+      if (receipt.orderId) {
+        const order = eventOrders.find(o => o.id === receipt.orderId);
+        if (order) linkedHtml = `<div style="font-size:0.7rem;color:var(--primary);margin-top:1px;"><i class="fas fa-link" style="margin-right:3px;opacity:.7;"></i>${order.eventType||'Evento'} · ${formatDate(order.eventDate||'')}</div>`;
+      }
+
       const card = document.createElement('div');
-      card.className = 'receipt-card';
-      card.style.cssText = 'background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border-soft);padding:12px;box-shadow:var(--card-shadow);display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden;';
+      card.style.cssText = 'background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border-soft);padding:13px 14px;box-shadow:var(--card-shadow);display:flex;align-items:center;gap:12px;margin-bottom:6px;cursor:pointer;transition:all 0.15s;position:relative;overflow:hidden;';
       card.innerHTML = `
-        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${statusColor};border-radius:var(--r-md) var(--r-md) 0 0;"></div>
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;">
-          <div style="font-size:0.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;">Recibo #${receipt.id.toString().slice(-4)}</div>
-          <span style="font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:999px;background:${statusColor}22;color:${statusColor};white-space:nowrap;">${statusLabel}</span>
+        <div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:${st.color};border-radius:var(--r-md) 0 0 var(--r-md);"></div>
+        <div style="padding-left:4px;flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+            <span style="font-size:0.65rem;font-weight:700;color:var(--text3);text-transform:uppercase;">Recibo #${receipt.id.toString().slice(-4)}</span>
+            <span style="font-size:0.63rem;font-weight:700;padding:2px 7px;border-radius:var(--r-full);background:${st.bg};color:${st.color};">${st.label}</span>
+          </div>
+          <div style="font-weight:700;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${client.name}</div>
+          <div style="font-size:0.74rem;color:var(--text3);margin-top:1px;">${receipt.description ? receipt.description.slice(0,40)+(receipt.description.length>40?'…':'') : '—'} · ${formatDate(receipt.date)}</div>
+          ${linkedHtml}
         </div>
-        <div>
-          <div style="font-family:var(--font-display);font-weight:700;font-size:0.88rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${client.name}</div>
-          <div style="font-size:0.72rem;color:var(--text3);margin-top:2px;">${formatDate(receipt.date)}</div>
-        </div>
-        <div style="font-family:var(--font-display);font-weight:800;font-size:1rem;color:var(--ev-teal);">${formatCurrency(receipt.amount)}</div>
-        <div style="display:flex;gap:4px;flex-wrap:wrap;">
-          <button class="btn btn-xs" style="flex:1;font-size:0.7rem;" data-action="download-receipt-pdf" data-id="${receipt.id}"><i class="fas fa-download"></i> PDF</button>
-          <button class="btn btn-xs btn-ghost" style="padding:5px 8px;" data-action="edit-receipt" data-id="${receipt.id}"><i class="fas fa-edit"></i></button>
-          <button class="btn btn-xs btn-danger" style="padding:5px 8px;" data-action="delete-receipt" data-id="${receipt.id}"><i class="fas fa-trash"></i></button>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">
+          <div style="font-weight:800;font-size:1rem;color:${receipt.status==='pago'?'var(--success)':'var(--text)'};">${formatCurrency(receipt.amount)}</div>
+          <div style="display:flex;gap:4px;">
+            <button class="btn btn-xs" style="padding:4px 8px;font-size:0.68rem;" data-action="download-receipt-pdf" data-id="${receipt.id}" title="Baixar PDF"><i class="fas fa-download"></i></button>
+            <button class="btn btn-xs btn-ghost" style="padding:4px 7px;font-size:0.68rem;" data-action="edit-receipt" data-id="${receipt.id}" title="Editar"><i class="fas fa-edit"></i></button>
+            <button class="btn btn-xs btn-danger" style="padding:4px 7px;font-size:0.68rem;" data-action="delete-receipt" data-id="${receipt.id}" title="Excluir"><i class="fas fa-trash"></i></button>
+          </div>
         </div>
       `;
-      grid.appendChild(card);
+      card.addEventListener('mouseenter', () => { card.style.boxShadow='var(--card-shadow-hover)'; card.style.transform='translateX(2px)'; });
+      card.addEventListener('mouseleave', () => { card.style.boxShadow='var(--card-shadow)'; card.style.transform=''; });
+      list.appendChild(card);
     });
-    list.appendChild(grid);
   }
   
 function updateClientsList() {
@@ -6778,37 +7482,74 @@ function updateClientsList() {
         return commitmentDate.getFullYear() === currentYear && commitmentDate.getMonth() === currentMonth;
     });
     if (filteredCommitments.length === 0) {
-      list.innerHTML = `<div style="text-align: center; padding: 30px; color: var(--gray);"><i class="fas fa-calendar-times" style="font-size: 3rem; margin-bottom: 15px;"></i><p>Nenhum compromisso para este mês.</p></div>`;
+      list.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-calendar-times"></i></div><h4>Nenhum compromisso neste mês</h4><p>Adicione compromissos para organizar sua agenda</p></div>`;
       return;
     }
-    
+
+    const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const statusColors  = { agendado: 'var(--warning)', confirmado: 'var(--success)', realizado: 'var(--accent)', cancelado: 'var(--danger)' };
+    const statusBgs     = { agendado: 'var(--warning-bg)', confirmado: 'var(--success-bg)', realizado: 'rgba(139,92,246,0.12)', cancelado: 'var(--danger-bg)' };
+    const statusLabels  = { agendado: '⏳ Agendado', confirmado: '✅ Confirmado', realizado: '🎉 Realizado', cancelado: '❌ Cancelado' };
+    const _today = new Date(); _today.setHours(0,0,0,0);
+
     filteredCommitments.sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(commitment => {
       const client = commitment.clientId ? clients.find(c => c.id === commitment.clientId) : null;
-      const statusTexts = { agendado: 'Agendado', confirmado: 'Confirmado', realizado: 'Realizado', cancelado: 'Cancelado' };
       const date = new Date(commitment.date);
-      const formattedDate = date.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
-      
+      const timeStr = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      const diffDays = Math.round((date - _today) / 86400000);
+      const isToday = diffDays === 0;
+      const isPast  = diffDays < 0;
+
+      // Countdown
+      let countHtml = '';
+      if (!isPast) {
+        let cbg = 'rgba(59,130,246,0.1)', cc = 'var(--primary)', ct = `${diffDays}d`;
+        if (isToday)      { cbg='var(--danger-bg)'; cc='var(--danger)'; ct='HOJE'; }
+        else if (diffDays===1) { cbg='rgba(245,158,11,0.12)'; cc='var(--warning)'; ct='Amanhã'; }
+        else if (diffDays<=7) { cbg='rgba(139,92,246,0.12)'; cc='var(--accent)'; ct=`${diffDays}d`; }
+        countHtml = `<span style="font-size:0.62rem;font-weight:700;padding:2px 7px;border-radius:var(--r-full);background:${cbg};color:${cc};">${ct}</span>`;
+      }
+
+      // Linked order value
+      let valHtml = '';
+      if (commitment.linkedOrderId) {
+        const order = eventOrders.find(o => o.id === commitment.linkedOrderId);
+        if (order) {
+          const paid  = receipts.filter(r => r.orderId === order.id && r.status === 'pago').reduce((s,r)=>s+r.amount,0);
+          const saldo = (order.totalValue||0) - paid;
+          valHtml = `<div style="font-size:0.72rem;font-weight:700;margin-top:3px;color:${saldo>0?'var(--warning)':'var(--success)'};">
+            <i class="fas fa-${saldo>0?'clock':'check-circle'}" style="margin-right:3px;"></i>${saldo>0?'Saldo: '+formatCurrency(saldo):'Quitado'}
+          </div>`;
+        }
+      }
+
       const card = document.createElement('div');
-      card.className = 'commitment-card';
+      card.style.cssText = `display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border-soft);box-shadow:var(--card-shadow);margin-bottom:8px;cursor:pointer;transition:all 0.15s;${isPast?'opacity:0.6;':''}`;
       card.innerHTML = `
-        <div class="transaction-header">
-          <span class="category-badge">${formattedDate}</span>
-          <span class="status-badge ${commitment.status}">${statusTexts[commitment.status]}</span>
+        <div style="width:42px;height:52px;border-radius:var(--r-sm);background:${isToday?'var(--danger)':'var(--primary)'};color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;">
+          <span style="font-size:1.15rem;font-weight:800;line-height:1;font-family:var(--font-display);">${String(date.getDate()).padStart(2,'0')}</span>
+          <span style="font-size:0.55rem;font-weight:700;opacity:0.85;text-transform:uppercase;">${months[date.getMonth()]}</span>
+          <span style="font-size:0.52rem;opacity:0.7;">${timeStr}</span>
         </div>
-        <div class="transaction-body">
-          <span class="transaction-favorecido">${commitment.title}</span>
-          <div class="transaction-details" style="display: flex; flex-direction: column; gap: 4px; margin-top: 8px;">
-            ${client ? `<div><i class="fas fa-user fa-fw" style="margin-right: 5px;"></i>${client.name}</div>` : ''}
-            ${commitment.location ? `<div><i class="fas fa-map-marker-alt fa-fw" style="margin-right: 5px;"></i>${commitment.location}</div>` : ''}
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:700;font-size:0.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${commitment.title}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:3px;font-size:0.73rem;color:var(--text3);">
+            ${client ? `<span><i class="fas fa-user" style="margin-right:3px;"></i>${client.name}</span>` : ''}
+            ${commitment.location ? `<span><i class="fas fa-map-marker-alt" style="margin-right:3px;"></i>${commitment.location}</span>` : ''}
           </div>
+          ${valHtml}
         </div>
-        <div class="transaction-footer">
-          <span></span>
-          <div class="transaction-actions">
-            <button class="btn btn-xs" data-action="edit-commitment" data-id="${commitment.id}"><i class="fas fa-edit"></i></button>
-            <button class="btn btn-xs btn-danger" data-action="delete-commitment" data-id="${commitment.id}"><i class="fas fa-trash"></i></button>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">
+          <span style="font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:var(--r-full);background:${statusBgs[commitment.status]||'var(--surface3)'};color:${statusColors[commitment.status]||'var(--text3)'};">${statusLabels[commitment.status]||commitment.status}</span>
+          ${countHtml}
+          <div style="display:flex;gap:4px;margin-top:2px;">
+            <button class="btn btn-xs btn-ghost" style="padding:4px 8px;font-size:0.7rem;" data-action="edit-commitment" data-id="${commitment.id}"><i class="fas fa-edit"></i></button>
+            <button class="btn btn-xs btn-danger" style="padding:4px 8px;font-size:0.7rem;" data-action="delete-commitment" data-id="${commitment.id}"><i class="fas fa-trash"></i></button>
           </div>
         </div>`;
+      card.addEventListener('mouseenter', () => { card.style.boxShadow='var(--card-shadow-hover)'; card.style.borderColor='rgba(59,130,246,0.2)'; });
+      card.addEventListener('mouseleave', () => { card.style.boxShadow='var(--card-shadow)'; card.style.borderColor='var(--border-soft)'; });
+      card.addEventListener('click', (e) => { if (!e.target.closest('button')) openSingleCommitmentDetail(commitment.id); });
       list.appendChild(card);
     });
   }
@@ -6881,6 +7622,19 @@ function updateClientsList() {
           <div style="display:flex;flex-direction:column;gap:4px;font-size:0.75rem;color:var(--text2);">
             <div style="display:flex;align-items:center;gap:6px;"><i class="fas fa-calendar" style="color:${accentColor};width:12px;"></i><span>${formatDate(date)}</span></div>
             <div style="display:flex;align-items:center;gap:6px;"><i class="fas fa-star" style="color:${accentColor};width:12px;"></i><span>${item.eventType || '—'}</span></div>
+            ${(() => {
+              if (isOrder) {
+                const paid = receipts.filter(r => r.orderId === item.id && r.status === 'pago').reduce((s,r)=>s+r.amount,0);
+                const saldo = (item.totalValue||0) - paid;
+                const saldoPct = item.totalValue > 0 ? Math.round((paid/item.totalValue)*100) : 0;
+                return `<div style="display:flex;align-items:center;gap:6px;"><i class="fas fa-${saldo>0?'clock':'check-circle'}" style="color:${saldo>0?'var(--warning)':'var(--success)'};width:12px;"></i>
+                  <span style="color:${saldo>0?'var(--warning)':'var(--success)'};">${saldo>0?'Saldo: '+formatCurrency(saldo):'Quitado'}</span></div>
+                <div style="margin-top:3px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;">
+                  <div style="height:100%;background:${saldo>0?'var(--warning)':'var(--success)'};width:${saldoPct}%;border-radius:2px;transition:width 0.4s;"></div>
+                </div>`;
+              }
+              return '';
+            })()}
           </div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto;">
             <div style="font-family:var(--font-display);font-size:0.9rem;font-weight:800;color:${accentColor};">${formatCurrency(item.totalValue)}</div>
@@ -6988,10 +7742,16 @@ function updateClientsList() {
     doc.rect(0, H - 18, W, 1.5, 'F');
 
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7);
+    doc.setFontSize(6.5);
     doc.setTextColor('#9090bb');
-    doc.text(`Documento gerado em ${new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' })}`, 14, H - 7);
-    doc.text('DJ Manager Pro', W - 14, H - 7, { align: 'right' });
+    doc.text(`Emitido em ${new Date().toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' })}`, 14, H - 10);
+    doc.text(userInfo.name || 'DJ Manager Pro', 14, H - 5);
+    doc.setFontSize(7);
+    doc.setTextColor(T.accent);
+    doc.text('DJ Manager Pro', W - 14, H - 7.5, { align: 'right' });
+    doc.setFontSize(6);
+    doc.setTextColor('#9090bb');
+    doc.text('Sistema de Gestão para DJs', W - 14, H - 3.5, { align: 'right' });
 
     // Reset
     doc.setTextColor(T.text);
@@ -7588,53 +8348,257 @@ function updateCommitmentOrderSelector(clientId) {
   function updateEventTypeReport() {
     const filterSelect = document.getElementById('event-type-report-filter');
     const resultsTbody = document.getElementById('event-type-report-results');
-
     if (!filterSelect || !resultsTbody) return;
 
+    // Populate type filter
     const currentFilterValue = filterSelect.value;
-    
-    const eventTypes = [...new Set(eventOrders.map(o => o.eventType))];
+    const eventTypes = [...new Set(eventOrders.map(o => o.eventType).filter(Boolean))];
     filterSelect.innerHTML = '<option value="">-- Todos --</option>';
-    eventTypes.sort().forEach(type => {
-        filterSelect.add(new Option(type, type));
-    });
-
+    eventTypes.sort().forEach(type => filterSelect.add(new Option(type, type)));
     filterSelect.value = currentFilterValue;
 
-    const renderReport = () => {
-        const selectedType = filterSelect.value;
-        const filteredOrders = selectedType 
-            ? eventOrders.filter(o => o.eventType === selectedType)
-            : eventOrders;
+    function getFilteredOrders() {
+      const selectedType = filterSelect.value;
+      const selectedStatus = (document.getElementById('rpt-status-filter') || {}).value || '';
+      const dateStart = (document.getElementById('rpt-date-start') || {}).value || '';
+      const dateEnd   = (document.getElementById('rpt-date-end')   || {}).value || '';
+      const search    = ((document.getElementById('rpt-search-input') || {}).value || '').toLowerCase().trim();
 
-        resultsTbody.innerHTML = '';
-
-        if (filteredOrders.length === 0) {
-            resultsTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 20px;">Nenhum evento encontrado.</td></tr>';
-            return;
+      return eventOrders.filter(order => {
+        if (selectedType && order.eventType !== selectedType) return false;
+        // status via linked commitment
+        if (selectedStatus) {
+          const comm = commitments.find(c => c.linkedOrderId === order.id);
+          if (!comm || comm.status !== selectedStatus) return false;
         }
-
-        filteredOrders
-          .sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate))
-          .forEach(order => {
-            const client = clients.find(c => c.id === order.clientId) || { name: 'Cliente não encontrado' };
-            const row = `
-                <tr>
-                    <td>${client.name}</td>
-                    <td>${formatDate(order.eventDate)}</td>
-                    <td class="positive">${formatCurrency(order.totalValue)}</td>
-                </tr>
-            `;
-            resultsTbody.innerHTML += row;
-        });
-    };
-
-    if (!filterSelect.dataset.listenerAttached) {
-        filterSelect.addEventListener('change', renderReport);
-        filterSelect.dataset.listenerAttached = 'true';
+        if (dateStart && order.eventDate < dateStart) return false;
+        if (dateEnd   && order.eventDate > dateEnd)   return false;
+        if (search) {
+          const client = clients.find(c => c.id === order.clientId);
+          const clientName = client ? client.name.toLowerCase() : '';
+          const type = (order.eventType || '').toLowerCase();
+          if (!clientName.includes(search) && !type.includes(search)) return false;
+        }
+        return true;
+      }).sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate));
     }
 
+    function updateKPIs() {
+      const all = eventOrders;
+      let totalVal = 0, totalRec = 0;
+      all.forEach(o => {
+        totalVal += o.totalValue || 0;
+        const paid = receipts.filter(r => r.orderId === o.id && r.status === 'pago').reduce((s,r) => s + r.amount, 0);
+        totalRec += paid;
+      });
+      const pct = totalVal > 0 ? Math.round((totalRec / totalVal) * 100) : 0;
+      const el = id => document.getElementById(id);
+      if (el('rpt-kpi-total-events'))  el('rpt-kpi-total-events').textContent = all.length;
+      if (el('rpt-kpi-events-label'))  el('rpt-kpi-events-label').textContent = `total cadastrados`;
+      if (el('rpt-kpi-total-value'))   el('rpt-kpi-total-value').textContent  = formatCurrency(totalVal);
+      if (el('rpt-kpi-recebido-label')) el('rpt-kpi-recebido-label').textContent = formatCurrency(totalRec) + ' recebido';
+      if (el('rpt-kpi-pending'))       el('rpt-kpi-pending').textContent = formatCurrency(totalVal - totalRec);
+      if (el('rpt-kpi-percent'))       el('rpt-kpi-percent').textContent = pct + '%';
+    }
+
+    const statusColors = {
+      agendado:   { bg: 'rgba(6,182,212,0.12)',   color: 'var(--info)',    label: 'Agendado'   },
+      confirmado: { bg: 'rgba(16,185,129,0.12)',  color: 'var(--success)', label: 'Confirmado' },
+      realizado:  { bg: 'rgba(139,92,246,0.12)',  color: 'var(--accent)',  label: 'Realizado'  },
+      cancelado:  { bg: 'rgba(239,68,68,0.12)',   color: 'var(--danger)',  label: 'Cancelado'  },
+    };
+
+    function renderReport() {
+      const filtered = getFilteredOrders();
+      const countEl = document.getElementById('rpt-count-text');
+      if (countEl) countEl.textContent = `${filtered.length} evento(s) encontrado(s)`;
+
+      resultsTbody.innerHTML = '';
+      if (filtered.length === 0) {
+        resultsTbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text3);font-size:0.88rem;">
+          <i class="fas fa-search" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:.4;"></i>Nenhum evento encontrado.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(order => {
+        const client = clients.find(c => c.id === order.clientId) || { name: '—' };
+        const comm   = commitments.find(c => c.linkedOrderId === order.id);
+        const status = comm ? (comm.status || 'agendado') : 'agendado';
+        const sc     = statusColors[status] || statusColors.agendado;
+        const paid   = receipts.filter(r => r.orderId === order.id && r.status === 'pago').reduce((s,r) => s + r.amount, 0);
+        const saldo  = (order.totalValue || 0) - paid;
+
+        const tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        tr.style.transition = 'background 0.15s';
+        tr.innerHTML = `
+          <td style="font-weight:600;font-size:0.88rem;">${client.name}</td>
+          <td style="font-size:0.82rem;">
+            <div style="font-weight:600;color:var(--text);">${order.eventType || '—'}</div>
+            <div style="color:var(--text3);font-size:0.76rem;">${formatDate(order.eventDate)}</div>
+          </td>
+          <td>
+            <span style="background:${sc.bg};color:${sc.color};padding:2px 8px;border-radius:var(--r-full);font-size:0.72rem;font-weight:600;white-space:nowrap;">${sc.label}</span>
+          </td>
+          <td style="text-align:right;">
+            <div style="font-weight:700;color:var(--success);font-size:0.88rem;">${formatCurrency(order.totalValue || 0)}</div>
+            ${saldo > 0 ? `<div style="font-size:0.72rem;color:var(--danger);">−${formatCurrency(saldo)}</div>` : `<div style="font-size:0.72rem;color:var(--success);">Quitado</div>`}
+          </td>
+          <td style="text-align:center;">
+            <button onclick="event.stopPropagation();openViewOrderModal('${order.id}')" style="background:var(--primary-glow);border:none;color:var(--primary);border-radius:var(--r-sm);padding:5px 9px;cursor:pointer;font-size:0.8rem;" title="Ver pedido">
+              <i class="fas fa-eye"></i>
+            </button>
+          </td>
+        `;
+        tr.addEventListener('click', () => openViewOrderModal(order.id));
+        tr.addEventListener('mouseenter', () => tr.style.background = 'var(--surface2)');
+        tr.addEventListener('mouseleave', () => tr.style.background = '');
+        resultsTbody.appendChild(tr);
+      });
+    }
+
+    // Attach listeners once
+    if (!filterSelect.dataset.listenerAttached) {
+      filterSelect.dataset.listenerAttached = 'true';
+      filterSelect.addEventListener('change', renderReport);
+
+      const statusSel = document.getElementById('rpt-status-filter');
+      if (statusSel) statusSel.addEventListener('change', renderReport);
+
+      const searchIn = document.getElementById('rpt-search-input');
+      if (searchIn) searchIn.addEventListener('input', renderReport);
+
+      const ds = document.getElementById('rpt-date-start');
+      const de = document.getElementById('rpt-date-end');
+      if (ds) ds.addEventListener('change', renderReport);
+      if (de) de.addEventListener('change', renderReport);
+
+      // PDF button
+      const pdfBtn = document.getElementById('rpt-download-pdf-btn');
+      if (pdfBtn && !pdfBtn.dataset.attached) {
+        pdfBtn.dataset.attached = 'true';
+        pdfBtn.addEventListener('click', gerarRelatorioCompletoEventosPDF);
+      }
+    }
+
+    updateKPIs();
     renderReport();
+  }
+
+  function gerarRelatorioCompletoEventosPDF() {
+    const orders = [...eventOrders].sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate));
+    if (orders.length === 0) { showToast('Nenhum evento cadastrado.', 'warning'); return; }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const marginX = 14;
+
+    // Header
+    doc.setFillColor(29, 78, 216);
+    doc.rect(0, 0, pageW, 30, 'F');
+    doc.setFillColor(59, 130, 246);
+    doc.rect(0, 24, pageW, 6, 'F');
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(17);
+    doc.text(userInfo.name || 'DJ Manager Pro', marginX, 13);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.text('RELATÓRIO COMPLETO DE EVENTOS', marginX, 21);
+    doc.setFontSize(7.5);
+    doc.text(`Emitido em: ${new Date().toLocaleString('pt-BR')}`, pageW - marginX, 13, { align: 'right' });
+    doc.text(`Total: ${orders.length} evento(s)`, pageW - marginX, 21, { align: 'right' });
+
+    // KPIs box
+    let totalVal = 0, totalRec = 0;
+    orders.forEach(o => {
+      totalVal += o.totalValue || 0;
+      totalRec += receipts.filter(r => r.orderId === o.id && r.status === 'pago').reduce((s,r) => s + r.amount, 0);
+    });
+    const saldoGeral = totalVal - totalRec;
+
+    const kpiY = 36;
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(marginX, kpiY, pageW - marginX * 2, 20, 3, 3, 'F');
+    doc.setDrawColor(226, 232, 240);
+    doc.roundedRect(marginX, kpiY, pageW - marginX * 2, 20, 3, 3, 'S');
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(100, 116, 139);
+    const k1 = marginX + 10, k2 = pageW / 2 - 10, k3 = pageW - marginX - 10;
+    doc.text('TOTAL FATURADO', k1, kpiY + 6, { align: 'center' });
+    doc.text('RECEBIDO', k2, kpiY + 6, { align: 'center' });
+    doc.text('SALDO A RECEBER', k3, kpiY + 6, { align: 'center' });
+
+    doc.setFontSize(9.5); doc.setFont('helvetica', 'bold');
+    doc.setTextColor(15, 23, 42);
+    doc.text(formatCurrency(totalVal), k1, kpiY + 14, { align: 'center' });
+    doc.setTextColor(16, 185, 129);
+    doc.text(formatCurrency(totalRec), k2, kpiY + 14, { align: 'center' });
+    doc.setTextColor(saldoGeral > 0 ? 239 : 16, saldoGeral > 0 ? 68 : 185, saldoGeral > 0 ? 68 : 129);
+    doc.text(formatCurrency(saldoGeral), k3, kpiY + 14, { align: 'center' });
+
+    // Table data
+    const statusLabels = { agendado: 'Agendado', confirmado: 'Confirmado', realizado: 'Realizado', cancelado: 'Cancelado' };
+    const rows = orders.map(order => {
+      const client = clients.find(c => c.id === order.clientId);
+      const comm   = commitments.find(c => c.linkedOrderId === order.id);
+      const status = comm ? (comm.status || 'agendado') : '—';
+      const paid   = receipts.filter(r => r.orderId === order.id && r.status === 'pago').reduce((s,r) => s + r.amount, 0);
+      const saldo  = (order.totalValue || 0) - paid;
+      return [
+        client ? client.name : '—',
+        order.eventType || '—',
+        formatDate(order.eventDate) + (order.eventTime ? '\n' + order.eventTime : ''),
+        order.eventLocation || '—',
+        statusLabels[status] || status,
+        formatCurrency(order.totalValue || 0),
+        formatCurrency(paid),
+        formatCurrency(saldo),
+      ];
+    });
+
+    doc.autoTable({
+      startY: kpiY + 26,
+      head: [['Cliente', 'Tipo', 'Data/Hora', 'Local', 'Status', 'Valor', 'Recebido', 'Saldo']],
+      body: rows,
+      margin: { left: marginX, right: marginX },
+      styles: { font: 'helvetica', fontSize: 6.5, cellPadding: 2, valign: 'middle', overflow: 'linebreak' },
+      headStyles: { fillColor: [29, 78, 216], textColor: 255, fontStyle: 'bold', fontSize: 7 },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      columnStyles: {
+        0: { cellWidth: 30 }, 1: { cellWidth: 22 }, 2: { cellWidth: 22 }, 3: { cellWidth: 28 },
+        4: { cellWidth: 18 }, 5: { cellWidth: 20, halign: 'right' },
+        6: { cellWidth: 20, halign: 'right' }, 7: { cellWidth: 20, halign: 'right' },
+      },
+      didParseCell(data) {
+        if (data.section === 'body' && data.column.index === 4) {
+          const c = { Agendado: [6,182,212], Confirmado: [16,185,129], Realizado: [139,92,246], Cancelado: [239,68,68] };
+          const col = c[data.cell.text[0]];
+          if (col) data.cell.styles.textColor = col;
+        }
+        if (data.section === 'body' && data.column.index === 7) {
+          const raw = data.cell.text[0].replace(/[^\d,]/g,'').replace(',','.');
+          const v = parseFloat(raw);
+          if (!isNaN(v) && v > 0)  data.cell.styles.textColor = [239,68,68];
+          if (!isNaN(v) && v <= 0) data.cell.styles.textColor = [16,185,129];
+        }
+      },
+    });
+
+    // Footer
+    const pages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pages; i++) {
+      doc.setPage(i);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(148, 163, 184);
+      doc.text('Gerado pelo DJ Manager Pro', marginX, pageH - 7);
+      doc.text(`Página ${i} de ${pages}`, pageW - marginX, pageH - 7, { align: 'right' });
+    }
+
+    doc.save(`relatorio_completo_eventos_${new Date().toISOString().split('T')[0]}.pdf`);
+    showToast(`PDF gerado com ${orders.length} evento(s)!`, 'success');
   }
 
   function createOrUpdateChart(id, type, data, opts) {
@@ -8216,31 +9180,42 @@ function showCommitmentsForDay(dateString) {
     if (!list) return;
     list.innerHTML = '';
     if (packages.length === 0) {
-      list.innerHTML = `<div style="text-align:center; padding:30px; color:var(--gray);"><i class="fas fa-box-open" style="font-size:3rem; margin-bottom:15px;"></i><p>Nenhum pacote cadastrado. Crie pacotes para agilizar seus orçamentos!</p></div>`;
+      list.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-box-open"></i></div><h4>Nenhum pacote cadastrado</h4><p>Crie pacotes para agilizar seus orçamentos e pedidos</p></div>`;
       return;
     }
-    packages.sort((a, b) => a.name.localeCompare(b.name)).forEach(pkg => {
+    const pkgColors = ['#06b6d4','#8b5cf6','#10b981','#f59e0b','#3b82f6','#ec4899'];
+    packages.sort((a, b) => a.name.localeCompare(b.name)).forEach((pkg, idx) => {
+      const color = pkgColors[idx % pkgColors.length];
+      const servCount = (pkg.services || []).length;
       const card = document.createElement('div');
-      card.className = 'package-card transaction-card';
+      card.style.cssText = 'background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border-soft);box-shadow:var(--card-shadow);padding:14px;margin-bottom:8px;transition:all 0.15s;position:relative;overflow:hidden;';
       card.innerHTML = `
-        <div class="transaction-header">
-          <span class="category-badge"><i class="fas fa-box-open"></i> Pacote</span>
-          <span class="transaction-value" style="color:var(--ev-teal);">${formatCurrency(pkg.totalValue)}</span>
-        </div>
-        <div class="transaction-body">
-          <span class="transaction-favorecido">${pkg.name}</span>
-          ${pkg.description ? `<span class="transaction-details">${pkg.description}</span>` : ''}
-          <div style="margin-top:8px; font-size:0.85rem; color:var(--gray);">
-            ${(pkg.services || []).map(s => `<div>• ${s.description}: ${formatCurrency(s.value)}</div>`).join('')}
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${color};border-radius:var(--r-md) var(--r-md) 0 0;"></div>
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">
+          <div style="width:40px;height:40px;border-radius:var(--r-sm);background:${color}18;color:${color};display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">
+            <i class="fas fa-box-open"></i>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:0.95rem;">${pkg.name}</div>
+            ${pkg.description ? `<div style="font-size:0.78rem;color:var(--text3);margin-top:2px;">${pkg.description}</div>` : ''}
+            <div style="margin-top:4px;display:flex;align-items:center;gap:8px;">
+              <span style="font-size:0.68rem;font-weight:700;padding:2px 7px;border-radius:var(--r-full);background:${color}18;color:${color};">
+                <i class="fas fa-concierge-bell" style="margin-right:3px;"></i>${servCount} serviço${servCount!==1?'s':''}
+              </span>
+              <span style="font-size:0.9rem;font-weight:800;color:${color};">${formatCurrency(pkg.totalValue)}</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:4px;flex-shrink:0;">
+            <button class="btn btn-xs btn-ghost" style="padding:5px 8px;" data-action="edit-package" data-id="${pkg.id}"><i class="fas fa-edit"></i></button>
+            <button class="btn btn-xs btn-danger" style="padding:5px 8px;" data-action="delete-package" data-id="${pkg.id}"><i class="fas fa-trash"></i></button>
           </div>
         </div>
-        <div class="transaction-footer">
-          <span></span>
-          <div class="transaction-actions">
-            <button class="btn btn-xs" data-action="edit-package" data-id="${pkg.id}"><i class="fas fa-edit"></i></button>
-            <button class="btn btn-xs btn-danger" data-action="delete-package" data-id="${pkg.id}"><i class="fas fa-trash"></i></button>
-          </div>
-        </div>`;
+        ${servCount > 0 ? `<div style="background:var(--surface2);border-radius:var(--r-sm);padding:8px 10px;">
+          ${(pkg.services||[]).map(s=>`<div style="display:flex;justify-content:space-between;font-size:0.77rem;padding:2px 0;border-bottom:1px solid var(--border-soft);"><span style="color:var(--text2);">• ${s.description}</span><span style="font-weight:600;color:var(--text);">${formatCurrency(s.value)}</span></div>`).join('')}
+        </div>` : ''}
+      `;
+      card.addEventListener('mouseenter', () => { card.style.boxShadow='var(--card-shadow-hover)'; });
+      card.addEventListener('mouseleave', () => { card.style.boxShadow='var(--card-shadow)'; });
       list.appendChild(card);
     });
   }
@@ -9282,17 +10257,78 @@ function showCommitmentsForDay(dateString) {
     const greetEl = document.getElementById('hero-greeting');
     const nameEl = document.getElementById('hero-username');
     if (greetEl) greetEl.textContent = greet;
-    if (nameEl) nameEl.textContent = userInfo.name || 'FinancePro';
-    
-    // Show today's events in hero (all, clickable)
+    if (nameEl) nameEl.textContent = userInfo.name || 'DJ Manager Pro';
+
+    // ── Hero métricas financeiras ──
+    const now = new Date();
+    const monthTxs = transactions.filter(t => {
+      const d = new Date(t.date + 'T00:00:00');
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && t.status === 'confirmada';
+    });
+    const monthReceitas = monthTxs.filter(t => t.type === 'receita').reduce((s,t) => s+t.amount, 0);
+    const totalBalance = accounts.reduce((s, a) => s + (a.balance || 0), 0);
+
+    // A Receber: saldo de pedidos não quitados
+    let totalAR = 0, countAR = 0;
+    eventOrders.forEach(o => {
+      const paid = receipts.filter(r => r.orderId === o.id && r.status === 'pago').reduce((s,r) => s+r.amount, 0);
+      const saldo = (o.totalValue || 0) - paid;
+      if (saldo > 0) { totalAR += saldo; countAR++; }
+    });
+
+    const el = id => document.getElementById(id);
+    if (el('hero-receitas-month'))  el('hero-receitas-month').textContent  = formatCurrency(monthReceitas);
+    if (el('hero-ar-events'))       el('hero-ar-events').textContent       = formatCurrency(totalAR);
+    if (el('hero-saldo-contas'))    el('hero-saldo-contas').textContent    = formatCurrency(totalBalance);
+
+    // Saldo a receber card
+    const arCard = el('dash-ar-events-card');
+    if (arCard) {
+      if (totalAR > 0) {
+        arCard.style.display = 'block';
+        if (el('dash-ar-value'))  el('dash-ar-value').textContent = formatCurrency(totalAR);
+        if (el('dash-ar-count'))  el('dash-ar-count').textContent = countAR;
+      } else {
+        arCard.style.display = 'none';
+      }
+    }
+
+    // ── Quick stats ──
+    // Pedidos ativos
+    const activePedidos = eventOrders.filter(o => {
+      const comm = commitments.find(c => c.linkedOrderId === o.id);
+      return !comm || (comm.status !== 'cancelado' && comm.status !== 'realizado');
+    }).length;
+    if (el('dash-qs-pedidos')) el('dash-qs-pedidos').textContent = activePedidos;
+
+    // Eventos próximos 30 dias
+    const today30 = new Date(); today30.setDate(today30.getDate() + 30);
+    const todayStr0 = new Date().toISOString().split('T')[0];
+    const proxEvents = commitments.filter(c => {
+      const d = c.date ? c.date.split('T')[0] : '';
+      return d >= todayStr0 && d <= today30.toISOString().split('T')[0] && c.status !== 'cancelado';
+    }).length;
+    if (el('dash-qs-events')) el('dash-qs-events').textContent = proxEvents;
+
+    // Clientes
+    if (el('dash-qs-clients')) el('dash-qs-clients').textContent = clients.length;
+
+    // Manutenções pendentes
+    const maintPend = (typeof maintenanceNotes !== 'undefined') ? maintenanceNotes.filter(m => m.status === 'pendente').length : 0;
+    if (el('dash-qs-maint')) el('dash-qs-maint').textContent = maintPend;
+
+    // ── Atualiza avatar do perfil ──
+    updateProfileAvatar();
+
+    // ── Today events ──
     const _todayLocal = new Date();
     const todayStr = `${_todayLocal.getFullYear()}-${String(_todayLocal.getMonth()+1).padStart(2,'0')}-${String(_todayLocal.getDate()).padStart(2,'0')}`;
     const todayEvents = commitments.filter(c => {
       const d = c.date ? c.date.split('T')[0] : '';
       return d === todayStr && c.status !== 'cancelado';
     }).sort((a,b) => new Date(a.date) - new Date(b.date));
-    
-    const eventsList = document.getElementById('hero-today-events-list');
+
+    const eventsList = el('hero-today-events-list');
     if (eventsList) {
       eventsList.innerHTML = '';
       if (todayEvents.length > 0) {
@@ -9319,24 +10355,36 @@ function showCommitmentsForDay(dateString) {
           eventsList.appendChild(item);
         });
       } else {
-        eventsList.innerHTML = '<div style="font-size:0.9rem;font-weight:600;opacity:0.8;">Nenhum evento hoje</div>';
+        eventsList.innerHTML = '<div style="font-size:0.88rem;font-weight:600;opacity:0.75;">Nenhum evento hoje ✓</div>';
       }
     }
-    
-    // Still update elements that exist in financial tab (hidden IDs still referenced)
-    const totalBalance = accounts.reduce((s, a) => s + (a.balance || 0), 0);
-    const now = new Date();
-    const monthTxs = transactions.filter(t => { const d = new Date(t.date + 'T00:00:00'); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && t.status === 'confirmada'; });
-    const monthReceitas = monthTxs.filter(t => t.type === 'receita').reduce((s,t) => s+t.amount, 0);
+
+    // legacy elements
+    const balanceEl = el('hero-balance');
+    const receitasEl = el('hero-receitas');
+    const despesasEl = el('hero-despesas');
+    const balancoEl  = el('hero-balanco');
     const monthDespesas = monthTxs.filter(t => t.type === 'despesa').reduce((s,t) => s+t.amount, 0);
-    const balanceEl = document.getElementById('hero-balance');
-    const receitasEl = document.getElementById('hero-receitas');
-    const despesasEl = document.getElementById('hero-despesas');
-    const balancoEl = document.getElementById('hero-balanco');
-    if (balanceEl) balanceEl.textContent = formatCurrency(totalBalance);
+    if (balanceEl)  balanceEl.textContent  = formatCurrency(totalBalance);
     if (receitasEl) receitasEl.textContent = formatCurrency(monthReceitas);
     if (despesasEl) despesasEl.textContent = formatCurrency(monthDespesas);
-    if (balancoEl) balancoEl.textContent = formatCurrency(monthReceitas - monthDespesas);
+    if (balancoEl)  balancoEl.textContent  = formatCurrency(monthReceitas - monthDespesas);
+  }
+
+  function updateProfileAvatar() {
+    const name = userInfo.name || 'DJ';
+    const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+    const colors = ['#3b82f6','#7c3aed','#059669','#d97706','#dc2626','#0891b2'];
+    const colorIdx = name.charCodeAt(0) % colors.length;
+    const avatarEl = document.getElementById('profile-avatar-circle');
+    const nameEl   = document.getElementById('profile-display-name');
+    const docEl    = document.getElementById('profile-display-doc');
+    if (avatarEl) {
+      avatarEl.textContent = initials;
+      avatarEl.style.background = colors[colorIdx];
+    }
+    if (nameEl) nameEl.textContent = userInfo.name || 'Seu Nome';
+    if (docEl)  docEl.textContent  = userInfo.cpf  || 'CPF/CNPJ não definido';
   }
 
   function openCommitmentFromHero(commitmentId) {
@@ -9546,23 +10594,26 @@ function showCommitmentsForDay(dateString) {
     if (!el) return;
     const recent = [...transactions].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
     if (!recent.length) {
-      el.innerHTML = '<div class="empty-state" style="padding:20px;"><div class="empty-state-icon"><i class="fas fa-receipt"></i></div><h4>Sem transações</h4></div>';
+      el.innerHTML = '<div class="empty-state" style="padding:20px 0;"><div class="empty-state-icon"><i class="fas fa-receipt"></i></div><h4>Sem transações</h4></div>';
       return;
     }
+    const catColors = { receita: 'rgba(16,185,129,0.12)', despesa: 'rgba(239,68,68,0.12)', transferencia: 'rgba(59,130,246,0.12)' };
+    const catIconColors = { receita: 'var(--success)', despesa: 'var(--danger)', transferencia: 'var(--primary)' };
+    const catIcons = { receita: 'fa-arrow-down', despesa: 'fa-arrow-up', transferencia: 'fa-exchange-alt' };
     el.innerHTML = recent.map(t => {
-      const isPositive = t.type === 'receita';
-      const isTransfer = t.type === 'transferencia';
-      const icon = isTransfer ? 'fa-exchange-alt' : (isPositive ? 'fa-arrow-down' : 'fa-arrow-up');
-      const typeClass = isTransfer ? 'transferencia' : (isPositive ? 'receita' : 'despesa');
-      const amtClass = isPositive ? 'positive' : 'negative';
-      const sign = isPositive ? '+' : '-';
-      return `<div class="recent-tx-item">
-        <div class="recent-tx-icon ${typeClass}"><i class="fas ${icon}"></i></div>
-        <div class="recent-tx-info">
-          <div class="recent-tx-desc">${t.description}</div>
-          <div class="recent-tx-cat">${t.category} · ${formatDate(t.date)}</div>
+      const bg    = catColors[t.type] || catColors.despesa;
+      const ic    = catIconColors[t.type] || catIconColors.despesa;
+      const icon  = catIcons[t.type] || 'fa-circle';
+      const sign  = t.type === 'receita' ? '+' : (t.type === 'despesa' ? '-' : '');
+      const amtC  = t.type === 'receita' ? 'var(--success)' : (t.type === 'despesa' ? 'var(--danger)' : 'var(--primary)');
+      const pend  = t.status !== 'confirmada' ? `<span style="font-size:0.62rem;background:var(--warning-bg);color:var(--warning);padding:1px 6px;border-radius:var(--r-full);font-weight:600;margin-left:4px;">Pendente</span>` : '';
+      return `<div style="display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--border-soft);">
+        <div style="width:36px;height:36px;border-radius:var(--r-sm);background:${bg};color:${ic};display:flex;align-items:center;justify-content:center;font-size:0.88rem;flex-shrink:0;"><i class="fas ${icon}"></i></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:600;font-size:0.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.description}${pend}</div>
+          <div style="font-size:0.72rem;color:var(--text3);margin-top:1px;">${t.category || '—'} · ${formatDate(t.date)}</div>
         </div>
-        <div class="recent-tx-amount ${amtClass}">${sign}${formatCurrencyShort(t.amount)}</div>
+        <div style="font-weight:800;font-size:0.92rem;color:${amtC};flex-shrink:0;">${sign}${formatCurrency(t.amount)}</div>
       </div>`;
     }).join('');
   }
@@ -9572,35 +10623,69 @@ function showCommitmentsForDay(dateString) {
     if (!el) return;
     const today = new Date();
     today.setHours(0,0,0,0);
-    // Show all upcoming events sorted by date - no artificial slice, show next 3
     const upcoming = commitments.filter(c => {
       const d = new Date(c.date + (c.date.includes('T') ? '' : 'T00:00:00'));
       return d >= today && c.status !== 'cancelado';
-    }).sort((a,b) => new Date(a.date) - new Date(b.date)).slice(0, 3);
+    }).sort((a,b) => new Date(a.date) - new Date(b.date)).slice(0, 5);
+
     if (!upcoming.length) {
       el.innerHTML = '<div class="empty-state" style="padding:20px 0;"><div class="empty-state-icon"><i class="fas fa-calendar"></i></div><h4>Nenhum evento próximo</h4><p>Adicione compromissos para vê-los aqui</p></div>';
       return;
     }
     const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-    const _now = new Date();
-    const localToday = `${_now.getFullYear()}-${String(_now.getMonth()+1).padStart(2,'0')}-${String(_now.getDate()).padStart(2,'0')}`;
-    el.innerHTML = upcoming.map(c => {
+    const _now = new Date(); _now.setHours(0,0,0,0);
+    const statusColors = { agendado: 'var(--warning)', confirmado: 'var(--success)', realizado: 'var(--accent)', cancelado: 'var(--danger)' };
+    const statusBg = { agendado: 'var(--warning-bg)', confirmado: 'var(--success-bg)', realizado: 'rgba(139,92,246,0.12)', cancelado: 'var(--danger-bg)' };
+    const statusLabels = { agendado: 'Agendado', confirmado: 'Confirmado', realizado: 'Realizado', cancelado: 'Cancelado' };
+
+    el.innerHTML = '';
+    upcoming.forEach(c => {
       const d = new Date(c.date + (c.date.includes('T') ? '' : 'T00:00:00'));
+      const diffDays = Math.round((d - _now) / 86400000);
       const timeStr = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-      const isToday = c.date.split('T')[0] === localToday;
-      const dayLabel = isToday ? 'Hoje' : String(d.getDate());
-      return `<div class="upcoming-event-item" onclick="openCommitmentFromHero(${c.id})">
-        <div class="upcoming-event-date-badge">
-          <span class="day">${dayLabel}</span>
-          <span class="month">${isToday ? '🎯' : months[d.getMonth()]}</span>
+      const isToday = diffDays === 0;
+      const isTomorrow = diffDays === 1;
+      const dayNum = isToday ? '🎯' : String(d.getDate()).padStart(2,'0');
+      const monStr = isToday ? 'Hoje' : months[d.getMonth()];
+
+      // Countdown badge
+      let countBg = 'rgba(59,130,246,0.1)', countColor = 'var(--primary)', countTxt = `${diffDays}d`;
+      if (isToday) { countBg='var(--danger-bg)'; countColor='var(--danger)'; countTxt='HOJE'; }
+      else if (isTomorrow) { countBg='rgba(245,158,11,0.12)'; countColor='var(--warning)'; countTxt='Amanhã'; }
+      else if (diffDays <= 7) { countBg='rgba(139,92,246,0.12)'; countColor='var(--accent)'; countTxt=`${diffDays} dias`; }
+
+      // Linked order value
+      let valHtml = '';
+      if (c.linkedOrderId) {
+        const order = eventOrders.find(o => o.id === c.linkedOrderId);
+        if (order && order.totalValue) {
+          const paid = receipts.filter(r => r.orderId === order.id && r.status === 'pago').reduce((s,r) => s+r.amount, 0);
+          const saldo = order.totalValue - paid;
+          valHtml = `<div style="font-size:0.72rem;font-weight:700;color:${saldo > 0 ? 'var(--warning)' : 'var(--success)'};">${saldo > 0 ? '−'+formatCurrency(saldo) : '✓ Quitado'}</div>`;
+        }
+      }
+
+      const item = document.createElement('div');
+      item.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border-soft);border-radius:var(--r-md);margin-bottom:8px;cursor:pointer;transition:all 0.15s;';
+      item.innerHTML = `
+        <div style="width:42px;height:42px;border-radius:var(--r-sm);background:${isToday ? 'var(--danger)' : 'var(--primary)'};color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;">
+          <span style="font-size:${isToday ? '0.8rem' : '1.1rem'};font-weight:800;line-height:1;">${dayNum}</span>
+          <span style="font-size:0.55rem;font-weight:700;opacity:0.85;text-transform:uppercase;">${monStr}</span>
         </div>
-        <div class="upcoming-event-info">
-          <div class="upcoming-event-name">${c.title}</div>
-          <div class="upcoming-event-sub">${c.location || ''} · ${timeStr}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:700;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.title}</div>
+          <div style="font-size:0.73rem;color:var(--text3);margin-top:1px;">${timeStr}${c.location ? ' · '+c.location : ''}</div>
+          ${valHtml}
         </div>
-        <i class="fas fa-chevron-right" style="color:var(--text3);font-size:0.75rem"></i>
-      </div>`;
-    }).join('');
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
+          <span style="font-size:0.62rem;font-weight:700;padding:2px 7px;border-radius:var(--r-full);background:${countBg};color:${countColor};">${countTxt}</span>
+          <span style="font-size:0.62rem;font-weight:700;padding:2px 7px;border-radius:var(--r-full);background:${statusBg[c.status]||'var(--surface3)'};color:${statusColors[c.status]||'var(--text3)'};">${statusLabels[c.status]||c.status}</span>
+        </div>`;
+      item.addEventListener('mouseenter', () => { item.style.boxShadow = 'var(--card-shadow-hover)'; item.style.transform = 'translateX(2px)'; });
+      item.addEventListener('mouseleave', () => { item.style.boxShadow = ''; item.style.transform = ''; });
+      item.addEventListener('click', () => openSingleCommitmentDetail(c.id));
+      el.appendChild(item);
+    });
   }
 
   // =====================================================
@@ -11349,6 +12434,161 @@ function showCommitmentsForDay(dateString) {
       </div>
     </div>
   </div>
+
+<script>
+// =====================================================================
+// DJ MANAGER PRO — MELHORIAS v2
+// Wiring: quick-stats clicks, AR card tab-link, receipt list render,
+// PDF page numbers, profile avatar on load, logo upload UX
+// =====================================================================
+
+(function() {
+  'use strict';
+
+  // ── Wire data-tab-target on dynamically-injected elements ──
+  document.addEventListener('click', function(e) {
+    const el = e.target.closest('[data-tab-target]');
+    if (!el) return;
+    // Already handled by main nav listener; but dash-ar-sub span needs it
+    const tabId = el.dataset.tabTarget;
+    if (!tabId) return;
+    const tabContent = document.getElementById(tabId + '-content');
+    if (!tabContent) return;
+    // trigger existing switchTab if available
+    if (typeof switchTab === 'function') { switchTab(tabId); return; }
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    tabContent.classList.add('active');
+    document.querySelectorAll('.bottom-nav-item').forEach(b => {
+      b.classList.toggle('active', b.dataset.tabTarget === tabId);
+    });
+  });
+
+  // ── User logo file input → show preview immediately ──
+  document.addEventListener('change', function(e) {
+    if (e.target.id !== 'user-logo') return;
+    const file = e.target.files[0];
+    if (!file) return;
+    const prev = document.getElementById('logo-preview');
+    const ph   = document.getElementById('logo-upload-placeholder');
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      if (prev) { prev.src = ev.target.result; prev.style.display = 'block'; }
+      if (ph)   { ph.style.display = 'none'; }
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // ── Run updateProfileAvatar after data loads ──
+  const origUpdateUserInfoForm = window.updateUserInfoForm;
+  // Already patched in inline JS above; this is a safety fallback:
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+      if (typeof updateProfileAvatar === 'function') updateProfileAvatar();
+    }, 500);
+  });
+
+  // ── Enhance PDF: add page numbers to all doc pages after save ──
+  // Patch doc.save to auto-add page numbers before saving
+  // (jsPDF doesn't need patching — page numbers added inside each function)
+
+  // ── Keyboard shortcut: Escape closes modals ──
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      const openModal = document.querySelector('.modal.active');
+      if (openModal) openModal.classList.remove('active');
+    }
+  });
+
+  // ── Receipt list: enhance existing items on render ──
+  // Observe DOM changes to receipts-list and apply saldo chips
+  if (typeof MutationObserver !== 'undefined') {
+    const receiptList = document.getElementById('receipts-list');
+    if (receiptList) {
+      const obs = new MutationObserver(function() {
+        receiptList.querySelectorAll('.transaction-item:not([data-enhanced])').forEach(item => {
+          item.dataset.enhanced = '1';
+          item.style.transition = 'box-shadow 0.15s, transform 0.15s';
+          item.addEventListener('mouseenter', () => { item.style.boxShadow = 'var(--card-shadow-hover)'; item.style.transform = 'translateX(2px)'; });
+          item.addEventListener('mouseleave', () => { item.style.boxShadow = ''; item.style.transform = ''; });
+        });
+      });
+      obs.observe(receiptList, { childList: true, subtree: true });
+    }
+
+    // Enhance transactions list too
+    const txList = document.querySelector('#transacoes-content .transactions-list-container');
+    if (txList) {
+      const obs2 = new MutationObserver(function() {
+        txList.querySelectorAll('.transaction-item:not([data-enhanced])').forEach(item => {
+          item.dataset.enhanced = '1';
+          item.style.transition = 'box-shadow 0.15s, transform 0.15s';
+          item.addEventListener('mouseenter', () => { item.style.boxShadow = 'var(--card-shadow-hover)'; item.style.transform = 'translateX(2px)'; });
+          item.addEventListener('mouseleave', () => { item.style.boxShadow = ''; item.style.transform = ''; });
+        });
+      });
+      obs2.observe(txList, { childList: true, subtree: true });
+    }
+  }
+
+  // ── Smooth scroll to top when switching tabs ──
+  const origSwitchTab = window.switchTab;
+  if (typeof switchTab === 'function') {
+    window._switchTabOriginal = switchTab;
+    window.switchTab = function(tabId) {
+      window._switchTabOriginal(tabId);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+  }
+
+  // ── Dashboard "Saldo a Receber" card: refresh when tab-target clicked ──
+  document.querySelectorAll('[data-tab-target="pedidos"]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      setTimeout(function() {
+        if (typeof updateDashboardHero === 'function') updateDashboardHero();
+      }, 100);
+    });
+  });
+
+  // ── Add pulsing to HOJE badge in upcoming events ──
+  setInterval(function() {
+    document.querySelectorAll('.upcoming-event-item .countdown-badge.today').forEach(badge => {
+      badge.style.opacity = badge.style.opacity === '0.6' ? '1' : '0.6';
+    });
+  }, 800);
+
+  // ── Auto-format CPF/CNPJ field ──
+  const cpfInput = document.getElementById('user-cpf');
+  if (cpfInput) {
+    cpfInput.addEventListener('input', function() {
+      let v = this.value.replace(/\D/g, '');
+      if (v.length <= 11) {
+        v = v.replace(/(\d{3})(\d)/, '$1.$2')
+             .replace(/(\d{3})(\d)/, '$1.$2')
+             .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+      } else {
+        v = v.replace(/^(\d{2})(\d)/, '$1.$2')
+             .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+             .replace(/\.(\d{3})(\d)/, '.$1/$2')
+             .replace(/(\d{4})(\d)/, '$1-$2');
+      }
+      this.value = v.slice(0, 18);
+    });
+  }
+
+  // ── Glow effect on FAB ──
+  const fab = document.getElementById('fab-main-btn');
+  if (fab) {
+    setInterval(function() {
+      if (!fab.classList.contains('open')) {
+        fab.style.boxShadow = '0 4px 20px rgba(59,130,246,0.6)';
+        setTimeout(() => { if (fab) fab.style.boxShadow = '0 4px 16px rgba(59,130,246,0.4)'; }, 600);
+      }
+    }, 2000);
+  }
+
+  console.log('%c🎵 DJ Manager Pro v2 — Melhorias aplicadas', 'color:#3b82f6;font-weight:bold;font-size:12px;');
+})();
+</script>
 
 </body>
 </html>
