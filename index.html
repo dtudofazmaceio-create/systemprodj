@@ -378,6 +378,8 @@
   .fab-menu.open .fab-menu-item:nth-child(4) { transition-delay: 0.2s; }
   .fab-menu.open .fab-menu-item:nth-child(5) { transition-delay: 0.25s; }
   .fab-menu.open .fab-menu-item:nth-child(6) { transition-delay: 0.3s; }
+  .fab-menu.open .fab-menu-item:nth-child(7) { transition-delay: 0.35s; }
+  .fab-menu.open .fab-menu-item:nth-child(8) { transition-delay: 0.4s; }
   .fab-menu-item:active { transform: scale(0.95); }
   .fab-menu-item .fab-icon {
     width: 36px; height: 36px;
@@ -4205,8 +4207,10 @@ fa-download"></i> Baixar Pedido</button>
     <button class="fab-menu-item" data-action="add-new" data-type="receita"><span class="fab-icon" style="background:rgba(6,214,160,0.15);color:var(--success)"><i class="fas fa-arrow-down"></i></span>Nova Receita</button>
     <button class="fab-menu-item" data-action="add-new" data-type="despesa"><span class="fab-icon" style="background:rgba(239,71,111,0.15);color:var(--danger)"><i class="fas fa-arrow-up"></i></span>Nova Despesa</button>
     <button class="fab-menu-item" id="fab-new-order"><span class="fab-icon" style="background:rgba(247,127,0,0.15);color:var(--ev-orange)"><i class="fas fa-clipboard-check"></i></span>Novo Pedido</button>
+    <button class="fab-menu-item" id="fab-new-quote"><span class="fab-icon" style="background:rgba(59,130,246,0.15);color:var(--primary)"><i class="fas fa-file-alt"></i></span>Novo Orçamento</button>
     <button class="fab-menu-item" id="fab-new-client"><span class="fab-icon" style="background:rgba(72,149,239,0.15);color:var(--ev-blue)"><i class="fas fa-user-plus"></i></span>Novo Cliente</button>
     <button class="fab-menu-item" id="fab-new-commitment"><span class="fab-icon" style="background:rgba(155,93,229,0.15);color:var(--ev-purple)"><i class="fas fa-calendar-plus"></i></span>Novo Compromisso</button>
+    <button class="fab-menu-item" id="fab-new-shopping"><span class="fab-icon" style="background:rgba(245,158,11,0.15);color:var(--warning)"><i class="fas fa-shopping-cart"></i></span>Nova Lista de Compras</button>
     <button class="fab-menu-item" id="fab-new-maintenance"><span class="fab-icon" style="background:rgba(239,71,111,0.15);color:var(--danger)"><i class="fas fa-tools"></i></span>Nota de Manutenção</button>
 
   </div>
@@ -10413,8 +10417,10 @@ function showCommitmentsForDay(dateString) {
   fabBtn.addEventListener('click', () => toggleFab());
   fabOverlay.addEventListener('click', () => toggleFab(false));
   document.getElementById('fab-new-order')?.addEventListener('click', () => { toggleFab(false); openEventOrderModal(); });
+  document.getElementById('fab-new-quote')?.addEventListener('click', () => { toggleFab(false); openEventQuoteModal('new'); });
   document.getElementById('fab-new-client')?.addEventListener('click', () => { toggleFab(false); openClientModal(); });
   document.getElementById('fab-new-commitment')?.addEventListener('click', () => { toggleFab(false); openCommitmentModal(); });
+  document.getElementById('fab-new-shopping')?.addEventListener('click', () => { toggleFab(false); openShoppingModal('new'); });
 
 
   // =====================================================
