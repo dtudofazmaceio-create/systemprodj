@@ -1631,8 +1631,24 @@
     flex: 1; font-size: 0.95rem; font-weight: 700; color: var(--text);
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
-  .doc-viewer-iframe-wrap { flex: 1; overflow: hidden; background: #525659; }
+  .doc-viewer-iframe-wrap { flex: 1; overflow: hidden; background: #525659; position: relative; }
   #doc-viewer-iframe { width: 100%; height: 100%; border: none; display: block; }
+  /* iOS fallback message */
+  .doc-viewer-ios-fallback {
+    display: none;
+    position: absolute; inset: 0;
+    background: #525659;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    color: white;
+    text-align: center;
+    padding: 32px;
+  }
+  .doc-viewer-ios-fallback.show { display: flex; }
+  .doc-viewer-ios-fallback i { font-size: 3rem; opacity: 0.7; }
+  .doc-viewer-ios-fallback p { font-size: 0.9rem; opacity: 0.85; line-height: 1.6; }
   .doc-viewer-footer {
     display: flex; gap: 8px; align-items: center;
     padding: 10px 16px;
@@ -2665,6 +2681,7 @@
   .dashboard-hero {
     background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #7c3aed 100%) !important;
     box-shadow: 0 8px 32px rgba(37,99,235,0.35) !important;
+    padding: 20px 18px !important;
   }
   .hero-stats {
     display: grid;
@@ -2681,6 +2698,47 @@
     text-align: center;
   }
   .hero-stat-value { font-size: 0.95rem !important; }
+
+  /* ── Hero metrics grid — mobile-first ── */
+  #dashboard-content .dashboard-hero > div[style*="grid-template-columns:repeat(3,1fr)"] > div {
+    padding: 10px 8px !important;
+  }
+  #dashboard-content .dashboard-hero > div[style*="grid-template-columns:repeat(3,1fr)"] {
+    gap: 6px !important;
+    margin-top: 12px !important;
+    padding-top: 12px !important;
+  }
+  /* Make hero metric values bigger and more readable */
+  #hero-receitas-month,
+  #hero-ar-events,
+  #hero-saldo-contas {
+    font-size: 0.88rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.02em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* Hero metric labels */
+  #dashboard-content .dashboard-hero > div[style*="grid-template-columns:repeat(3,1fr)"] > div > div:first-child {
+    font-size: 0.58rem !important;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+  }
+  /* Hero name larger */
+  .hero-name {
+    font-size: 1.3rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 0 !important;
+  }
+  .hero-greeting {
+    font-size: 0.82rem !important;
+    margin-bottom: 3px !important;
+  }
+  /* Today events section */
+  #hero-today-event-section {
+    margin-top: 12px !important;
+  }
 
   /* ── Dashboard: Próximos Eventos lista melhorada ── */
   .upcoming-event-item {
@@ -3093,21 +3151,21 @@
         <div class="hero-greeting" id="hero-greeting">Bom dia 👋</div>
         <div class="hero-name" id="hero-username">FinancePro</div>
         <!-- 3 métricas financeiras rápidas -->
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.18);">
-          <div style="background:rgba(255,255,255,0.1);border-radius:var(--r-sm);padding:9px 10px;">
-            <div style="font-size:0.62rem;opacity:0.72;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;">Receita Mês</div>
-            <div style="font-size:1rem;font-weight:800;margin-top:3px;font-family:var(--font-display);" id="hero-receitas-month">R$ 0</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.18);">
+          <div style="background:rgba(255,255,255,0.12);border-radius:var(--r-sm);padding:10px 8px;min-width:0;">
+            <div style="font-size:0.58rem;opacity:0.75;text-transform:uppercase;letter-spacing:0.04em;font-weight:700;line-height:1.2;">Receita<br>Mês</div>
+            <div style="font-size:0.9rem;font-weight:800;margin-top:4px;font-family:var(--font-display);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="hero-receitas-month">R$ 0</div>
           </div>
-          <div style="background:rgba(255,255,255,0.1);border-radius:var(--r-sm);padding:9px 10px;">
-            <div style="font-size:0.62rem;opacity:0.72;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;">A Receber</div>
-            <div style="font-size:1rem;font-weight:800;margin-top:3px;font-family:var(--font-display);color:#fde047;" id="hero-ar-events">R$ 0</div>
+          <div style="background:rgba(255,255,255,0.12);border-radius:var(--r-sm);padding:10px 8px;min-width:0;">
+            <div style="font-size:0.58rem;opacity:0.75;text-transform:uppercase;letter-spacing:0.04em;font-weight:700;line-height:1.2;">A<br>Receber</div>
+            <div style="font-size:0.9rem;font-weight:800;margin-top:4px;font-family:var(--font-display);color:#fde047;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="hero-ar-events">R$ 0</div>
           </div>
-          <div style="background:rgba(255,255,255,0.1);border-radius:var(--r-sm);padding:9px 10px;">
-            <div style="font-size:0.62rem;opacity:0.72;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;">Saldo Contas</div>
-            <div style="font-size:1rem;font-weight:800;margin-top:3px;font-family:var(--font-display);" id="hero-saldo-contas">R$ 0</div>
+          <div style="background:rgba(255,255,255,0.12);border-radius:var(--r-sm);padding:10px 8px;min-width:0;">
+            <div style="font-size:0.58rem;opacity:0.75;text-transform:uppercase;letter-spacing:0.04em;font-weight:700;line-height:1.2;">Saldo<br>Contas</div>
+            <div style="font-size:0.9rem;font-weight:800;margin-top:4px;font-family:var(--font-display);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="hero-saldo-contas">R$ 0</div>
           </div>
         </div>
-        <div id="hero-today-event-section" style="margin-top:14px;">
+        <div id="hero-today-event-section" style="margin-top:12px;">
           <div style="font-size:0.72rem;opacity:0.75;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;font-weight:700;">📅 Eventos de Hoje</div>
           <div id="hero-today-events-list"></div>
         </div>
@@ -5279,7 +5337,7 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
     document.getElementById('doc-viewer-download-btn')?.addEventListener('click', () => {
       const id = parseFloat(document.getElementById('doc-viewer-id').value);
       const doc = savedDocuments.find(d => d.id === id);
-      if (doc) { const a = document.createElement('a'); a.href = doc.data; a.download = doc.name + '.pdf'; a.click(); }
+      if (doc) downloadDocMobile(doc);
     });
     document.getElementById('doc-viewer-close-btn')?.addEventListener('click', () => {
       document.getElementById('doc-viewer-modal').classList.remove('active');
@@ -5548,12 +5606,8 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
             // Saved Documents
             'download-saved-doc': () => {
               const doc = savedDocuments.find(d => d.id === id);
-              if (doc) {
-                const a = document.createElement('a');
-                a.href = doc.data;
-                a.download = doc.name + '.pdf';
-                a.click();
-              }
+              if (!doc) return;
+              downloadDocMobile(doc);
             },
             'edit-saved-doc': () => {
               openDocViewerModal(id);
@@ -5628,6 +5682,41 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
     } catch { 
       return def;
     } 
+  }
+
+  // ── Download helper robusto para mobile (iOS Safari / Android) ──
+  function downloadDocMobile(doc) {
+    if (!doc || !doc.data) return;
+    const filename = (doc.name || 'documento') + '.pdf';
+    try {
+      if (doc.data.startsWith('data:')) {
+        const parts = doc.data.split(',');
+        const mime = (parts[0].match(/:(.*?);/) || [])[1] || 'application/pdf';
+        const raw = atob(parts[1]);
+        const arr = new Uint8Array(raw.length);
+        for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+        const blob = new Blob([arr], { type: mime });
+        const blobUrl = URL.createObjectURL(blob);
+        // Tenta download com <a> (funciona em Android e desktop)
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        // iOS Safari: também abre em nova aba como fallback
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        if (isIOS) {
+          setTimeout(() => { window.open(blobUrl, '_blank'); }, 100);
+        }
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 8000);
+      } else {
+        window.open(doc.data, '_blank');
+      }
+    } catch(e) {
+      window.open(doc.data, '_blank');
+    }
   }
   
   function saveData() { 
@@ -11882,35 +11971,42 @@ function showCommitmentsForDay(dateString) {
     const typeIcon = { contract: 'fa-file-contract', order: 'fa-clipboard-list', quote: 'fa-file-alt', receipt: 'fa-file-invoice' };
     const typeColor = { contract: 'var(--primary)', order: 'var(--ev-orange)', quote: 'var(--ev-blue)', receipt: 'var(--ev-teal)' };
     const typeLabel = { contract: 'Contrato', order: 'Pedido', quote: 'Orçamento', receipt: 'Recibo' };
-    const grid = document.createElement('div');
-    grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:10px;';
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;flex-direction:column;gap:10px;';
     [...savedDocuments].reverse().forEach(doc => {
       const icon = typeIcon[doc.type] || 'fa-file-pdf';
       const color = typeColor[doc.type] || 'var(--danger)';
       const label = typeLabel[doc.type] || 'Documento';
+      const dateStr = new Date(doc.createdAt).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});
       const card = document.createElement('div');
-      card.style.cssText = `background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border-soft);padding:12px;box-shadow:var(--card-shadow);display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden;`;
+      card.style.cssText = `background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border-soft);padding:14px 14px 12px;box-shadow:var(--card-shadow);display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;`;
       card.innerHTML = `
-        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${color};border-radius:var(--r-md) var(--r-md) 0 0;"></div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div style="width:32px;height:32px;border-radius:var(--r-sm);background:${color}18;color:${color};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <i class="fas ${icon}" style="font-size:0.85rem;"></i>
+        <div style="position:absolute;top:0;left:0;bottom:0;width:4px;background:${color};border-radius:var(--r-md) 0 0 var(--r-md);"></div>
+        <div style="padding-left:8px;display:flex;align-items:center;gap:10px;">
+          <div style="width:40px;height:40px;border-radius:var(--r-md);background:${color}18;color:${color};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fas ${icon}" style="font-size:1rem;"></i>
           </div>
           <div style="flex:1;min-width:0;">
-            <div style="font-size:0.62rem;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:0.04em;">${label}</div>
+            <div style="font-size:0.65rem;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">${label}</div>
+            <div style="font-size:0.88rem;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${doc.name}</div>
+            <div style="font-size:0.7rem;color:var(--text3);margin-top:1px;"><i class="fas fa-clock" style="font-size:0.6rem;margin-right:3px;"></i>${dateStr}</div>
           </div>
         </div>
-        <div style="font-size:0.78rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="doc-name-display-${doc.id}">${doc.name}</div>
-        <div style="font-size:0.68rem;color:var(--text3);">${new Date(doc.createdAt).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</div>
-        <div style="display:flex;gap:4px;">
-          <button class="btn btn-xs" style="flex:1;font-size:0.72rem;" data-action="download-saved-doc" data-id="${doc.id}"><i class="fas fa-download"></i> Baixar</button>
-          <button class="btn btn-xs" style="padding:5px 8px;background:var(--primary);color:#fff;" data-action="edit-saved-doc" data-id="${doc.id}" title="Editar conteúdo do documento"><i class="fas fa-edit"></i></button>
-          <button class="btn btn-xs btn-danger" style="padding:5px 8px;" data-action="delete-saved-doc" data-id="${doc.id}"><i class="fas fa-trash"></i></button>
+        <div style="padding-left:8px;display:grid;grid-template-columns:1fr auto auto;gap:6px;">
+          <button class="btn" style="height:40px;font-size:0.8rem;font-weight:700;background:${color};color:#fff;border-radius:var(--r-sm);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;" data-action="download-saved-doc" data-id="${doc.id}">
+            <i class="fas fa-download"></i> Baixar PDF
+          </button>
+          <button class="btn btn-xs" style="height:40px;width:40px;padding:0;background:var(--surface2);border:1.5px solid var(--border);color:var(--text2);border-radius:var(--r-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;" data-action="edit-saved-doc" data-id="${doc.id}" title="Editar documento">
+            <i class="fas fa-edit" style="font-size:0.85rem;"></i>
+          </button>
+          <button class="btn btn-xs" style="height:40px;width:40px;padding:0;background:var(--danger-bg);border:none;color:var(--danger);border-radius:var(--r-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;" data-action="delete-saved-doc" data-id="${doc.id}" title="Excluir">
+            <i class="fas fa-trash" style="font-size:0.85rem;"></i>
+          </button>
         </div>`;
-      grid.appendChild(card);
+      wrap.appendChild(card);
     });
     list.innerHTML = '';
-    list.appendChild(grid);
+    list.appendChild(wrap);
   }
 
   function openEditSavedDocModal(id) {
@@ -12423,6 +12519,10 @@ function showCommitmentsForDay(dateString) {
       </div>
       <div class="doc-viewer-iframe-wrap">
         <iframe id="doc-viewer-iframe" title="Visualização do documento"></iframe>
+        <div class="doc-viewer-ios-fallback" id="doc-viewer-ios-fallback">
+          <i class="fas fa-file-pdf"></i>
+          <p>A pré-visualização não está disponível neste navegador.<br>Toque em <strong>Baixar PDF</strong> para abrir o documento.</p>
+        </div>
       </div>
       <div class="doc-viewer-footer">
         <div class="doc-viewer-name-wrap">
@@ -12440,10 +12540,54 @@ function showCommitmentsForDay(dateString) {
 // DJ MANAGER PRO — MELHORIAS v2
 // Wiring: quick-stats clicks, AR card tab-link, receipt list render,
 // PDF page numbers, profile avatar on load, logo upload UX
+// iOS PDF download patch
 // =====================================================================
 
 (function() {
   'use strict';
+
+  // ── Patch jsPDF.save() para funcionar no iOS Safari ──
+  // No iOS, o jsPDF usa <a>.click() que não dispara download — abrimos em nova aba
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  if (isIOS) {
+    document.addEventListener('DOMContentLoaded', function() {
+      // Espera jsPDF carregar
+      const patchJsPDF = () => {
+        const jspdf = window.jspdf;
+        if (!jspdf || !jspdf.jsPDF) return;
+        const OrigJsPDF = jspdf.jsPDF;
+        const origProto = OrigJsPDF.prototype;
+        const origSave = origProto.save;
+        origProto.save = function(filename) {
+          try {
+            // Tenta salvar normalmente
+            origSave.call(this, filename);
+          } catch(e) {}
+          // Em iOS, também abre em nova aba via blob
+          try {
+            const blob = this.output('blob');
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.target = '_blank';
+            a.rel = 'noopener';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 8000);
+          } catch(e2) {
+            try {
+              const dataUri = this.output('datauristring');
+              window.open(dataUri, '_blank');
+            } catch(e3) {}
+          }
+        };
+      };
+      // Tenta imediatamente e com delay caso scripts ainda carreguem
+      patchJsPDF();
+      setTimeout(patchJsPDF, 1500);
+    });
+  }
 
   // ── Wire data-tab-target on dynamically-injected elements ──
   document.addEventListener('click', function(e) {
