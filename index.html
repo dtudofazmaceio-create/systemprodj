@@ -4836,9 +4836,27 @@ class="modal-content">
       <span class="close-button" data-action="close-modal">&times;</span>
       <h2 id="view-order-modal-title">Detalhes do Pedido</h2>
       <div id="view-order-modal-body"></div>
-      <div class="btn-container">
-          <button type="button" class="btn" id="view-order-modal-download-btn"><i class="fas fa-download"></i> Baixar PDF</button>
-          <button type="button" class="btn btn-danger" data-action="close-modal">Fechar</button>
+      <div class="btn-container" style="flex-wrap:wrap;gap:8px;">
+          <button type="button" class="btn" id="view-order-modal-whatsapp-btn" style="background:#25d366;color:#fff;display:none;flex:1;min-width:140px;"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+          <button type="button" class="btn" id="view-order-modal-download-btn" style="flex:1;min-width:140px;"><i class="fas fa-download"></i> Baixar PDF</button>
+          <button type="button" class="btn btn-danger" data-action="close-modal" style="flex:1;min-width:100px;">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Detalhes do Cliente -->
+  <div id="view-client-modal" class="modal">
+    <div class="modal-content"><div class="modal-handle"></div>
+      <span class="close-button" data-action="close-modal">&times;</span>
+      <h2 id="view-client-modal-title" style="display:flex;align-items:center;gap:10px;">
+        <span id="view-client-modal-avatar" style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem;flex-shrink:0;"></span>
+        <span id="view-client-modal-name">Cliente</span>
+      </h2>
+      <div id="view-client-modal-body"></div>
+      <div class="btn-container" style="flex-wrap:wrap;gap:8px;">
+        <button type="button" id="view-client-whatsapp-btn" class="btn" style="background:#25d366;color:#fff;flex:1;min-width:140px;display:none;"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+        <button type="button" id="view-client-edit-btn" class="btn" style="flex:1;min-width:120px;"><i class="fas fa-edit"></i> Editar</button>
+        <button type="button" class="btn btn-danger" data-action="close-modal" style="flex:1;min-width:80px;">Fechar</button>
       </div>
     </div>
   </div>
@@ -5616,6 +5634,8 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
               const idx = savedDocuments.findIndex(d => d.id === id);
               if (idx > -1) { savedDocuments.splice(idx, 1); saveData(); updateSavedDocumentsList(); showToast('Documento removido!', 'success'); }
             },
+            // Cliente: abrir modal de visualização
+            'view-client': () => openViewClientModal(id),
         };
         if(actions[action]) actions[action]();
     });
@@ -6834,6 +6854,10 @@ function openCommitmentModal(mode, id = null, date = null) {
         <p><strong>Nome:</strong> ${client.name}</p>
         <p><strong>Documento:</strong> ${client.document || 'N/A'}</p>
         <p><strong>Contato:</strong> ${client.phone || 'N/A'} | ${client.email || 'N/A'}</p>
+        ${client.phone ? `<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+          <a href="tel:${client.phone}" class="btn btn-xs" style="background:var(--success-bg);color:var(--success);border:1px solid var(--success);text-decoration:none;font-size:0.75rem;padding:6px 12px;border-radius:var(--r-full);" onclick="event.stopPropagation()"><i class="fas fa-phone"></i> Ligar</a>
+          ${client.email ? `<a href="mailto:${client.email}" class="btn btn-xs" style="background:var(--info-bg);color:var(--info);border:1px solid var(--info);text-decoration:none;font-size:0.75rem;padding:6px 12px;border-radius:var(--r-full);" onclick="event.stopPropagation()"><i class="fas fa-envelope"></i> E-mail</a>` : ''}
+        </div>` : ''}
       </div>
       <div class="detail-group">
         <h4><i class="fas fa-calendar-check"></i> Detalhes do Evento</h4>
@@ -6881,6 +6905,138 @@ function openCommitmentModal(mode, id = null, date = null) {
     body.innerHTML += financialDetailsHtml;
     
     document.getElementById('view-order-modal-download-btn').dataset.id = orderId;
+
+    // WhatsApp button
+    const waBtn = document.getElementById('view-order-modal-whatsapp-btn');
+    const rawPhone = (client.phone || '').replace(/\D/g, '');
+    if (rawPhone) {
+      const waPhone = rawPhone.startsWith('55') ? rawPhone : '55' + rawPhone;
+      const waMsg = encodeURIComponent(
+        `Olá ${client.name}! 👋\n\nSegue o resumo do seu pedido *#${order.orderNumber}*:\n` +
+        `📅 *Evento:* ${order.eventType} — ${formatDate(order.eventDate)} às ${order.eventTime}\n` +
+        `📍 *Local:* ${order.eventLocation}\n` +
+        `💰 *Valor Total:* ${formatCurrency(order.totalValue)}\n\n` +
+        `Qualquer dúvida estou à disposição! 🎵`
+      );
+      waBtn.style.display = '';
+      waBtn.onclick = () => window.open(`https://wa.me/${waPhone}?text=${waMsg}`, '_blank');
+    } else {
+      waBtn.style.display = 'none';
+    }
+
+    modal.classList.add('active');
+  }
+
+  // ── Modal de detalhes do cliente ──
+  function openViewClientModal(clientId) {
+    const client = clients.find(c => c.id === clientId);
+    if (!client) return;
+
+    const modal = document.getElementById('view-client-modal');
+    if (!modal) return;
+
+    // Avatar
+    const initials = (client.name || '?').split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase();
+    const colors = ['#6c63ff','#4895ef','#06d6a0','#f77f00','#f72585','#ffd93d'];
+    const avatarColor = colors[(client.name || '').charCodeAt(0) % colors.length];
+    const avatarEl = document.getElementById('view-client-modal-avatar');
+    avatarEl.textContent = initials;
+    avatarEl.style.cssText = `width:42px;height:42px;border-radius:50%;background:${avatarColor}22;color:${avatarColor};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem;flex-shrink:0;border:2px solid ${avatarColor}55;`;
+    document.getElementById('view-client-modal-name').textContent = client.name;
+
+    // Orders for this client
+    const clientOrders = eventOrders.filter(o => o.clientId === client.id);
+    const totalSpent = clientOrders.reduce((s, o) => s + (o.totalValue || 0), 0);
+    const statusColors = { confirmado: 'var(--success)', agendado: 'var(--warning)', realizado: 'var(--accent)', cancelado: 'var(--danger)' };
+    const statusLabels = { confirmado: 'Confirmado', agendado: 'Agendado', realizado: 'Realizado', cancelado: 'Cancelado' };
+
+    const ordersHtml = clientOrders.length > 0
+      ? clientOrders.sort((a,b) => new Date(b.eventDate) - new Date(a.eventDate)).map(o => `
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border-soft);margin-bottom:6px;cursor:pointer;" data-action="view-order-from-client" data-id="${o.id}">
+            <div>
+              <div style="font-size:0.82rem;font-weight:700;color:var(--text);">${o.eventType} <span style="font-size:0.72rem;font-weight:500;color:var(--text3);">#${o.orderNumber}</span></div>
+              <div style="font-size:0.72rem;color:var(--text3);margin-top:2px;"><i class="fas fa-calendar" style="margin-right:4px;"></i>${formatDate(o.eventDate)}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:0.82rem;font-weight:700;color:${avatarColor};">${formatCurrency(o.totalValue)}</div>
+              <div style="font-size:0.65rem;font-weight:700;color:${statusColors[o.status]||'var(--text3)'};">${statusLabels[o.status]||o.status}</div>
+            </div>
+          </div>`).join('')
+      : `<div style="text-align:center;padding:16px;color:var(--text3);font-size:0.85rem;"><i class="fas fa-clipboard" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.5;"></i>Nenhum pedido</div>`;
+
+    document.getElementById('view-client-modal-body').innerHTML = `
+      <!-- Contato rápido -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:16px;">
+        ${client.phone ? `
+        <a href="tel:${client.phone}" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;background:var(--surface2);border-radius:var(--r-md);border:1px solid var(--border-soft);text-decoration:none;color:var(--text2);font-size:0.72rem;font-weight:600;transition:var(--t-fast);" ontouchstart="">
+          <i class="fas fa-phone" style="font-size:1.2rem;color:var(--success);"></i>Ligar
+        </a>` : ''}
+        ${client.email ? `
+        <a href="mailto:${client.email}" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;background:var(--surface2);border-radius:var(--r-md);border:1px solid var(--border-soft);text-decoration:none;color:var(--text2);font-size:0.72rem;font-weight:600;transition:var(--t-fast);" ontouchstart="">
+          <i class="fas fa-envelope" style="font-size:1.2rem;color:var(--primary);"></i>E-mail
+        </a>` : ''}
+        ${client.address ? `
+        <a href="https://maps.google.com/?q=${encodeURIComponent(client.address)}" target="_blank" rel="noopener" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;background:var(--surface2);border-radius:var(--r-md);border:1px solid var(--border-soft);text-decoration:none;color:var(--text2);font-size:0.72rem;font-weight:600;" ontouchstart="">
+          <i class="fas fa-map-marker-alt" style="font-size:1.2rem;color:var(--danger);"></i>Mapa
+        </a>` : ''}
+      </div>
+
+      <!-- Informações -->
+      <div style="background:var(--surface2);border-radius:var(--r-md);border:1px solid var(--border-soft);padding:14px;margin-bottom:14px;">
+        <div style="font-size:0.7rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;"><i class="fas fa-id-card" style="margin-right:5px;"></i>Dados do Cliente</div>
+        ${client.phone ? `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border-soft);"><i class="fas fa-phone" style="color:var(--success);width:16px;font-size:0.85rem;"></i><div><div style="font-size:0.68rem;color:var(--text3);">Telefone / WhatsApp</div><div style="font-size:0.88rem;font-weight:600;color:var(--text);">${client.phone}</div></div></div>` : ''}
+        ${client.email ? `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border-soft);"><i class="fas fa-envelope" style="color:var(--primary);width:16px;font-size:0.85rem;"></i><div><div style="font-size:0.68rem;color:var(--text3);">E-mail</div><div style="font-size:0.88rem;font-weight:600;color:var(--text);word-break:break-all;">${client.email}</div></div></div>` : ''}
+        ${client.document ? `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border-soft);"><i class="fas fa-id-badge" style="color:var(--accent);width:16px;font-size:0.85rem;"></i><div><div style="font-size:0.68rem;color:var(--text3);">CPF / CNPJ</div><div style="font-size:0.88rem;font-weight:600;color:var(--text);">${client.document}</div></div></div>` : ''}
+        ${client.birthday ? `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border-soft);"><i class="fas fa-birthday-cake" style="color:var(--ev-pink);width:16px;font-size:0.85rem;"></i><div><div style="font-size:0.68rem;color:var(--text3);">Aniversário</div><div style="font-size:0.88rem;font-weight:600;color:var(--text);">${formatDate(client.birthday)}</div></div></div>` : ''}
+        ${client.address ? `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;"><i class="fas fa-map-marker-alt" style="color:var(--danger);width:16px;font-size:0.85rem;"></i><div><div style="font-size:0.68rem;color:var(--text3);">Endereço</div><div style="font-size:0.88rem;font-weight:600;color:var(--text);">${client.address}</div></div></div>` : ''}
+      </div>
+
+      <!-- Resumo financeiro -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div style="background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(59,130,246,0.05));border-radius:var(--r-md);padding:12px;border:1px solid rgba(59,130,246,0.15);text-align:center;">
+          <div style="font-size:0.65rem;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Pedidos</div>
+          <div style="font-size:1.6rem;font-weight:800;color:var(--primary);">${clientOrders.length}</div>
+        </div>
+        <div style="background:linear-gradient(135deg,rgba(16,185,129,0.1),rgba(16,185,129,0.05));border-radius:var(--r-md);padding:12px;border:1px solid rgba(16,185,129,0.15);text-align:center;">
+          <div style="font-size:0.65rem;font-weight:700;color:var(--success);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Total Gerado</div>
+          <div style="font-size:1rem;font-weight:800;color:var(--success);">${formatCurrency(totalSpent)}</div>
+        </div>
+      </div>
+
+      <!-- Pedidos -->
+      <div>
+        <div style="font-size:0.7rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;"><i class="fas fa-clipboard-list" style="margin-right:5px;"></i>Histórico de Pedidos</div>
+        ${ordersHtml}
+      </div>
+    `;
+
+    // Botão WhatsApp
+    const rawPhone = (client.phone || '').replace(/\D/g, '');
+    const waBtn = document.getElementById('view-client-whatsapp-btn');
+    if (rawPhone) {
+      const waPhone = rawPhone.startsWith('55') ? rawPhone : '55' + rawPhone;
+      const waMsg = encodeURIComponent(`Olá ${client.name}! 👋`);
+      waBtn.style.display = '';
+      waBtn.onclick = () => window.open(`https://wa.me/${waPhone}?text=${waMsg}`, '_blank');
+    } else {
+      waBtn.style.display = 'none';
+    }
+
+    // Botão Editar
+    document.getElementById('view-client-edit-btn').onclick = () => {
+      modal.classList.remove('active');
+      openClientModal('edit', clientId);
+    };
+
+    // Clique nos pedidos dentro do modal
+    modal.querySelectorAll('[data-action="view-order-from-client"]').forEach(el => {
+      el.addEventListener('click', () => {
+        modal.classList.remove('active');
+        const ordId = parseFloat(el.dataset.id);
+        setTimeout(() => openViewOrderModal(ordId), 200);
+      });
+    });
+
     modal.classList.add('active');
   }
 
@@ -7536,7 +7692,9 @@ function updateClientsList() {
     const clientOrders = eventOrders.filter(o => o.clientId === client.id).length;
     const card = document.createElement('div');
     card.className = 'client-card';
-    card.style.cssText = 'background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border-soft);padding:14px;box-shadow:var(--card-shadow);display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;';
+    card.style.cssText = 'background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border-soft);padding:14px;box-shadow:var(--card-shadow);display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;cursor:pointer;';
+    card.dataset.action = 'view-client';
+    card.dataset.id = client.id;
     card.innerHTML = `
       <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${avatarColor};border-radius:var(--r-md) var(--r-md) 0 0;"></div>
       <div style="display:flex;align-items:center;gap:10px;">
@@ -7545,13 +7703,14 @@ function updateClientsList() {
           <div style="font-family:var(--font-display);font-weight:700;font-size:0.88rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${client.name}</div>
           ${clientOrders > 0 ? `<div style="font-size:0.68rem;color:${avatarColor};font-weight:600;">${clientOrders} pedido${clientOrders>1?'s':''}</div>` : '<div style="font-size:0.68rem;color:var(--text3);">Sem pedidos</div>'}
         </div>
+        <i class="fas fa-chevron-right" style="color:var(--text3);font-size:0.7rem;flex-shrink:0;"></i>
       </div>
       <div style="display:flex;flex-direction:column;gap:4px;font-size:0.75rem;color:var(--text2);">
         ${client.phone ? `<div style="display:flex;align-items:center;gap:6px;"><i class="fas fa-phone" style="color:${avatarColor};width:12px;"></i><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${client.phone}</span></div>` : ''}
         ${client.email ? `<div style="display:flex;align-items:center;gap:6px;"><i class="fas fa-envelope" style="color:${avatarColor};width:12px;"></i><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${client.email}</span></div>` : ''}
         ${birthday ? `<div style="display:flex;align-items:center;gap:6px;"><i class="fas fa-birthday-cake" style="color:${avatarColor};width:12px;"></i><span>${birthday}</span></div>` : ''}
       </div>
-      <div style="display:flex;gap:6px;margin-top:auto;">
+      <div style="display:flex;gap:6px;margin-top:auto;" onclick="event.stopPropagation()">
         <button class="btn btn-xs btn-outline" style="flex:1;font-size:0.72rem;" data-action="edit-client" data-id="${client.id}"><i class="fas fa-edit"></i> Editar</button>
         <button class="btn btn-xs btn-danger" style="padding:6px 10px;" data-action="delete-client" data-id="${client.id}"><i class="fas fa-trash"></i></button>
       </div>`;
@@ -7696,7 +7855,11 @@ function updateClientsList() {
 
         const card = document.createElement('div');
         card.className = isOrder ? 'order-card' : 'quote-card';
-        card.style.cssText = 'background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border-soft);padding:14px;box-shadow:var(--card-shadow);display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;';
+        card.style.cssText = 'background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border-soft);padding:14px;box-shadow:var(--card-shadow);display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;cursor:pointer;';
+        card.dataset.action = isOrder ? 'view-order' : 'view-quote';
+        card.dataset.id = item.id;
+        const clientPhone = (client.phone||'').replace(/\D/g,'');
+        const waPhone = clientPhone ? (clientPhone.startsWith('55') ? clientPhone : '55'+clientPhone) : '';
         card.innerHTML = `
           <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${accentColor};border-radius:var(--r-md) var(--r-md) 0 0;"></div>
           <div style="display:flex;align-items:center;gap:8px;">
@@ -7707,6 +7870,7 @@ function updateClientsList() {
               <div style="font-size:0.65rem;font-weight:700;color:${accentColor};text-transform:uppercase;letter-spacing:0.04em;">${typeLabel} Nº ${number}</div>
               <div style="font-family:var(--font-display);font-weight:700;font-size:0.82rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${client.name}</div>
             </div>
+            <i class="fas fa-chevron-right" style="color:var(--text3);font-size:0.7rem;flex-shrink:0;"></i>
           </div>
           <div style="display:flex;flex-direction:column;gap:4px;font-size:0.75rem;color:var(--text2);">
             <div style="display:flex;align-items:center;gap:6px;"><i class="fas fa-calendar" style="color:${accentColor};width:12px;"></i><span>${formatDate(date)}</span></div>
@@ -7729,9 +7893,9 @@ function updateClientsList() {
             <div style="font-family:var(--font-display);font-size:0.9rem;font-weight:800;color:${accentColor};">${formatCurrency(item.totalValue)}</div>
             ${statusBadge}
           </div>
-          <div style="display:flex;gap:5px;flex-wrap:wrap;">
+          <div style="display:flex;gap:5px;flex-wrap:wrap;" onclick="event.stopPropagation()">
+            ${waPhone ? `<a href="https://wa.me/${waPhone}" target="_blank" rel="noopener" class="btn btn-xs" style="flex:1;font-size:0.68rem;background:#25d366;color:#fff;border:none;" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>` : ''}
             ${isOrder ? `<button class="btn btn-xs btn-ghost" style="flex:1;font-size:0.68rem;" data-action="open-checklist-from-order" data-id="${item.id}"><i class="fas fa-clipboard-list"></i></button>` : ''}
-            <button class="btn btn-xs" style="flex:1;font-size:0.68rem;" data-action="view-${isOrder?'order':'quote'}" data-id="${item.id}"><i class="fas fa-eye"></i></button>
             <button class="btn btn-xs btn-ghost" style="flex:1;font-size:0.68rem;" data-action="edit-${isOrder?'order':'quote'}" data-id="${item.id}"><i class="fas fa-edit"></i></button>
             <button class="btn btn-xs btn-danger" style="flex:1;font-size:0.68rem;" data-action="delete-${isOrder?'order':'quote'}" data-id="${item.id}"><i class="fas fa-trash"></i></button>
           </div>`;
@@ -12244,6 +12408,8 @@ function showCommitmentsForDay(dateString) {
   window.openShoppingModal = openShoppingModal;
   window.updateShoppingList = updateShoppingList;
   window.updateSavedDocumentsList = updateSavedDocumentsList;
+  window.openViewClientModal = openViewClientModal;
+  window.openViewOrderModal = openViewOrderModal;
 });
 
 </script>
