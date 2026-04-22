@@ -4840,10 +4840,13 @@ class="modal-content">
       <span class="close-button" data-action="close-modal">&times;</span>
       <h2 id="view-order-modal-title">Detalhes do Pedido</h2>
       <div id="view-order-modal-body"></div>
-      <div class="btn-container" style="flex-wrap:wrap;gap:8px;">
-          <button type="button" class="btn" id="view-order-modal-whatsapp-btn" style="background:#25d366;color:#fff;display:none;flex:1;min-width:140px;"><i class="fab fa-whatsapp"></i> WhatsApp</button>
-          <button type="button" class="btn" id="view-order-modal-download-btn" style="flex:1;min-width:140px;"><i class="fas fa-download"></i> Baixar PDF</button>
-          <button type="button" class="btn btn-danger" data-action="close-modal" style="flex:1;min-width:100px;">Fechar</button>
+      <div id="view-order-modal-actions" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;">
+          <button type="button" class="btn" id="view-order-modal-whatsapp-btn" style="background:#25d366;color:#fff;display:none;grid-column:1/-1;"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+          <button type="button" class="btn" id="view-order-modal-download-btn" style="background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;"><i class="fas fa-file-pdf"></i> Baixar PDF</button>
+          <button type="button" class="btn" id="view-order-modal-edit-btn" style="background:var(--surface2);color:var(--text);border:1.5px solid var(--border);"><i class="fas fa-edit"></i> Editar</button>
+          <button type="button" class="btn" id="view-order-modal-receipt-btn" style="background:var(--success-bg);color:var(--success);border:1.5px solid var(--success);"><i class="fas fa-receipt"></i> Criar Recibo</button>
+          <button type="button" class="btn" id="view-order-modal-checklist-btn" style="background:var(--warning-bg);color:var(--warning);border:1.5px solid var(--warning);"><i class="fas fa-tasks"></i> Checklist</button>
+          <button type="button" class="btn btn-danger" data-action="close-modal" style="grid-column:1/-1;"><i class="fas fa-times"></i> Fechar</button>
       </div>
     </div>
   </div>
@@ -5377,21 +5380,42 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
     // Fuel config
     initFuelConfigPanel();
     
-    document.getElementById('view-order-modal-download-btn')?.addEventListener('click', (e) => {
-      const orderId = e.target.dataset.id;
+    document.getElementById('view-order-modal-download-btn')?.addEventListener('click', function() {
+      const orderId = this.dataset.id;
       if (orderId) openClauseEditor('order', parseFloat(orderId));
     });
+    document.getElementById('view-order-modal-edit-btn')?.addEventListener('click', function() {
+      const orderId = this.dataset.id;
+      if (orderId) {
+        document.getElementById('view-order-modal').classList.remove('active');
+        setTimeout(() => openEventOrderModal('edit', parseFloat(orderId)), 300);
+      }
+    });
+    document.getElementById('view-order-modal-receipt-btn')?.addEventListener('click', function() {
+      const orderId = this.dataset.id;
+      if (orderId) {
+        document.getElementById('view-order-modal').classList.remove('active');
+        setTimeout(() => openReceiptModal('new', parseFloat(orderId)), 300);
+      }
+    });
+    document.getElementById('view-order-modal-checklist-btn')?.addEventListener('click', function() {
+      const orderId = this.dataset.id;
+      if (orderId) {
+        document.getElementById('view-order-modal').classList.remove('active');
+        setTimeout(() => openChecklistForEvent('o_' + orderId), 300);
+      }
+    });
     // NOVO RECURSO: Botões de ação no modal de visualização de orçamento
-    document.getElementById('view-quote-modal-download-btn')?.addEventListener('click', (e) => {
-        const quoteId = e.target.dataset.id;
+    document.getElementById('view-quote-modal-download-btn')?.addEventListener('click', function() {
+        const quoteId = this.dataset.id;
         if (quoteId) openClauseEditor('quote', parseFloat(quoteId));
     });
-    document.getElementById('view-quote-modal-approve-btn')?.addEventListener('click', (e) => {
-        const quoteId = e.target.dataset.id;
+    document.getElementById('view-quote-modal-approve-btn')?.addEventListener('click', function() {
+        const quoteId = this.dataset.id;
         if (quoteId) convertQuoteToOrder(parseFloat(quoteId));
     });
-    document.getElementById('view-quote-modal-reject-btn')?.addEventListener('click', (e) => {
-        const quoteId = e.target.dataset.id;
+    document.getElementById('view-quote-modal-reject-btn')?.addEventListener('click', function() {
+        const quoteId = this.dataset.id;
         if (quoteId) rejectQuote(parseFloat(quoteId));
     });
 
@@ -5640,6 +5664,11 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
             },
             // Cliente: abrir modal de visualização
             'view-client': () => openViewClientModal(id),
+            // Pedido a partir do modal de cliente
+            'view-order-from-client': () => {
+              document.getElementById('view-client-modal')?.classList.remove('active');
+              setTimeout(() => openViewOrderModal(id), 300);
+            },
         };
         if(actions[action]) actions[action]();
     });
@@ -6564,6 +6593,18 @@ if (typeof activeModalCallback === 'function') {
         modal.querySelector('#receipt-date').value = receipt.date;
         modal.querySelector('#receipt-status').value = receipt.status;
       }
+    } else if (mode === 'new' && id) {
+      // mode='new' com id = orderId: pré-seleciona o pedido e cliente
+      const order = eventOrders.find(o => o.id === id);
+      if (order) {
+        modal.querySelector('#receipt-client').value = order.clientId;
+        updateReceiptOrderSelector({ target: { value: order.clientId } }, () => {
+          modal.querySelector('#receipt-order').value = order.id;
+          modal.querySelector('#receipt-order').dispatchEvent(new Event('change'));
+        });
+        modal.querySelector('#receipt-status').value = 'pago';
+      }
+      modal.querySelector('#receipt-date').valueAsDate = new Date();
     } else {
       modal.querySelector('#receipt-date').valueAsDate = new Date();
     }
@@ -6908,7 +6949,11 @@ function openCommitmentModal(mode, id = null, date = null) {
     `;
     body.innerHTML += financialDetailsHtml;
     
-    document.getElementById('view-order-modal-download-btn').dataset.id = orderId;
+    // Set orderId on all action buttons
+    ['view-order-modal-download-btn','view-order-modal-edit-btn','view-order-modal-receipt-btn','view-order-modal-checklist-btn'].forEach(btnId => {
+      const btn = document.getElementById(btnId);
+      if (btn) btn.dataset.id = orderId;
+    });
 
     // WhatsApp button
     const waBtn = document.getElementById('view-order-modal-whatsapp-btn');
@@ -6922,7 +6967,8 @@ function openCommitmentModal(mode, id = null, date = null) {
         `💰 *Valor Total:* ${formatCurrency(order.totalValue)}\n\n` +
         `Qualquer dúvida estou à disposição! 🎵`
       );
-      waBtn.style.display = '';
+      waBtn.style.display = 'flex';
+      waBtn.style.gridColumn = '1 / -1';
       waBtn.onclick = () => window.open(`https://wa.me/${waPhone}?text=${waMsg}`, '_blank');
     } else {
       waBtn.style.display = 'none';
