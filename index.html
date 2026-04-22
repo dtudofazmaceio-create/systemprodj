@@ -2681,6 +2681,18 @@
      MELHORIAS GLOBAIS — v2 UPGRADE
   ========================================== */
 
+  /* ── Grid de pedidos/orçamentos — 1 coluna mobile, 2 no desktop ── */
+  .orders-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  @media (min-width: 600px) {
+    .orders-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
   /* ── Dashboard Hero melhorado ── */
   .dashboard-hero {
     background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #7c3aed 100%) !important;
@@ -7927,7 +7939,7 @@ function updateClientsList() {
     }
 
     const grid = document.createElement('div');
-    grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:12px;';
+    grid.className = 'orders-grid';
 
     filteredItems.sort((a, b) => {
         const dateA = a._type === 'order' ? a.eventDate : a.emissionDate;
