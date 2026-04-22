@@ -3794,6 +3794,11 @@
         </div>
         <div class="ped-kpi-sep"></div>
         <div class="ped-kpi-item">
+          <span class="ped-kpi-num" id="ped-finalizado-count" style="color:var(--success);">0</span>
+          <span class="ped-kpi-lbl">Finalizados</span>
+        </div>
+        <div class="ped-kpi-sep"></div>
+        <div class="ped-kpi-item">
           <span class="ped-kpi-num ped-kpi-blue" id="ped-orcamento-count">0</span>
           <span class="ped-kpi-lbl">Orçamentos</span>
         </div>
@@ -4842,6 +4847,7 @@ class="modal-content">
       <div id="view-order-modal-body"></div>
       <div id="view-order-modal-actions" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;">
           <button type="button" class="btn" id="view-order-modal-whatsapp-btn" style="background:#25d366;color:#fff;display:none;grid-column:1/-1;"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+          <button type="button" class="btn" id="view-order-modal-finalize-btn" style="background:linear-gradient(135deg,var(--success),#059669);color:#fff;grid-column:1/-1;display:none;"><i class="fas fa-flag-checkered"></i> Finalizar Pedido</button>
           <button type="button" class="btn" id="view-order-modal-download-btn" style="background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;"><i class="fas fa-file-pdf"></i> Baixar PDF</button>
           <button type="button" class="btn" id="view-order-modal-edit-btn" style="background:var(--surface2);color:var(--text);border:1.5px solid var(--border);"><i class="fas fa-edit"></i> Editar</button>
           <button type="button" class="btn" id="view-order-modal-receipt-btn" style="background:var(--success-bg);color:var(--success);border:1.5px solid var(--success);"><i class="fas fa-receipt"></i> Criar Recibo</button>
@@ -5405,6 +5411,13 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
         setTimeout(() => openChecklistForEvent('o_' + orderId), 300);
       }
     });
+    document.getElementById('view-order-modal-finalize-btn')?.addEventListener('click', function() {
+      const orderId = parseFloat(this.dataset.id);
+      if (orderId) {
+        document.getElementById('view-order-modal').classList.remove('active');
+        setTimeout(() => finalizeOrder(orderId), 300);
+      }
+    });
     // NOVO RECURSO: Botões de ação no modal de visualização de orçamento
     document.getElementById('view-quote-modal-download-btn')?.addEventListener('click', function() {
         const quoteId = this.dataset.id;
@@ -5604,6 +5617,7 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
             'delete-order': () => deleteOrderAndCommitment(id),
             'edit-order': () => openEventOrderModal('edit', id),
             'view-order': () => openViewOrderModal(id),
+            'finalize-order': () => finalizeOrder(id),
             'remove-service': () => removeServiceItem(target),
             'edit-order-from-calendar': () => {
                 document.getElementById('calendar-commitments-modal').classList.remove('active');
@@ -6893,6 +6907,7 @@ function openCommitmentModal(mode, id = null, date = null) {
         <h4><i class="fas fa-file-invoice"></i> Detalhes do Pedido</h4>
         <p><strong>Número:</strong> ${order.orderNumber}</p>
         <p><strong>Valor Total:</strong> ${formatCurrency(order.totalValue)}</p>
+        <p><strong>Status:</strong> <span style="display:inline-block;font-size:0.75rem;font-weight:700;padding:2px 10px;border-radius:999px;background:${{'pendente':'rgba(245,158,11,0.12)','confirmado':'rgba(59,130,246,0.10)','realizado':'rgba(139,92,246,0.10)','cancelado':'rgba(239,68,68,0.10)','finalizado':'rgba(16,185,129,0.10)'}[order.status||'pendente']||'rgba(245,158,11,0.12)'};color:${{'pendente':'var(--warning)','confirmado':'var(--primary)','realizado':'var(--accent)','cancelado':'var(--danger)','finalizado':'var(--success)'}[order.status||'pendente']||'var(--warning)'};">${{'pendente':'Pendente','confirmado':'Confirmado','realizado':'Realizado','cancelado':'Cancelado','finalizado':'Finalizado ✓'}[order.status||'pendente']||'Pendente'}</span></p>
       </div>
       <div class="detail-group">
         <h4><i class="fas fa-user"></i> Dados do Cliente</h4>
@@ -6950,10 +6965,18 @@ function openCommitmentModal(mode, id = null, date = null) {
     body.innerHTML += financialDetailsHtml;
     
     // Set orderId on all action buttons
-    ['view-order-modal-download-btn','view-order-modal-edit-btn','view-order-modal-receipt-btn','view-order-modal-checklist-btn'].forEach(btnId => {
+    ['view-order-modal-download-btn','view-order-modal-edit-btn','view-order-modal-receipt-btn','view-order-modal-checklist-btn','view-order-modal-finalize-btn'].forEach(btnId => {
       const btn = document.getElementById(btnId);
       if (btn) btn.dataset.id = orderId;
     });
+
+    // Show/hide finalize button based on current status
+    const finalizeBtn = document.getElementById('view-order-modal-finalize-btn');
+    if (finalizeBtn) {
+      const canFinalize = order.status !== 'finalizado' && order.status !== 'cancelado';
+      finalizeBtn.style.display = canFinalize ? 'flex' : 'none';
+      finalizeBtn.style.gridColumn = '1 / -1';
+    }
 
     // WhatsApp button
     const waBtn = document.getElementById('view-order-modal-whatsapp-btn');
@@ -6997,8 +7020,8 @@ function openCommitmentModal(mode, id = null, date = null) {
     // Orders for this client
     const clientOrders = eventOrders.filter(o => o.clientId === client.id);
     const totalSpent = clientOrders.reduce((s, o) => s + (o.totalValue || 0), 0);
-    const statusColors = { confirmado: 'var(--success)', agendado: 'var(--warning)', realizado: 'var(--accent)', cancelado: 'var(--danger)' };
-    const statusLabels = { confirmado: 'Confirmado', agendado: 'Agendado', realizado: 'Realizado', cancelado: 'Cancelado' };
+    const statusColors = { confirmado: 'var(--success)', agendado: 'var(--warning)', realizado: 'var(--accent)', cancelado: 'var(--danger)', finalizado: 'var(--success)', pendente: 'var(--warning)' };
+    const statusLabels = { confirmado: 'Confirmado', agendado: 'Agendado', realizado: 'Realizado', cancelado: 'Cancelado', finalizado: 'Finalizado ✓', pendente: 'Pendente' };
 
     const ordersHtml = clientOrders.length > 0
       ? clientOrders.sort((a,b) => new Date(b.eventDate) - new Date(a.eventDate)).map(o => `
@@ -7855,17 +7878,15 @@ function updateClientsList() {
   function updateOrdersList() {
     const list = document.getElementById('orders-list');
     list.innerHTML = '';
-    
+
     const searchTerm = activeOrderFilters.search;
-    const typeFilter = activeOrderFilters.type;
+    const typeFilter  = activeOrderFilters.type;
 
     let allItems = [];
-    if (typeFilter === 'all' || typeFilter === 'order') {
+    if (typeFilter === 'all' || typeFilter === 'order')
         allItems.push(...eventOrders.map(o => ({ ...o, _type: 'order' })));
-    }
-    if (typeFilter === 'all' || typeFilter === 'quote') {
+    if (typeFilter === 'all' || typeFilter === 'quote')
         allItems.push(...eventQuotes.map(q => ({ ...q, _type: 'quote' })));
-    }
 
     let filteredItems = allItems.filter(item => {
         const client = clients.find(c => c.id === item.clientId) || {};
@@ -7880,6 +7901,29 @@ function updateClientsList() {
         return;
     }
 
+    // ── Banner de lote: pedidos com >60 dias NÃO finalizados ──
+    const today = new Date(); today.setHours(0,0,0,0);
+    const overdueOrders = eventOrders.filter(o => {
+        if (o.status === 'finalizado') return false;
+        const d = new Date(o.eventDate + 'T00:00:00');
+        return (today - d) / 86400000 > 60;
+    });
+    if (overdueOrders.length > 0) {
+        const banner = document.createElement('div');
+        banner.style.cssText = 'background:linear-gradient(135deg,rgba(245,158,11,0.12),rgba(245,158,11,0.06));border:1.5px solid rgba(245,158,11,0.35);border-radius:var(--r-md);padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;';
+        banner.innerHTML = `
+          <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+            <div style="width:36px;height:36px;border-radius:50%;background:rgba(245,158,11,0.15);color:var(--warning);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;"><i class="fas fa-history"></i></div>
+            <div>
+              <div style="font-weight:700;font-size:0.82rem;color:var(--text);">${overdueOrders.length} pedido${overdueOrders.length>1?'s':''} com +60 dias</div>
+              <div style="font-size:0.72rem;color:var(--text3);margin-top:1px;">Eventos já ocorridos sem finalização</div>
+            </div>
+          </div>
+          <button class="btn btn-xs" id="batch-finalize-btn" style="background:var(--warning);color:#fff;flex-shrink:0;font-size:0.75rem;padding:8px 12px;white-space:nowrap;"><i class="fas fa-check-double"></i> Quitar em Lote</button>`;
+        list.appendChild(banner);
+        banner.querySelector('#batch-finalize-btn').addEventListener('click', () => batchFinalizeOverdueOrders());
+    }
+
     const grid = document.createElement('div');
     grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:12px;';
 
@@ -7888,30 +7932,70 @@ function updateClientsList() {
         const dateB = b._type === 'order' ? b.eventDate : b.emissionDate;
         return new Date(dateB) - new Date(dateA);
     }).forEach(item => {
-        const client = clients.find(c => c.id === item.clientId) || { name: 'N/A' };
+        const client  = clients.find(c => c.id === item.clientId) || { name: 'N/A' };
         const isOrder = item._type === 'order';
-        const number = isOrder ? item.orderNumber : item.quoteNumber;
+        const number    = isOrder ? item.orderNumber : item.quoteNumber;
         const typeLabel = isOrder ? 'Pedido' : 'Orçamento';
-        const accentColor = isOrder ? 'var(--ev-orange)' : 'var(--ev-blue)';
-        const iconName = isOrder ? 'fa-clipboard-check' : 'fa-file-alt';
         const date = isOrder ? item.eventDate : item.emissionDate;
 
-        let statusBadge = '';
-        if (!isOrder) {
-          const statusMap = { 'emitido': ['Pendente', 'var(--warning)'], 'aprovado': ['Aprovado', 'var(--success)'], 'recusado': ['Recusado', 'var(--danger)'] };
-          const [lbl, clr] = statusMap[item.status] || ['—', 'var(--text3)'];
-          statusBadge = `<span style="font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:999px;background:${clr}22;color:${clr};">${lbl}</span>`;
+        // ── Status do pedido ──
+        const orderStatus = isOrder ? (item.status || 'pendente') : null;
+        const statusCfg = {
+          pendente:    { label:'Pendente',    clr:'var(--warning)',  bg:'rgba(245,158,11,0.12)' },
+          confirmado:  { label:'Confirmado',  clr:'var(--primary)', bg:'rgba(59,130,246,0.10)' },
+          realizado:   { label:'Realizado',   clr:'var(--accent)',  bg:'rgba(139,92,246,0.10)' },
+          cancelado:   { label:'Cancelado',   clr:'var(--danger)',  bg:'rgba(239,68,68,0.10)'  },
+          finalizado:  { label:'Finalizado',  clr:'var(--success)', bg:'rgba(16,185,129,0.10)' },
+        };
+        const sCfg = statusCfg[orderStatus] || statusCfg.pendente;
+
+        // ── Accent color driven by status when finalizado ──
+        let accentColor = isOrder ? 'var(--ev-orange)' : 'var(--ev-blue)';
+        if (orderStatus === 'finalizado') accentColor = 'var(--success)';
+        if (orderStatus === 'cancelado')  accentColor = 'var(--danger)';
+        const iconName = isOrder ? 'fa-clipboard-check' : 'fa-file-alt';
+
+        // ── Overdue badge (>60 days, not finalized) ──
+        const eventDateObj = isOrder ? new Date(item.eventDate + 'T00:00:00') : null;
+        const daysAgo = eventDateObj ? Math.floor((today - eventDateObj) / 86400000) : 0;
+        const isOverdue = isOrder && daysAgo > 60 && orderStatus !== 'finalizado' && orderStatus !== 'cancelado';
+
+        // ── Pagamentos ──
+        let saldoHtml = '', saldo = 0, paid = 0;
+        if (isOrder) {
+          paid  = receipts.filter(r => r.orderId === item.id && r.status === 'pago').reduce((s,r)=>s+r.amount,0);
+          saldo = (item.totalValue||0) - paid;
+          const saldoPct = item.totalValue > 0 ? Math.round((paid/item.totalValue)*100) : 0;
+          saldoHtml = `
+            <div style="display:flex;align-items:center;gap:6px;">
+              <i class="fas fa-${saldo>0?'clock':'check-circle'}" style="color:${saldo>0?'var(--warning)':'var(--success)'};width:12px;"></i>
+              <span style="color:${saldo>0?'var(--warning)':'var(--success)'};">${saldo>0?'Saldo: '+formatCurrency(saldo):'Quitado ✓'}</span>
+            </div>
+            <div style="margin-top:3px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;">
+              <div style="height:100%;background:${saldo>0?'var(--warning)':'var(--success)'};width:${saldoPct}%;border-radius:2px;transition:width 0.4s;"></div>
+            </div>`;
         }
+
+        // ── Quote status badge ──
+        let quoteStatusBadge = '';
+        if (!isOrder) {
+          const qMap = { 'emitido':['Pendente','var(--warning)'], 'aprovado':['Aprovado','var(--success)'], 'recusado':['Recusado','var(--danger)'] };
+          const [lbl, clr] = qMap[item.status] || ['—','var(--text3)'];
+          quoteStatusBadge = `<span style="font-size:0.62rem;font-weight:700;padding:2px 7px;border-radius:999px;background:${clr}22;color:${clr};">${lbl}</span>`;
+        }
+
+        const clientPhone = (client.phone||'').replace(/\D/g,'');
+        const waPhone = clientPhone ? (clientPhone.startsWith('55') ? clientPhone : '55'+clientPhone) : '';
 
         const card = document.createElement('div');
         card.className = isOrder ? 'order-card' : 'quote-card';
-        card.style.cssText = 'background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border-soft);padding:14px;box-shadow:var(--card-shadow);display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;cursor:pointer;';
+        card.style.cssText = `background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border-soft);padding:14px;box-shadow:var(--card-shadow);display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;cursor:pointer;${orderStatus==='finalizado'?'opacity:0.82;':''}`;
         card.dataset.action = isOrder ? 'view-order' : 'view-quote';
         card.dataset.id = item.id;
-        const clientPhone = (client.phone||'').replace(/\D/g,'');
-        const waPhone = clientPhone ? (clientPhone.startsWith('55') ? clientPhone : '55'+clientPhone) : '';
+
         card.innerHTML = `
           <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${accentColor};border-radius:var(--r-md) var(--r-md) 0 0;"></div>
+          ${isOverdue ? `<div style="position:absolute;top:8px;right:8px;background:rgba(245,158,11,0.15);color:var(--warning);font-size:0.55rem;font-weight:800;padding:2px 6px;border-radius:999px;border:1px solid rgba(245,158,11,0.3);"><i class="fas fa-exclamation-circle"></i> +60d</div>` : ''}
           <div style="display:flex;align-items:center;gap:8px;">
             <div style="width:34px;height:34px;border-radius:var(--r-sm);background:${accentColor}18;color:${accentColor};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
               <i class="fas ${iconName}" style="font-size:0.85rem;"></i>
@@ -7925,29 +8009,22 @@ function updateClientsList() {
           <div style="display:flex;flex-direction:column;gap:4px;font-size:0.75rem;color:var(--text2);">
             <div style="display:flex;align-items:center;gap:6px;"><i class="fas fa-calendar" style="color:${accentColor};width:12px;"></i><span>${formatDate(date)}</span></div>
             <div style="display:flex;align-items:center;gap:6px;"><i class="fas fa-star" style="color:${accentColor};width:12px;"></i><span>${item.eventType || '—'}</span></div>
-            ${(() => {
-              if (isOrder) {
-                const paid = receipts.filter(r => r.orderId === item.id && r.status === 'pago').reduce((s,r)=>s+r.amount,0);
-                const saldo = (item.totalValue||0) - paid;
-                const saldoPct = item.totalValue > 0 ? Math.round((paid/item.totalValue)*100) : 0;
-                return `<div style="display:flex;align-items:center;gap:6px;"><i class="fas fa-${saldo>0?'clock':'check-circle'}" style="color:${saldo>0?'var(--warning)':'var(--success)'};width:12px;"></i>
-                  <span style="color:${saldo>0?'var(--warning)':'var(--success)'};">${saldo>0?'Saldo: '+formatCurrency(saldo):'Quitado'}</span></div>
-                <div style="margin-top:3px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;">
-                  <div style="height:100%;background:${saldo>0?'var(--warning)':'var(--success)'};width:${saldoPct}%;border-radius:2px;transition:width 0.4s;"></div>
-                </div>`;
-              }
-              return '';
-            })()}
+            ${saldoHtml}
           </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto;gap:6px;">
             <div style="font-family:var(--font-display);font-size:0.9rem;font-weight:800;color:${accentColor};">${formatCurrency(item.totalValue)}</div>
-            ${statusBadge}
+            ${isOrder
+              ? `<span style="font-size:0.62rem;font-weight:700;padding:2px 8px;border-radius:999px;background:${sCfg.bg};color:${sCfg.clr};">${sCfg.label}</span>`
+              : quoteStatusBadge}
           </div>
           <div style="display:flex;gap:5px;flex-wrap:wrap;" onclick="event.stopPropagation()">
             ${waPhone ? `<a href="https://wa.me/${waPhone}" target="_blank" rel="noopener" class="btn btn-xs" style="flex:1;font-size:0.68rem;background:#25d366;color:#fff;border:none;" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>` : ''}
-            ${isOrder ? `<button class="btn btn-xs btn-ghost" style="flex:1;font-size:0.68rem;" data-action="open-checklist-from-order" data-id="${item.id}"><i class="fas fa-clipboard-list"></i></button>` : ''}
-            <button class="btn btn-xs btn-ghost" style="flex:1;font-size:0.68rem;" data-action="edit-${isOrder?'order':'quote'}" data-id="${item.id}"><i class="fas fa-edit"></i></button>
-            <button class="btn btn-xs btn-danger" style="flex:1;font-size:0.68rem;" data-action="delete-${isOrder?'order':'quote'}" data-id="${item.id}"><i class="fas fa-trash"></i></button>
+            ${isOrder && orderStatus !== 'finalizado' && orderStatus !== 'cancelado'
+              ? `<button class="btn btn-xs" style="flex:1;font-size:0.68rem;background:var(--success-bg);color:var(--success);border:1px solid var(--success);" data-action="finalize-order" data-id="${item.id}" title="Finalizar pedido"><i class="fas fa-flag-checkered"></i></button>`
+              : ''}
+            <button class="btn btn-xs" style="flex:1;font-size:0.68rem;background:var(--surface2);color:var(--text2);border:1px solid var(--border);" data-action="view-order" data-id="${item.id}" title="Visualizar pedido" onclick="event.stopPropagation()"><i class="fas fa-eye"></i></button>
+            <button class="btn btn-xs btn-ghost" style="flex:1;font-size:0.68rem;" data-action="edit-${isOrder?'order':'quote'}" data-id="${item.id}" title="Editar" onclick="event.stopPropagation()"><i class="fas fa-edit"></i></button>
+            <button class="btn btn-xs btn-danger" style="flex:1;font-size:0.68rem;" data-action="delete-${isOrder?'order':'quote'}" data-id="${item.id}" title="Excluir" onclick="event.stopPropagation()"><i class="fas fa-trash"></i></button>
           </div>`;
         grid.appendChild(card);
     });
@@ -9306,6 +9383,172 @@ function showCommitmentsForDay(dateString) {
     };
   }
 // --- NOVA FUNÇÃO: Exclui Pedido e o Compromisso da Agenda vinculado ---
+  // =====================================================
+  // FINALIZAR PEDIDO — quita saldo e marca como finalizado
+  // =====================================================
+  function finalizeOrder(orderId) {
+    const order = eventOrders.find(o => o.id === orderId);
+    if (!order) return;
+
+    const paid  = receipts.filter(r => r.orderId === orderId && r.status === 'pago').reduce((s,r)=>s+r.amount,0);
+    const saldo = (order.totalValue || 0) - paid;
+    const client = clients.find(c => c.id === order.clientId) || {};
+
+    function doFinalize(autoQuit) {
+      // Marca pedido como finalizado
+      order.status = 'finalizado';
+
+      // Sincroniza compromisso vinculado
+      const comm = commitments.find(c => c.linkedOrderId === orderId);
+      if (comm) comm.status = 'realizado';
+
+      // Se solicitado, gera recibo automático de quitação
+      if (autoQuit && saldo > 0) {
+        const defaultAccount = accounts.length > 0 ? accounts[0].id : null;
+        const autoReceipt = {
+          id: Date.now(),
+          clientId: order.clientId,
+          orderId: orderId,
+          destinationAccountId: defaultAccount,
+          amount: saldo,
+          description: `Quitação automática — Pedido Nº ${order.orderNumber}`,
+          date: new Date().toISOString().split('T')[0],
+          status: 'pago',
+          createdAt: new Date().toISOString(),
+        };
+        receipts.push(autoReceipt);
+        // Cria transação de receita correspondente
+        if (defaultAccount) {
+          transactions.push({
+            id: Date.now() + 1,
+            type: 'receita',
+            amount: saldo,
+            date: autoReceipt.date,
+            description: autoReceipt.description,
+            category: 'Serviços DJ',
+            status: 'confirmada',
+            toAccount: defaultAccount,
+            linkedReceiptId: autoReceipt.id,
+            createdAt: new Date().toISOString(),
+          });
+        }
+        showToast(`Pedido finalizado e R$ ${formatCurrency(saldo)} quitados automaticamente! ✅`, 'success');
+      } else {
+        showToast(`Pedido #${order.orderNumber} finalizado! ✅`, 'success');
+      }
+
+      saveData();
+      updateUI();
+    }
+
+    if (saldo > 0) {
+      // Tem saldo pendente — pergunta se deseja quitar
+      showConfirm(
+        `Este pedido tem saldo de ${formatCurrency(saldo)} a receber. Deseja quitar automaticamente ao finalizar?`,
+        'Finalizar Pedido',
+        () => doFinalize(true),
+        'warning',
+        'Finalizar e Quitar'
+      );
+      // Adiciona botão extra "Finalizar Sem Quitar"
+      setTimeout(() => {
+        const confirmSheet = document.getElementById('confirm-sheet');
+        if (!confirmSheet) return;
+        if (confirmSheet.querySelector('#finalize-no-quit-btn')) return;
+        const noQuitBtn = document.createElement('button');
+        noQuitBtn.id = 'finalize-no-quit-btn';
+        noQuitBtn.className = 'btn btn-ghost';
+        noQuitBtn.style.cssText = 'margin-top:8px;width:100%;font-size:0.82rem;color:var(--text2);';
+        noQuitBtn.textContent = 'Finalizar sem quitar saldo';
+        noQuitBtn.addEventListener('click', () => {
+          // remove btn
+          noQuitBtn.remove();
+          hideConfirm();
+          doFinalize(false);
+        });
+        const cancelBtn = confirmSheet.querySelector('#confirm-sheet-cancel');
+        if (cancelBtn) cancelBtn.parentNode.insertBefore(noQuitBtn, cancelBtn.nextSibling);
+      }, 50);
+    } else {
+      // Sem saldo, finaliza direto
+      showConfirm(
+        `Confirmar finalização do pedido #${order.orderNumber} de ${client.name || 'N/A'}?`,
+        'Finalizar Pedido',
+        () => doFinalize(false),
+        'success',
+        'Finalizar'
+      );
+    }
+  }
+
+  // =====================================================
+  // QUITAR EM LOTE — pedidos com >60 dias não finalizados
+  // =====================================================
+  function batchFinalizeOverdueOrders() {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const overdue = eventOrders.filter(o => {
+      if (o.status === 'finalizado' || o.status === 'cancelado') return false;
+      const d = new Date(o.eventDate + 'T00:00:00');
+      return (today - d) / 86400000 > 60;
+    });
+    if (!overdue.length) { showToast('Nenhum pedido elegível encontrado.', 'warning'); return; }
+
+    const totalSaldo = overdue.reduce((sum, o) => {
+      const paid = receipts.filter(r => r.orderId === o.id && r.status === 'pago').reduce((s,r)=>s+r.amount,0);
+      return sum + Math.max(0, (o.totalValue||0) - paid);
+    }, 0);
+
+    showConfirm(
+      `${overdue.length} pedido${overdue.length>1?'s':''} serão marcados como finalizados. ${totalSaldo > 0 ? `Saldo total de ${formatCurrency(totalSaldo)} será quitado automaticamente.` : 'Todos estão quitados.'}`,
+      'Quitar em Lote',
+      () => {
+        const defaultAccount = accounts.length > 0 ? accounts[0].id : null;
+        let quitCount = 0;
+        overdue.forEach(order => {
+          order.status = 'finalizado';
+          const comm = commitments.find(c => c.linkedOrderId === order.id);
+          if (comm) comm.status = 'realizado';
+          const paid = receipts.filter(r => r.orderId === order.id && r.status === 'pago').reduce((s,r)=>s+r.amount,0);
+          const saldo = (order.totalValue||0) - paid;
+          if (saldo > 0) {
+            quitCount++;
+            const autoReceipt = {
+              id: Date.now() + Math.random() * 1000 | 0,
+              clientId: order.clientId,
+              orderId: order.id,
+              destinationAccountId: defaultAccount,
+              amount: saldo,
+              description: `Quitação em lote — Pedido Nº ${order.orderNumber}`,
+              date: new Date().toISOString().split('T')[0],
+              status: 'pago',
+              createdAt: new Date().toISOString(),
+            };
+            receipts.push(autoReceipt);
+            if (defaultAccount) {
+              transactions.push({
+                id: Date.now() + Math.random() * 1000 | 0,
+                type: 'receita',
+                amount: saldo,
+                date: autoReceipt.date,
+                description: autoReceipt.description,
+                category: 'Serviços DJ',
+                status: 'confirmada',
+                toAccount: defaultAccount,
+                linkedReceiptId: autoReceipt.id,
+                createdAt: new Date().toISOString(),
+              });
+            }
+          }
+        });
+        saveData();
+        updateUI();
+        showToast(`${overdue.length} pedido${overdue.length>1?'s':''} finalizado${overdue.length>1?'s':''}${quitCount>0?` · ${quitCount} recibo${quitCount>1?'s':''} gerado${quitCount>1?'s':''}`:''}! ✅`, 'success');
+      },
+      'warning',
+      `Finalizar ${overdue.length} pedido${overdue.length>1?'s':''}`
+    );
+  }
+
   function deleteOrderAndCommitment(id) {
     showConfirm('O compromisso agendado também será removido.', 'Excluir Pedido', () => {
         // 1. Remove o Pedido
@@ -11801,13 +12044,14 @@ function showCommitmentsForDay(dateString) {
   // ── Update orders KPI strip ─────────────────────────────
   function updateOrdersKPI() {
     const el = id => document.getElementById(id);
-    if (!el('ped-total-count')) return; // panel not yet in DOM
+    if (!el('ped-total-count')) return;
     const allItems = [...(eventOrders || []), ...(eventQuotes || [])];
     const orders = eventOrders || [];
     const quotes = eventQuotes || [];
     if (el('ped-total-count'))       el('ped-total-count').textContent       = allItems.length;
     if (el('ped-confirmado-count'))  el('ped-confirmado-count').textContent  = orders.filter(o => (o.status||'').toLowerCase() === 'confirmado').length;
     if (el('ped-pendente-count'))    el('ped-pendente-count').textContent    = orders.filter(o => !o.status || (o.status||'').toLowerCase() === 'pendente').length;
+    if (el('ped-finalizado-count'))  el('ped-finalizado-count').textContent  = orders.filter(o => (o.status||'').toLowerCase() === 'finalizado').length;
     if (el('ped-orcamento-count'))   el('ped-orcamento-count').textContent   = quotes.length;
   }
   updateOrdersKPI();
@@ -12462,6 +12706,8 @@ function showCommitmentsForDay(dateString) {
   window.updateSavedDocumentsList = updateSavedDocumentsList;
   window.openViewClientModal = openViewClientModal;
   window.openViewOrderModal = openViewOrderModal;
+  window.finalizeOrder = finalizeOrder;
+  window.batchFinalizeOverdueOrders = batchFinalizeOverdueOrders;
 });
 
 </script>
