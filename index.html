@@ -11269,10 +11269,26 @@ function showCommitmentsForDay(dateString) {
         }
       }
 
+      // WhatsApp link
+      const _client = c.clientId ? clients.find(cl => cl.id === c.clientId) : null;
+      const _rawPhone = (_client && _client.phone) ? _client.phone.replace(/\D/g, '') : '';
+      const _waPhone = _rawPhone ? (_rawPhone.startsWith('55') ? _rawPhone : '55' + _rawPhone) : '';
+      const waHtml = _waPhone
+        ? `<a href="https://wa.me/${_waPhone}" target="_blank" rel="noopener"
+              style="display:inline-flex;align-items:center;justify-content:center;gap:5px;
+                     padding:4px 10px;border-radius:var(--r-full);
+                     background:#25d366;color:#fff;font-size:0.68rem;font-weight:700;
+                     text-decoration:none;transition:opacity 0.15s;flex-shrink:0;"
+              onclick="event.stopPropagation()" ontouchstart=""
+              title="WhatsApp ${_client.name}">
+              <i class="fab fa-whatsapp" style="font-size:0.85rem;"></i> WhatsApp
+           </a>`
+        : '';
+
       const item = document.createElement('div');
-      item.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border-soft);border-radius:var(--r-md);margin-bottom:8px;cursor:pointer;transition:all 0.15s;';
+      item.style.cssText = 'display:flex;align-items:flex-start;gap:12px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border-soft);border-radius:var(--r-md);margin-bottom:8px;cursor:pointer;transition:all 0.15s;';
       item.innerHTML = `
-        <div style="width:42px;height:42px;border-radius:var(--r-sm);background:${isToday ? 'var(--danger)' : 'var(--primary)'};color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;">
+        <div style="width:42px;height:42px;border-radius:var(--r-sm);background:${isToday ? 'var(--danger)' : 'var(--primary)'};color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">
           <span style="font-size:${isToday ? '0.8rem' : '1.1rem'};font-weight:800;line-height:1;">${dayNum}</span>
           <span style="font-size:0.55rem;font-weight:700;opacity:0.85;text-transform:uppercase;">${monStr}</span>
         </div>
@@ -11280,6 +11296,7 @@ function showCommitmentsForDay(dateString) {
           <div style="font-weight:700;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.title}</div>
           <div style="font-size:0.73rem;color:var(--text3);margin-top:1px;">${timeStr}${c.location ? ' · '+c.location : ''}</div>
           ${valHtml}
+          ${waHtml ? `<div style="margin-top:6px;">${waHtml}</div>` : ''}
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
           <span style="font-size:0.62rem;font-weight:700;padding:2px 7px;border-radius:var(--r-full);background:${countBg};color:${countColor};">${countTxt}</span>
