@@ -3139,6 +3139,190 @@
     .summary-cards { grid-template-columns: repeat(4,1fr); }
   }
 
+  /* ============================================
+     SININHO DE ALERTAS — CLIENTES SEM PAGAMENTO
+  ============================================ */
+  .alert-bell-btn {
+    position: relative;
+    background: none;
+    border: none;
+    width: 40px; height: 40px;
+    border-radius: var(--r-full);
+    color: var(--text2);
+    font-size: 1.15rem;
+    cursor: pointer;
+    transition: var(--t-fast);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .alert-bell-btn:hover, .alert-bell-btn:active {
+    background: var(--surface3);
+    color: var(--warning);
+    transform: scale(1.08);
+  }
+  .alert-bell-btn.has-alerts { color: var(--warning); }
+  .alert-bell-btn.has-alerts i {
+    animation: bellShake 2.5s ease-in-out infinite;
+  }
+  @keyframes bellShake {
+    0%, 60%, 100% { transform: rotate(0deg); }
+    65% { transform: rotate(-15deg); }
+    70% { transform: rotate(15deg); }
+    75% { transform: rotate(-12deg); }
+    80% { transform: rotate(12deg); }
+    85% { transform: rotate(-8deg); }
+    90% { transform: rotate(0deg); }
+  }
+  .alert-bell-badge {
+    position: absolute;
+    top: 4px; right: 4px;
+    min-width: 17px; height: 17px;
+    background: var(--danger);
+    color: white;
+    border-radius: var(--r-full);
+    font-size: 0.6rem;
+    font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 4px;
+    border: 2px solid var(--surface);
+    line-height: 1;
+    animation: badgePop 0.4s var(--t-spring) both;
+  }
+  @keyframes badgePop {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  /* Modal de alertas de clientes */
+  .alerts-modal-overlay {
+    position: fixed; inset: 0;
+    background: var(--modal-bg);
+    z-index: 800;
+    opacity: 0; pointer-events: none;
+    transition: var(--t-normal);
+    backdrop-filter: blur(4px);
+  }
+  .alerts-modal-overlay.open { opacity: 1; pointer-events: all; }
+  .alerts-modal {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-radius: 0 0 var(--r-xl) var(--r-xl);
+    z-index: 810;
+    padding: 0 var(--space-md) var(--space-lg);
+    transform: translateY(-100%);
+    transition: transform var(--t-slow);
+    max-height: 88vh;
+    overflow-y: auto;
+    padding-top: calc(60px + env(safe-area-inset-top, 0px));
+  }
+  .alerts-modal.open { transform: translateY(0); }
+  .alerts-modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 0 16px;
+    border-bottom: 1px solid var(--border-soft);
+    margin-bottom: 16px;
+    position: sticky; top: calc(60px + env(safe-area-inset-top, 0px));
+    background: var(--surface);
+    z-index: 1;
+  }
+  .alerts-modal-title {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-display);
+    font-size: 1.1rem; font-weight: 800;
+    color: var(--text);
+  }
+  .alerts-modal-title .title-icon {
+    width: 36px; height: 36px; border-radius: var(--r-md);
+    background: var(--warning-bg);
+    color: var(--warning);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+  }
+  .alerts-modal-close {
+    width: 36px; height: 36px; border-radius: var(--r-full);
+    background: var(--surface3); border: none;
+    color: var(--text2); font-size: 1.1rem;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: var(--t-fast);
+  }
+  .alerts-modal-close:hover { background: var(--danger-bg); color: var(--danger); }
+
+  /* Card de alerta individual */
+  .alert-client-card {
+    background: var(--surface2);
+    border: 1px solid var(--border-soft);
+    border-left: 4px solid var(--warning);
+    border-radius: var(--r-md);
+    padding: 14px 14px 14px 16px;
+    margin-bottom: 10px;
+    animation: tabIn 0.3s var(--t-normal) both;
+  }
+  .alert-client-card:nth-child(2) { animation-delay: 0.05s; }
+  .alert-client-card:nth-child(3) { animation-delay: 0.1s; }
+  .alert-client-card:nth-child(4) { animation-delay: 0.15s; }
+  .alert-client-card:nth-child(5) { animation-delay: 0.2s; }
+  .alert-client-header {
+    display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px;
+  }
+  .alert-client-avatar {
+    width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem; font-weight: 800; color: white;
+    background: linear-gradient(135deg, var(--warning), var(--accent2));
+  }
+  .alert-client-info { flex: 1; min-width: 0; }
+  .alert-client-name {
+    font-weight: 700; font-size: 0.95rem;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .alert-client-meta { font-size: 0.76rem; color: var(--text3); margin-top: 2px; }
+  .alert-days-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--warning-bg); color: var(--warning);
+    padding: 3px 9px; border-radius: var(--r-full);
+    font-size: 0.7rem; font-weight: 800;
+    flex-shrink: 0;
+  }
+  .alert-order-detail {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--r-sm);
+    padding: 10px 12px;
+    font-size: 0.82rem;
+    color: var(--text2);
+    margin-bottom: 10px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px;
+  }
+  .alert-order-detail .detail-row { display: contents; }
+  .alert-order-detail .detail-label { color: var(--text3); font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  .alert-order-detail .detail-value { font-weight: 600; color: var(--text); }
+  .alert-order-detail .detail-value.danger { color: var(--danger); }
+  .alert-whatsapp-btn {
+    width: 100%;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 11px 16px;
+    background: linear-gradient(135deg, #25D366, #128C7E);
+    color: white;
+    border: none; border-radius: var(--r-md);
+    font-family: var(--font-body);
+    font-size: 0.88rem; font-weight: 700;
+    cursor: pointer;
+    transition: var(--t-fast);
+    text-decoration: none;
+  }
+  .alert-whatsapp-btn:hover, .alert-whatsapp-btn:active {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+  }
+  .alert-whatsapp-btn i { font-size: 1.05rem; }
+  .alerts-empty {
+    text-align: center; padding: 40px 20px;
+    color: var(--text3);
+  }
+  .alerts-empty i { font-size: 2.5rem; color: var(--success); margin-bottom: 12px; display: block; }
+  .alerts-empty p { font-size: 0.9rem; margin-top: 6px; }
+
 </style>
 
 </head>
@@ -3154,9 +3338,30 @@
     <h1 class="page-title" id="page-title" style="display:none;">Início</h1>
     <div class="top-bar-actions">
       <button class="icon-button" id="search-toggle-btn" title="Buscar"><i class="fas fa-search"></i></button>
+      <button class="alert-bell-btn" id="alert-bell-btn" title="Alertas de clientes">
+        <i class="fas fa-bell"></i>
+      </button>
       <button class="icon-button theme-toggle" id="theme-toggle-btn" title="Alternar tema"><i class="fas fa-moon"></i></button>
     </div>
   </header>
+
+  <!-- Overlay + Modal de Alertas de Clientes -->
+  <div class="alerts-modal-overlay" id="alerts-modal-overlay"></div>
+  <div class="alerts-modal" id="alerts-modal">
+    <div class="alerts-modal-header">
+      <div class="alerts-modal-title">
+        <div class="title-icon"><i class="fas fa-bell"></i></div>
+        <div>
+          <div>Alertas de Cobrança</div>
+          <div style="font-size:0.7rem;font-weight:500;color:var(--text3);margin-top:1px;">Pedidos sem pagamento há +3 dias</div>
+        </div>
+      </div>
+      <button class="alerts-modal-close" id="alerts-modal-close-btn"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="alerts-modal-body">
+      <!-- Preenchido dinamicamente -->
+    </div>
+  </div>
 
   <main class="main-content">
     
@@ -13268,6 +13473,266 @@ function showCommitmentsForDay(dateString) {
   }
 
   console.log('%c🎵 DJ Manager Pro v2 — Melhorias aplicadas', 'color:#3b82f6;font-weight:bold;font-size:12px;');
+})();
+</script>
+
+<script>
+// =====================================================================
+// SISTEMA DE ALERTAS — CLIENTES SEM PAGAMENTO (>3 DIAS)
+// =====================================================================
+(function() {
+  'use strict';
+
+  const DAYS_THRESHOLD = 3;
+
+  // Formata data no padrão dd/mm/aaaa
+  function fmtDate(d) {
+    if (!d) return '—';
+    const dt = new Date(d + 'T00:00:00');
+    return dt.toLocaleDateString('pt-BR');
+  }
+
+  // Formata valor em BRL
+  function fmtCurrency(v) {
+    return (v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
+
+  // Retorna iniciais do nome
+  function initials(name) {
+    if (!name) return '?';
+    return name.trim().split(/\s+/).map(p => p[0]).slice(0, 2).join('').toUpperCase();
+  }
+
+  // Diferença em dias entre hoje e uma data string (YYYY-MM-DD)
+  function daysSince(dateStr) {
+    if (!dateStr) return 0;
+    const created = new Date(dateStr + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return Math.floor((today - created) / 86400000);
+  }
+
+  // Calcula total já pago num pedido (somando receipts vinculados)
+  function getPaidForOrder(orderId) {
+    try {
+      const receipts = JSON.parse(localStorage.getItem('receipts') || '[]');
+      return receipts
+        .filter(r => r.eventOrderId === orderId || r.linkedOrderId === orderId)
+        .reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
+    } catch { return 0; }
+  }
+
+  // Detecta pedidos sem pagamento há mais de DAYS_THRESHOLD dias
+  function getUnpaidAlerts() {
+    try {
+      const eventOrders = JSON.parse(localStorage.getItem('eventOrders') || '[]');
+      const clients = JSON.parse(localStorage.getItem('clients') || '[]');
+      const receipts = JSON.parse(localStorage.getItem('receipts') || '[]');
+
+      const alerts = [];
+
+      for (const order of eventOrders) {
+        // Ignorar pedidos finalizados, realizados ou cancelados
+        if (['realizado', 'cancelado', 'finalizado'].includes(order.status)) continue;
+
+        // Data de criação do pedido (usa createdAt ou eventDate como fallback)
+        const createdAt = (order.createdAt || '').split('T')[0] || order.eventDate;
+        if (!createdAt) continue;
+
+        const dias = daysSince(createdAt);
+        if (dias < DAYS_THRESHOLD) continue;
+
+        // Verifica se há algum pagamento registrado
+        const totalPaid = receipts
+          .filter(r => String(r.eventOrderId) === String(order.id) || String(r.linkedOrderId) === String(order.id))
+          .reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
+
+        if (totalPaid > 0) continue; // Já tem algum pagamento
+
+        const client = clients.find(c => c.id === order.clientId) || {};
+        alerts.push({ order, client, dias, totalPaid });
+      }
+
+      // Ordena do mais antigo para o mais recente
+      alerts.sort((a, b) => b.dias - a.dias);
+      return alerts;
+    } catch (e) {
+      console.error('Erro ao buscar alertas:', e);
+      return [];
+    }
+  }
+
+  // Gera mensagem padrão do WhatsApp
+  function buildWhatsAppMessage(order, client) {
+    const clientName = client.name || 'Cliente';
+    const eventType = order.eventType || 'evento';
+    const eventDate = order.eventDate ? fmtDate(order.eventDate) : 'data a confirmar';
+    const total = fmtCurrency(order.totalValue || order.total || 0);
+    const msg = `Olá, ${clientName}! 👋\n\nPassando para confirmar seu pedido conosco:\n\n` +
+      `🎵 *Serviço:* ${eventType}\n` +
+      `📅 *Data do evento:* ${eventDate}\n` +
+      `💰 *Valor total:* ${total}\n\n` +
+      `Gostaríamos de confirmar o agendamento e combinar a forma de pagamento. Poderia nos retornar?\n\nObrigado! 😊`;
+    return encodeURIComponent(msg);
+  }
+
+  // Formata número de telefone para WhatsApp (remove caracteres não numéricos, adiciona 55 se necessário)
+  function formatPhone(phone) {
+    if (!phone) return '';
+    let p = phone.replace(/\D/g, '');
+    if (p.startsWith('0')) p = p.slice(1);
+    if (p.length <= 11 && !p.startsWith('55')) p = '55' + p;
+    return p;
+  }
+
+  // Renderiza o modal de alertas
+  function renderAlertsModal() {
+    const body = document.getElementById('alerts-modal-body');
+    if (!body) return;
+    const alerts = getUnpaidAlerts();
+
+    if (alerts.length === 0) {
+      body.innerHTML = `
+        <div class="alerts-empty">
+          <i class="fas fa-check-circle"></i>
+          <strong>Tudo em dia!</strong>
+          <p>Nenhum pedido sem pagamento há mais de ${DAYS_THRESHOLD} dias.</p>
+        </div>`;
+      return;
+    }
+
+    body.innerHTML = alerts.map(({ order, client, dias }) => {
+      const phone = formatPhone(client.phone || '');
+      const msg = buildWhatsAppMessage(order, client);
+      const waUrl = phone ? `https://wa.me/${phone}?text=${msg}` : `https://wa.me/?text=${msg}`;
+      const total = fmtCurrency(order.totalValue || order.total || 0);
+      const createdAt = (order.createdAt || '').split('T')[0] || order.eventDate;
+      const initStr = initials(client.name || '?');
+      const eventType = order.eventType || 'Evento';
+
+      return `
+        <div class="alert-client-card">
+          <div class="alert-client-header">
+            <div class="alert-client-avatar">${initStr}</div>
+            <div class="alert-client-info">
+              <div class="alert-client-name">${client.name || 'Cliente desconhecido'}</div>
+              <div class="alert-client-meta">${eventType}${order.eventDate ? ' · ' + fmtDate(order.eventDate) : ''}</div>
+            </div>
+            <div class="alert-days-badge"><i class="fas fa-clock"></i> ${dias}d</div>
+          </div>
+          <div class="alert-order-detail">
+            <span class="detail-label">Valor total</span>
+            <span class="detail-value danger">${total}</span>
+            <span class="detail-label">Pedido criado em</span>
+            <span class="detail-value">${createdAt ? fmtDate(createdAt) : '—'}</span>
+            <span class="detail-label">Sem pagamento há</span>
+            <span class="detail-value danger">${dias} dia${dias !== 1 ? 's' : ''}</span>
+            <span class="detail-label">Telefone</span>
+            <span class="detail-value">${client.phone || '—'}</span>
+          </div>
+          <a class="alert-whatsapp-btn" href="${waUrl}" target="_blank" rel="noopener">
+            <i class="fab fa-whatsapp"></i> Contatar via WhatsApp
+          </a>
+        </div>`;
+    }).join('');
+  }
+
+  // Atualiza badge e aparência do sininho
+  function updateBellBadge() {
+    const btn = document.getElementById('alert-bell-btn');
+    if (!btn) return;
+    const alerts = getUnpaidAlerts();
+    const count = alerts.length;
+
+    // Remove badge anterior
+    const oldBadge = btn.querySelector('.alert-bell-badge');
+    if (oldBadge) oldBadge.remove();
+
+    if (count > 0) {
+      btn.classList.add('has-alerts');
+      const badge = document.createElement('span');
+      badge.className = 'alert-bell-badge';
+      badge.textContent = count > 9 ? '9+' : count;
+      btn.appendChild(badge);
+    } else {
+      btn.classList.remove('has-alerts');
+    }
+  }
+
+  // Abre modal
+  function openAlertsModal() {
+    renderAlertsModal();
+    document.getElementById('alerts-modal-overlay').classList.add('open');
+    document.getElementById('alerts-modal').classList.add('open');
+  }
+
+  // Fecha modal
+  function closeAlertsModal() {
+    document.getElementById('alerts-modal-overlay').classList.remove('open');
+    document.getElementById('alerts-modal').classList.remove('open');
+  }
+
+  // Inicializa após DOM carregar
+  function init() {
+    const bellBtn = document.getElementById('alert-bell-btn');
+    const overlay = document.getElementById('alerts-modal-overlay');
+    const closeBtn = document.getElementById('alerts-modal-close-btn');
+
+    if (bellBtn) bellBtn.addEventListener('click', openAlertsModal);
+    if (overlay) overlay.addEventListener('click', closeAlertsModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeAlertsModal);
+
+    // Fecha com ESC (integra ao handler existente)
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.getElementById('alerts-modal').classList.contains('open')) {
+        closeAlertsModal();
+      }
+    });
+
+    // Atualiza badge imediatamente
+    updateBellBadge();
+
+    // Revalida badge a cada 60s e quando localStorage muda
+    setInterval(updateBellBadge, 60000);
+    window.addEventListener('storage', updateBellBadge);
+
+    // Observa mudanças no DOM para atualizar badge quando dados salvos
+    // (intercepta o saveData global)
+    const origSaveData = window.saveData;
+    if (typeof origSaveData === 'function') {
+      window.saveData = function() {
+        origSaveData.apply(this, arguments);
+        setTimeout(updateBellBadge, 200);
+      };
+    }
+
+    // Patch alternativo: observa localStorage via MutationObserver no body
+    // (garante sincronização quando app salva dados)
+    const patchInterval = setInterval(() => {
+      if (typeof window._djAlertPatched === 'undefined') {
+        // Tenta patch via proxy em localStorage
+        const origSetItem = localStorage.setItem.bind(localStorage);
+        localStorage.setItem = function(key, value) {
+          origSetItem(key, value);
+          if (key === 'eventOrders' || key === 'receipts') {
+            setTimeout(updateBellBadge, 300);
+          }
+        };
+        window._djAlertPatched = true;
+        clearInterval(patchInterval);
+      }
+    }, 500);
+
+    console.log('%c🔔 Sistema de Alertas de Cobrança ativado', 'color:#f59e0b;font-weight:bold;');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    // DOM já carregou, aguarda um tick para que os dados do app estejam prontos
+    setTimeout(init, 800);
+  }
+
 })();
 </script>
 
