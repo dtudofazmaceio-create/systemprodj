@@ -3323,6 +3323,56 @@
   .alerts-empty i { font-size: 2.5rem; color: var(--success); margin-bottom: 12px; display: block; }
   .alerts-empty p { font-size: 0.9rem; margin-top: 6px; }
 
+  /* Rótulo de seção dentro do modal */
+  .alerts-section-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: flex; align-items: center; gap: 7px;
+    margin: 0 0 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .alerts-section-label i { font-size: 0.85rem; }
+
+  /* Linha de ações dentro do card */
+  .alert-actions-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .alert-action-btn {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 9px 10px;
+    border: none; border-radius: var(--r-md);
+    font-family: var(--font-body);
+    font-size: 0.76rem; font-weight: 700;
+    cursor: pointer;
+    transition: var(--t-fast);
+    white-space: nowrap;
+    min-width: 0;
+  }
+  .alert-action-cancel {
+    background: var(--danger-bg);
+    color: var(--danger);
+  }
+  .alert-action-cancel:hover, .alert-action-cancel:active {
+    background: var(--danger);
+    color: white;
+  }
+  .alert-action-snooze {
+    background: var(--surface3);
+    color: var(--text2);
+  }
+  .alert-action-snooze:hover, .alert-action-snooze:active {
+    background: var(--border);
+    color: var(--text);
+  }
+
 </style>
 
 </head>
@@ -13478,105 +13528,56 @@ function showCommitmentsForDay(dateString) {
 
 <script>
 // =====================================================================
-// SISTEMA DE ALERTAS — CLIENTES SEM PAGAMENTO (>3 DIAS)
+// SISTEMA DE ALERTAS — PEDIDOS SEM PAGAMENTO (+3 DIAS) E
+//                      ORÇAMENTOS SEM RESPOSTA (+5 DIAS)
+// Com: marcar cancelado/não aceito, fechar (silencia até amanhã)
 // =====================================================================
 (function() {
   'use strict';
 
-  const DAYS_THRESHOLD = 3;
+  const ORDER_DAYS  = 3;  // dias sem pagamento para alertar pedido
+  const QUOTE_DAYS  = 5;  // dias sem resposta para alertar orçamento
 
-  // Formata data no padrão dd/mm/aaaa
-  function fmtDate(d) {
-    if (!d) return '—';
-    const dt = new Date(d + 'T00:00:00');
-    return dt.toLocaleDateString('pt-BR');
+  // ── Chaves de controle de silêncio (localStorage) ──
+  // Formato: { [orderId|quoteId]: "YYYY-MM-DD" }  → não mostrar nesse dia
+  const SNOOZE_KEY = 'dj_alert_snoozed';
+
+  function getSnoozeMap() {
+    try { return JSON.parse(localStorage.getItem(SNOOZE_KEY) || '{}'); } catch { return {}; }
+  }
+  function setSnooze(id, type) {
+    const map = getSnoozeMap();
+    map[type + '_' + id] = todayStr();
+    localStorage.setItem(SNOOZE_KEY, JSON.stringify(map));
+  }
+  function isSnoozed(id, type) {
+    const map = getSnoozeMap();
+    return map[type + '_' + id] === todayStr();
+  }
+  function todayStr() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }
 
-  // Formata valor em BRL
+  // ── Utilitários ──
+  function fmtDate(d) {
+    if (!d) return '—';
+    return new Date(d + 'T00:00:00').toLocaleDateString('pt-BR');
+  }
   function fmtCurrency(v) {
     return (v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   }
-
-  // Retorna iniciais do nome
-  function initials(name) {
+  function getInitials(name) {
     if (!name) return '?';
     return name.trim().split(/\s+/).map(p => p[0]).slice(0, 2).join('').toUpperCase();
   }
-
-  // Diferença em dias entre hoje e uma data string (YYYY-MM-DD)
   function daysSince(dateStr) {
     if (!dateStr) return 0;
-    const created = new Date(dateStr + 'T00:00:00');
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return Math.floor((today - created) / 86400000);
+    const base = dateStr.split('T')[0];
+    const d = new Date(base + 'T00:00:00');
+    const now = new Date(); now.setHours(0,0,0,0);
+    return Math.floor((now - d) / 86400000);
   }
-
-  // Calcula total já pago num pedido (somando receipts vinculados)
-  function getPaidForOrder(orderId) {
-    try {
-      const receipts = JSON.parse(localStorage.getItem('receipts') || '[]');
-      return receipts
-        .filter(r => r.eventOrderId === orderId || r.linkedOrderId === orderId)
-        .reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
-    } catch { return 0; }
-  }
-
-  // Detecta pedidos sem pagamento há mais de DAYS_THRESHOLD dias
-  function getUnpaidAlerts() {
-    try {
-      const eventOrders = JSON.parse(localStorage.getItem('eventOrders') || '[]');
-      const clients = JSON.parse(localStorage.getItem('clients') || '[]');
-      const receipts = JSON.parse(localStorage.getItem('receipts') || '[]');
-
-      const alerts = [];
-
-      for (const order of eventOrders) {
-        // Ignorar pedidos finalizados, realizados ou cancelados
-        if (['realizado', 'cancelado', 'finalizado'].includes(order.status)) continue;
-
-        // Data de criação do pedido (usa createdAt ou eventDate como fallback)
-        const createdAt = (order.createdAt || '').split('T')[0] || order.eventDate;
-        if (!createdAt) continue;
-
-        const dias = daysSince(createdAt);
-        if (dias < DAYS_THRESHOLD) continue;
-
-        // Verifica se há algum pagamento registrado
-        const totalPaid = receipts
-          .filter(r => String(r.eventOrderId) === String(order.id) || String(r.linkedOrderId) === String(order.id))
-          .reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
-
-        if (totalPaid > 0) continue; // Já tem algum pagamento
-
-        const client = clients.find(c => c.id === order.clientId) || {};
-        alerts.push({ order, client, dias, totalPaid });
-      }
-
-      // Ordena do mais antigo para o mais recente
-      alerts.sort((a, b) => b.dias - a.dias);
-      return alerts;
-    } catch (e) {
-      console.error('Erro ao buscar alertas:', e);
-      return [];
-    }
-  }
-
-  // Gera mensagem padrão do WhatsApp
-  function buildWhatsAppMessage(order, client) {
-    const clientName = client.name || 'Cliente';
-    const eventType = order.eventType || 'evento';
-    const eventDate = order.eventDate ? fmtDate(order.eventDate) : 'data a confirmar';
-    const total = fmtCurrency(order.totalValue || order.total || 0);
-    const msg = `Olá, ${clientName}! 👋\n\nPassando para confirmar seu pedido conosco:\n\n` +
-      `🎵 *Serviço:* ${eventType}\n` +
-      `📅 *Data do evento:* ${eventDate}\n` +
-      `💰 *Valor total:* ${total}\n\n` +
-      `Gostaríamos de confirmar o agendamento e combinar a forma de pagamento. Poderia nos retornar?\n\nObrigado! 😊`;
-    return encodeURIComponent(msg);
-  }
-
-  // Formata número de telefone para WhatsApp (remove caracteres não numéricos, adiciona 55 se necessário)
   function formatPhone(phone) {
     if (!phone) return '';
     let p = phone.replace(/\D/g, '');
@@ -13585,69 +13586,259 @@ function showCommitmentsForDay(dateString) {
     return p;
   }
 
-  // Renderiza o modal de alertas
+  // ── Calcula alertas de pedidos ──
+  function getOrderAlerts() {
+    try {
+      const orders   = JSON.parse(localStorage.getItem('eventOrders') || '[]');
+      const clients  = JSON.parse(localStorage.getItem('clients')     || '[]');
+      const receipts = JSON.parse(localStorage.getItem('receipts')    || '[]');
+      const alerts = [];
+      for (const order of orders) {
+        if (['realizado','cancelado','finalizado'].includes(order.status)) continue;
+        if (isSnoozed(order.id, 'order')) continue;
+        const dateRef = (order.createdAt || '').split('T')[0] || order.eventDate;
+        if (!dateRef) continue;
+        const dias = daysSince(dateRef);
+        if (dias < ORDER_DAYS) continue;
+        const totalPaid = receipts
+          .filter(r => String(r.eventOrderId) === String(order.id) || String(r.linkedOrderId) === String(order.id) || String(r.orderId) === String(order.id))
+          .reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
+        if (totalPaid > 0) continue;
+        const client = clients.find(c => c.id === order.clientId) || {};
+        alerts.push({ type: 'order', item: order, client, dias });
+      }
+      return alerts.sort((a, b) => b.dias - a.dias);
+    } catch(e) { return []; }
+  }
+
+  // ── Calcula alertas de orçamentos ──
+  function getQuoteAlerts() {
+    try {
+      const quotes  = JSON.parse(localStorage.getItem('eventQuotes') || '[]');
+      const clients = JSON.parse(localStorage.getItem('clients')     || '[]');
+      const alerts = [];
+      for (const quote of quotes) {
+        if (['aprovado','recusado'].includes(quote.status)) continue;
+        if (isSnoozed(quote.id, 'quote')) continue;
+        const dateRef = (quote.createdAt || '').split('T')[0] || quote.emissionDate;
+        if (!dateRef) continue;
+        const dias = daysSince(dateRef);
+        if (dias < QUOTE_DAYS) continue;
+        const client = clients.find(c => c.id === quote.clientId) || {};
+        alerts.push({ type: 'quote', item: quote, client, dias });
+      }
+      return alerts.sort((a, b) => b.dias - a.dias);
+    } catch(e) { return []; }
+  }
+
+  function getAllAlerts() {
+    return [...getOrderAlerts(), ...getQuoteAlerts()];
+  }
+
+  // ── Mensagens WhatsApp ──
+  function buildOrderWhatsApp(order, client) {
+    const n    = client.name  || 'Cliente';
+    const tipo = order.eventType || 'evento';
+    const data = order.eventDate ? fmtDate(order.eventDate) : 'data a confirmar';
+    const val  = fmtCurrency(order.totalValue || 0);
+    return encodeURIComponent(
+      `Olá, ${n}! 👋\n\n` +
+      `Passando para confirmar seu pedido conosco e combinar o pagamento:\n\n` +
+      `🎵 *Serviço:* ${tipo}\n` +
+      `📅 *Data do evento:* ${data}\n` +
+      `💰 *Valor total:* ${val}\n\n` +
+      `Poderia nos dar um retorno sobre a forma de pagamento? Estamos à disposição! 😊`
+    );
+  }
+  function buildQuoteWhatsApp(quote, client) {
+    const n    = client.name || 'Cliente';
+    const tipo = quote.eventType || 'evento';
+    const data = quote.eventDate ? fmtDate(quote.eventDate) : 'data a confirmar';
+    const val  = fmtCurrency((quote.services || []).reduce((s,sv) => s + (sv.value||0), 0));
+    return encodeURIComponent(
+      `Olá, ${n}! 👋\n\n` +
+      `Gostaríamos de saber se você teve a oportunidade de analisar nosso orçamento:\n\n` +
+      `🎵 *Serviço:* ${tipo}\n` +
+      `📅 *Data do evento:* ${data}\n` +
+      `💰 *Valor orçado:* ${val}\n\n` +
+      `Ficamos no aguardo do seu retorno. Qualquer dúvida, estamos à disposição! 😊`
+    );
+  }
+
+  // ── Ação: cancelar pedido ──
+  function cancelOrder(orderId) {
+    try {
+      const orders = JSON.parse(localStorage.getItem('eventOrders') || '[]');
+      const idx = orders.findIndex(o => o.id === orderId);
+      if (idx < 0) return;
+      orders[idx].status = 'cancelado';
+      localStorage.setItem('eventOrders', JSON.stringify(orders));
+      if (typeof window.updateUI === 'function') window.updateUI();
+      if (typeof window.updateOrdersKPI === 'function') window.updateOrdersKPI();
+      updateBellBadge();
+      renderAlertsModal();
+      if (typeof window.showToast === 'function') window.showToast('Pedido marcado como cancelado.', 'warning');
+    } catch(e) {}
+  }
+
+  // ── Ação: marcar orçamento como não aceito ──
+  function rejectQuoteAlert(quoteId) {
+    try {
+      const quotes = JSON.parse(localStorage.getItem('eventQuotes') || '[]');
+      const idx = quotes.findIndex(q => q.id === quoteId);
+      if (idx < 0) return;
+      quotes[idx].status = 'recusado';
+      localStorage.setItem('eventQuotes', JSON.stringify(quotes));
+      if (typeof window.updateUI === 'function') window.updateUI();
+      updateBellBadge();
+      renderAlertsModal();
+      if (typeof window.showToast === 'function') window.showToast('Orçamento marcado como não aceito.', 'warning');
+    } catch(e) {}
+  }
+
+  // ── Ação: fechar (soneca até amanhã) ──
+  function snoozeAlert(id, type) {
+    setSnooze(id, type);
+    updateBellBadge();
+    renderAlertsModal();
+  }
+
+  // ── Renderiza o modal ──
   function renderAlertsModal() {
     const body = document.getElementById('alerts-modal-body');
     if (!body) return;
-    const alerts = getUnpaidAlerts();
 
-    if (alerts.length === 0) {
+    const orders = getOrderAlerts();
+    const quotes = getQuoteAlerts();
+    const total  = orders.length + quotes.length;
+
+    if (total === 0) {
       body.innerHTML = `
         <div class="alerts-empty">
           <i class="fas fa-check-circle"></i>
           <strong>Tudo em dia!</strong>
-          <p>Nenhum pedido sem pagamento há mais de ${DAYS_THRESHOLD} dias.</p>
+          <p>Nenhum pedido ou orçamento pendente de atenção.</p>
         </div>`;
       return;
     }
 
-    body.innerHTML = alerts.map(({ order, client, dias }) => {
-      const phone = formatPhone(client.phone || '');
-      const msg = buildWhatsAppMessage(order, client);
-      const waUrl = phone ? `https://wa.me/${phone}?text=${msg}` : `https://wa.me/?text=${msg}`;
-      const total = fmtCurrency(order.totalValue || order.total || 0);
-      const createdAt = (order.createdAt || '').split('T')[0] || order.eventDate;
-      const initStr = initials(client.name || '?');
-      const eventType = order.eventType || 'Evento';
+    let html = '';
 
-      return `
-        <div class="alert-client-card">
-          <div class="alert-client-header">
-            <div class="alert-client-avatar">${initStr}</div>
-            <div class="alert-client-info">
-              <div class="alert-client-name">${client.name || 'Cliente desconhecido'}</div>
-              <div class="alert-client-meta">${eventType}${order.eventDate ? ' · ' + fmtDate(order.eventDate) : ''}</div>
+    // ── Seção de pedidos ──
+    if (orders.length > 0) {
+      html += `<div class="alerts-section-label"><i class="fas fa-clipboard-list"></i> Pedidos sem pagamento há +${ORDER_DAYS} dias</div>`;
+      html += orders.map(({ item: order, client, dias }) => {
+        const phone   = formatPhone(client.phone || '');
+        const waMsg   = buildOrderWhatsApp(order, client);
+        const waUrl   = phone ? `https://wa.me/${phone}?text=${waMsg}` : `https://wa.me/?text=${waMsg}`;
+        const total   = fmtCurrency(order.totalValue || 0);
+        const dateRef = (order.createdAt || '').split('T')[0] || order.eventDate;
+        const initStr = getInitials(client.name || '?');
+        return `
+          <div class="alert-client-card" id="alert-card-order-${order.id}">
+            <div class="alert-client-header">
+              <div class="alert-client-avatar">${initStr}</div>
+              <div class="alert-client-info">
+                <div class="alert-client-name">${client.name || 'Cliente desconhecido'}</div>
+                <div class="alert-client-meta">${order.eventType || 'Pedido'}${order.eventDate ? ' · ' + fmtDate(order.eventDate) : ''}</div>
+              </div>
+              <div class="alert-days-badge"><i class="fas fa-clock"></i> ${dias}d</div>
             </div>
-            <div class="alert-days-badge"><i class="fas fa-clock"></i> ${dias}d</div>
-          </div>
-          <div class="alert-order-detail">
-            <span class="detail-label">Valor total</span>
-            <span class="detail-value danger">${total}</span>
-            <span class="detail-label">Pedido criado em</span>
-            <span class="detail-value">${createdAt ? fmtDate(createdAt) : '—'}</span>
-            <span class="detail-label">Sem pagamento há</span>
-            <span class="detail-value danger">${dias} dia${dias !== 1 ? 's' : ''}</span>
-            <span class="detail-label">Telefone</span>
-            <span class="detail-value">${client.phone || '—'}</span>
-          </div>
-          <a class="alert-whatsapp-btn" href="${waUrl}" target="_blank" rel="noopener">
-            <i class="fab fa-whatsapp"></i> Contatar via WhatsApp
-          </a>
-        </div>`;
-    }).join('');
+            <div class="alert-order-detail">
+              <span class="detail-label">Valor total</span>
+              <span class="detail-value danger">${total}</span>
+              <span class="detail-label">Criado em</span>
+              <span class="detail-value">${dateRef ? fmtDate(dateRef) : '—'}</span>
+              <span class="detail-label">Sem pagamento há</span>
+              <span class="detail-value danger">${dias} dia${dias !== 1 ? 's' : ''}</span>
+              <span class="detail-label">Telefone</span>
+              <span class="detail-value">${client.phone || '—'}</span>
+            </div>
+            <a class="alert-whatsapp-btn" href="${waUrl}" target="_blank" rel="noopener">
+              <i class="fab fa-whatsapp"></i> Contatar via WhatsApp
+            </a>
+            <div class="alert-actions-row">
+              <button class="alert-action-btn alert-action-cancel" data-action="cancel-order" data-id="${order.id}">
+                <i class="fas fa-times-circle"></i> Marcar como Cancelado
+              </button>
+              <button class="alert-action-btn alert-action-snooze" data-action="snooze" data-id="${order.id}" data-type="order">
+                <i class="fas fa-bell-slash"></i> Fechar (avisar amanhã)
+              </button>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // ── Seção de orçamentos ──
+    if (quotes.length > 0) {
+      html += `<div class="alerts-section-label" style="margin-top:${orders.length > 0 ? '20px' : '0'};"><i class="fas fa-file-alt"></i> Orçamentos sem resposta há +${QUOTE_DAYS} dias</div>`;
+      html += quotes.map(({ item: quote, client, dias }) => {
+        const phone   = formatPhone(client.phone || '');
+        const waMsg   = buildQuoteWhatsApp(quote, client);
+        const waUrl   = phone ? `https://wa.me/${phone}?text=${waMsg}` : `https://wa.me/?text=${waMsg}`;
+        const valTotal = (quote.services || []).reduce((s, sv) => s + (sv.value || 0), 0);
+        const dateRef  = (quote.createdAt || '').split('T')[0] || quote.emissionDate;
+        const initStr  = getInitials(client.name || '?');
+        return `
+          <div class="alert-client-card" style="border-left-color:var(--primary);" id="alert-card-quote-${quote.id}">
+            <div class="alert-client-header">
+              <div class="alert-client-avatar" style="background:linear-gradient(135deg,var(--primary),var(--accent));">${initStr}</div>
+              <div class="alert-client-info">
+                <div class="alert-client-name">${client.name || 'Cliente desconhecido'}</div>
+                <div class="alert-client-meta">${quote.eventType || 'Orçamento'}${quote.eventDate ? ' · ' + fmtDate(quote.eventDate) : ''}</div>
+              </div>
+              <div class="alert-days-badge" style="background:rgba(59,130,246,0.12);color:var(--primary);"><i class="fas fa-clock"></i> ${dias}d</div>
+            </div>
+            <div class="alert-order-detail">
+              <span class="detail-label">Valor orçado</span>
+              <span class="detail-value" style="color:var(--primary);">${fmtCurrency(valTotal)}</span>
+              <span class="detail-label">Emitido em</span>
+              <span class="detail-value">${dateRef ? fmtDate(dateRef) : '—'}</span>
+              <span class="detail-label">Aguardando há</span>
+              <span class="detail-value" style="color:var(--primary);">${dias} dia${dias !== 1 ? 's' : ''}</span>
+              <span class="detail-label">Telefone</span>
+              <span class="detail-value">${client.phone || '—'}</span>
+            </div>
+            <a class="alert-whatsapp-btn" href="${waUrl}" target="_blank" rel="noopener">
+              <i class="fab fa-whatsapp"></i> Contatar via WhatsApp
+            </a>
+            <div class="alert-actions-row">
+              <button class="alert-action-btn alert-action-cancel" data-action="reject-quote" data-id="${quote.id}">
+                <i class="fas fa-times-circle"></i> Marcar como Não Aceito
+              </button>
+              <button class="alert-action-btn alert-action-snooze" data-action="snooze" data-id="${quote.id}" data-type="quote">
+                <i class="fas fa-bell-slash"></i> Fechar (avisar amanhã)
+              </button>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    body.innerHTML = html;
+
+    // ── Wiring dos botões ──
+    body.querySelectorAll('[data-action="cancel-order"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (confirm('Confirmar cancelamento do pedido?')) cancelOrder(parseFloat(btn.dataset.id));
+      });
+    });
+    body.querySelectorAll('[data-action="reject-quote"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (confirm('Confirmar orçamento como não aceito?')) rejectQuoteAlert(parseFloat(btn.dataset.id));
+      });
+    });
+    body.querySelectorAll('[data-action="snooze"]').forEach(btn => {
+      btn.addEventListener('click', () => snoozeAlert(parseFloat(btn.dataset.id), btn.dataset.type));
+    });
   }
 
-  // Atualiza badge e aparência do sininho
+  // ── Badge do sininho ──
   function updateBellBadge() {
     const btn = document.getElementById('alert-bell-btn');
     if (!btn) return;
-    const alerts = getUnpaidAlerts();
-    const count = alerts.length;
-
-    // Remove badge anterior
-    const oldBadge = btn.querySelector('.alert-bell-badge');
-    if (oldBadge) oldBadge.remove();
-
+    const count = getAllAlerts().length;
+    const old = btn.querySelector('.alert-bell-badge');
+    if (old) old.remove();
     if (count > 0) {
       btn.classList.add('has-alerts');
       const badge = document.createElement('span');
@@ -13659,79 +13850,44 @@ function showCommitmentsForDay(dateString) {
     }
   }
 
-  // Abre modal
   function openAlertsModal() {
     renderAlertsModal();
     document.getElementById('alerts-modal-overlay').classList.add('open');
     document.getElementById('alerts-modal').classList.add('open');
   }
-
-  // Fecha modal
   function closeAlertsModal() {
     document.getElementById('alerts-modal-overlay').classList.remove('open');
     document.getElementById('alerts-modal').classList.remove('open');
   }
 
-  // Inicializa após DOM carregar
+  // ── Inicialização ──
   function init() {
-    const bellBtn = document.getElementById('alert-bell-btn');
-    const overlay = document.getElementById('alerts-modal-overlay');
-    const closeBtn = document.getElementById('alerts-modal-close-btn');
+    document.getElementById('alert-bell-btn')?.addEventListener('click', openAlertsModal);
+    document.getElementById('alerts-modal-overlay')?.addEventListener('click', closeAlertsModal);
+    document.getElementById('alerts-modal-close-btn')?.addEventListener('click', closeAlertsModal);
 
-    if (bellBtn) bellBtn.addEventListener('click', openAlertsModal);
-    if (overlay) overlay.addEventListener('click', closeAlertsModal);
-    if (closeBtn) closeBtn.addEventListener('click', closeAlertsModal);
-
-    // Fecha com ESC (integra ao handler existente)
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && document.getElementById('alerts-modal').classList.contains('open')) {
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && document.getElementById('alerts-modal')?.classList.contains('open'))
         closeAlertsModal();
-      }
     });
 
-    // Atualiza badge imediatamente
     updateBellBadge();
-
-    // Revalida badge a cada 60s e quando localStorage muda
     setInterval(updateBellBadge, 60000);
     window.addEventListener('storage', updateBellBadge);
 
-    // Observa mudanças no DOM para atualizar badge quando dados salvos
-    // (intercepta o saveData global)
-    const origSaveData = window.saveData;
-    if (typeof origSaveData === 'function') {
-      window.saveData = function() {
-        origSaveData.apply(this, arguments);
-        setTimeout(updateBellBadge, 200);
-      };
-    }
-
-    // Patch alternativo: observa localStorage via MutationObserver no body
-    // (garante sincronização quando app salva dados)
-    const patchInterval = setInterval(() => {
-      if (typeof window._djAlertPatched === 'undefined') {
-        // Tenta patch via proxy em localStorage
-        const origSetItem = localStorage.setItem.bind(localStorage);
-        localStorage.setItem = function(key, value) {
-          origSetItem(key, value);
-          if (key === 'eventOrders' || key === 'receipts') {
-            setTimeout(updateBellBadge, 300);
-          }
-        };
-        window._djAlertPatched = true;
-        clearInterval(patchInterval);
-      }
-    }, 500);
-
+    // Intercepta localStorage.setItem para atualizar badge em tempo real
+    const origSet = localStorage.setItem.bind(localStorage);
+    localStorage.setItem = function(key, value) {
+      origSet(key, value);
+      if (['eventOrders','eventQuotes','receipts'].includes(key))
+        setTimeout(updateBellBadge, 300);
+    };
     console.log('%c🔔 Sistema de Alertas de Cobrança ativado', 'color:#f59e0b;font-weight:bold;');
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    // DOM já carregou, aguarda um tick para que os dados do app estejam prontos
-    setTimeout(init, 800);
-  }
+  document.readyState === 'loading'
+    ? document.addEventListener('DOMContentLoaded', init)
+    : setTimeout(init, 800);
 
 })();
 </script>
