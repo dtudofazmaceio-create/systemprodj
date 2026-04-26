@@ -638,6 +638,234 @@
   .confirm-sheet-actions .btn-ghost { flex-basis: 100%; order: 10; margin-top: 0; }
 
   /* ==========================================
+     STATUS SHEET — Profissional
+  ========================================== */
+  .status-sheet-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 800;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s ease;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .status-sheet-overlay.open { opacity: 1; pointer-events: all; }
+  .status-sheet {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-radius: 24px 24px 0 0;
+    z-index: 801;
+    padding: 0 0 calc(20px + env(safe-area-inset-bottom, 0px));
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: 0 -12px 60px rgba(0,0,0,0.25);
+    max-height: 92vh;
+    overflow-y: auto;
+  }
+  .status-sheet.open { transform: translateY(0); }
+  .status-sheet-header {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--border-soft);
+    position: sticky; top: 0;
+    background: var(--surface);
+    border-radius: 24px 24px 0 0;
+    z-index: 1;
+  }
+  .status-sheet-handle {
+    width: 36px; height: 4px;
+    background: var(--border);
+    border-radius: 4px;
+    margin: 0 auto 14px;
+  }
+  .status-sheet-title {
+    font-size: 1rem; font-weight: 800;
+    color: var(--text);
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 4px;
+  }
+  .status-sheet-title .sheet-icon {
+    width: 32px; height: 32px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), #7c3aed);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; color: white; flex-shrink: 0;
+  }
+  .status-sheet-sub {
+    font-size: 0.78rem; color: var(--text3);
+    padding-left: 42px;
+  }
+  .status-sheet-body { padding: 16px 20px; }
+  .status-options { display: flex; flex-direction: column; gap: 6px; }
+  .status-option-btn {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px;
+    border: 1.5px solid var(--border-soft);
+    border-radius: var(--r-md);
+    background: var(--surface2);
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 0.9rem; font-weight: 600;
+    color: var(--text);
+    transition: all 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+    text-align: left; width: 100%;
+  }
+  .status-option-btn:active { transform: scale(0.98); }
+  .status-option-btn.is-current {
+    border-color: currentColor;
+    background: color-mix(in srgb, currentColor 8%, var(--surface));
+  }
+  .status-dot-wrap {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .status-dot-wrap i { font-size: 0.85rem; }
+  .status-option-info { flex: 1; }
+  .status-option-name { font-weight: 700; font-size: 0.88rem; }
+  .status-option-desc { font-size: 0.71rem; color: var(--text3); margin-top: 1px; font-weight: 400; }
+  .status-check-mark {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: currentColor;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transform: scale(0.5);
+    transition: all 0.2s var(--t-spring);
+    flex-shrink: 0;
+  }
+  .status-check-mark i { font-size: 0.6rem; color: white; }
+  .status-option-btn.is-current .status-check-mark {
+    opacity: 1; transform: scale(1);
+  }
+  .status-sheet-footer { padding: 0 20px; }
+
+  /* ==========================================
+     KM TRACKER MODAL
+  ========================================== */
+  .km-tracker-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 900;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex; align-items: flex-end;
+    justify-content: center;
+  }
+  .km-tracker-overlay.open { opacity: 1; pointer-events: all; }
+  .km-tracker-panel {
+    background: var(--surface);
+    border-radius: 24px 24px 0 0;
+    width: 100%;
+    padding: 0 0 calc(24px + env(safe-area-inset-bottom, 0px));
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: 0 -16px 60px rgba(0,0,0,0.3);
+    max-height: 90vh; overflow-y: auto;
+  }
+  .km-tracker-overlay.open .km-tracker-panel { transform: translateY(0); }
+  .km-tracker-header {
+    padding: 16px 20px 14px;
+    border-bottom: 1px solid var(--border-soft);
+    position: sticky; top: 0;
+    background: var(--surface);
+    border-radius: 24px 24px 0 0;
+    z-index: 1;
+  }
+  .km-tracker-body { padding: 20px; }
+  .km-dest-chip {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    background: rgba(234,67,53,0.08);
+    border: 1px solid rgba(234,67,53,0.2);
+    border-radius: var(--r-md);
+    margin-bottom: 16px;
+  }
+  .km-dest-chip i { color: #ea4335; font-size: 1rem; flex-shrink: 0; }
+  .km-dest-chip span { font-size: 0.82rem; font-weight: 600; color: var(--text); }
+  .km-stat-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-bottom: 20px;
+  }
+  .km-stat-card {
+    background: var(--surface2);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--r-md);
+    padding: 14px;
+    text-align: center;
+  }
+  .km-stat-card.highlight {
+    background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(59,130,246,0.05));
+    border-color: rgba(59,130,246,0.2);
+  }
+  .km-stat-val {
+    font-family: var(--font-display);
+    font-size: 1.6rem; font-weight: 800;
+    color: var(--primary); line-height: 1;
+    margin-bottom: 4px;
+  }
+  .km-stat-lbl { font-size: 0.68rem; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; }
+  .km-status-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px;
+    border-radius: var(--r-md);
+    margin-bottom: 16px;
+    font-size: 0.85rem; font-weight: 600;
+    background: var(--success-bg);
+    color: var(--success);
+    border: 1px solid rgba(16,185,129,0.2);
+  }
+  .km-status-row.idle { background: var(--surface2); color: var(--text3); border-color: var(--border-soft); }
+  .km-status-row.tracking { background: rgba(59,130,246,0.1); color: var(--primary); border-color: rgba(59,130,246,0.2); animation: pulseKm 2s infinite; }
+  @keyframes pulseKm {
+    0%,100% { opacity: 1; } 50% { opacity: 0.7; }
+  }
+  .km-btn-row { display: flex; flex-direction: column; gap: 8px; }
+  .km-ir-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 16px;
+    background: linear-gradient(135deg, #ea4335, #c62828);
+    color: white; border: none;
+    border-radius: var(--r-md);
+    font-family: var(--font-body);
+    font-size: 1rem; font-weight: 700;
+    cursor: pointer; transition: var(--t-fast);
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 4px 16px rgba(234,67,53,0.35);
+    width: 100%;
+  }
+  .km-ir-btn:active { transform: scale(0.98); }
+  .km-concluir-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--success), #059669);
+    color: white; border: none;
+    border-radius: var(--r-md);
+    font-family: var(--font-body);
+    font-size: 0.9rem; font-weight: 700;
+    cursor: pointer; transition: var(--t-fast);
+    -webkit-tap-highlight-color: transparent;
+    width: 100%; display: none;
+  }
+  .km-concluir-btn:active { transform: scale(0.98); }
+  .km-summary-card {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    border-radius: var(--r-md);
+    padding: 20px;
+    color: white;
+    text-align: center;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .km-summary-km {
+    font-size: 3rem; font-weight: 800;
+    color: #60a5fa; line-height: 1;
+  }
+  .km-summary-sub { font-size: 0.8rem; opacity: 0.6; margin-top: 6px; }
+
+  /* ==========================================
      CARDS & SURFACES
   ========================================== */
   .card {
@@ -4526,6 +4754,132 @@ fa-download"></i> Baixar Pedido</button>
   <!-- Confirm Sheet -->
   <div class="confirm-sheet-overlay" id="confirm-sheet-overlay"></div>
   <div class="confirm-sheet" id="confirm-sheet">
+
+  <!-- STATUS SHEET — Pedido -->
+  <div class="status-sheet-overlay" id="order-status-sheet-overlay"></div>
+  <div class="status-sheet" id="order-status-sheet">
+    <div class="status-sheet-header">
+      <div class="status-sheet-handle"></div>
+      <div class="status-sheet-title">
+        <span class="sheet-icon"><i class="fas fa-exchange-alt"></i></span>
+        Alterar Status do Pedido
+      </div>
+      <div class="status-sheet-sub" id="order-status-sheet-sub"></div>
+    </div>
+    <div class="status-sheet-body">
+      <div class="status-options" id="order-status-options"></div>
+    </div>
+    <div class="status-sheet-footer">
+      <button type="button" id="order-status-sheet-cancel" class="btn" style="width:100%;background:var(--surface2);color:var(--text2);border:1.5px solid var(--border);">
+        <i class="fas fa-times"></i> Cancelar
+      </button>
+    </div>
+  </div>
+
+  <!-- STATUS SHEET — Orçamento -->
+  <div class="status-sheet-overlay" id="quote-status-sheet-overlay"></div>
+  <div class="status-sheet" id="quote-status-sheet">
+    <div class="status-sheet-header">
+      <div class="status-sheet-handle"></div>
+      <div class="status-sheet-title">
+        <span class="sheet-icon"><i class="fas fa-exchange-alt"></i></span>
+        Alterar Status do Orçamento
+      </div>
+      <div class="status-sheet-sub" id="quote-status-sheet-sub"></div>
+    </div>
+    <div class="status-sheet-body">
+      <div class="status-options" id="quote-status-options"></div>
+    </div>
+    <div class="status-sheet-footer">
+      <button type="button" id="quote-status-sheet-cancel" class="btn" style="width:100%;background:var(--surface2);color:var(--text2);border:1.5px solid var(--border);">
+        <i class="fas fa-times"></i> Cancelar
+      </button>
+    </div>
+  </div>
+
+  <!-- KM TRACKER MODAL -->
+  <div class="km-tracker-overlay" id="km-tracker-overlay">
+    <div class="km-tracker-panel">
+      <div class="km-tracker-header">
+        <div class="status-sheet-handle"></div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#ea4335,#c62828);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fas fa-route" style="color:white;font-size:0.85rem;"></i>
+          </div>
+          <div>
+            <div style="font-size:1rem;font-weight:800;color:var(--text);">IR ao Evento</div>
+            <div style="font-size:0.75rem;color:var(--text3);" id="km-tracker-order-num"></div>
+          </div>
+        </div>
+      </div>
+      <div class="km-tracker-body">
+        <!-- Destino -->
+        <div class="km-dest-chip">
+          <i class="fas fa-map-marker-alt"></i>
+          <span id="km-tracker-dest"></span>
+        </div>
+
+        <!-- Summary card (shown after concluir) -->
+        <div class="km-summary-card" id="km-summary-card">
+          <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;opacity:0.5;margin-bottom:8px;">Quilometragem do Evento</div>
+          <div class="km-summary-km" id="km-summary-km-val">0 km</div>
+          <div class="km-summary-sub" id="km-summary-time-val">Duração: —</div>
+          <div style="display:flex;justify-content:center;gap:20px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.1);">
+            <div style="text-align:center;">
+              <div style="font-size:1.1rem;font-weight:800;color:#fbbf24;" id="km-summary-ida-val">— km</div>
+              <div style="font-size:0.62rem;opacity:0.5;margin-top:2px;">Ida</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:1.1rem;font-weight:800;color:#34d399;" id="km-summary-volta-val">— km</div>
+              <div style="font-size:0.62rem;opacity:0.5;margin-top:2px;">Volta</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats grid (shown during tracking) -->
+        <div id="km-stats-grid" class="km-stat-grid">
+          <div class="km-stat-card highlight">
+            <div class="km-stat-val" id="km-dist-val">0</div>
+            <div style="font-size:0.55rem;font-weight:700;color:var(--text3);margin-bottom:2px;">KM</div>
+            <div class="km-stat-lbl">Percorridos</div>
+          </div>
+          <div class="km-stat-card">
+            <div class="km-stat-val" style="color:var(--warning);" id="km-time-val">00:00</div>
+            <div class="km-stat-lbl">Tempo</div>
+          </div>
+          <div class="km-stat-card">
+            <div class="km-stat-val" style="font-size:1rem;color:var(--success);" id="km-phase-val">—</div>
+            <div class="km-stat-lbl">Fase</div>
+          </div>
+          <div class="km-stat-card">
+            <div class="km-stat-val" style="font-size:1rem;color:var(--text2);" id="km-speed-val">— km/h</div>
+            <div class="km-stat-lbl">Velocidade</div>
+          </div>
+        </div>
+
+        <!-- Status row -->
+        <div class="km-status-row idle" id="km-status-row">
+          <i class="fas fa-circle" style="font-size:0.5rem;"></i>
+          <span id="km-status-text">Pronto para iniciar o trajeto</span>
+        </div>
+
+        <!-- Buttons -->
+        <div class="km-btn-row">
+          <button class="km-ir-btn" id="km-open-maps-btn">
+            <i class="fas fa-diamond-turn-right"></i>
+            Abrir no Google Maps
+          </button>
+          <button class="km-concluir-btn" id="km-concluir-btn">
+            <i class="fas fa-flag-checkered"></i>
+            Concluir Trajeto e Salvar
+          </button>
+          <button type="button" id="km-tracker-close-btn" class="btn" style="width:100%;background:var(--surface2);color:var(--text2);border:1.5px solid var(--border);margin-top:4px;">
+            <i class="fas fa-times"></i> Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
     <div class="confirm-sheet-icon" id="confirm-sheet-icon"><i class="fas fa-trash"></i></div>
     <h3 id="confirm-sheet-title">Confirmar exclusão</h3>
     <p id="confirm-sheet-message">Tem certeza que deseja excluir?</p>
@@ -5116,6 +5470,8 @@ class="modal-content">
       <div id="view-order-modal-body"></div>
       <div id="view-order-modal-actions" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;">
           <button type="button" class="btn" id="view-order-modal-whatsapp-btn" style="background:#25d366;color:#fff;display:none;grid-column:1/-1;"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+          <button type="button" class="btn" id="view-order-modal-ir-btn" style="background:linear-gradient(135deg,#ea4335,#c62828);color:#fff;grid-column:1/-1;display:none;"><i class="fas fa-route"></i> IR ao Evento</button>
+          <button type="button" class="btn" id="view-order-modal-status-btn" style="background:linear-gradient(135deg,var(--accent),#7c3aed);color:#fff;grid-column:1/-1;"><i class="fas fa-exchange-alt"></i> Alterar Status</button>
           <button type="button" class="btn" id="view-order-modal-finalize-btn" style="background:linear-gradient(135deg,var(--success),#059669);color:#fff;grid-column:1/-1;display:none;"><i class="fas fa-flag-checkered"></i> Finalizar Pedido</button>
           <button type="button" class="btn" id="view-order-modal-download-btn" style="background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;"><i class="fas fa-file-pdf"></i> Baixar PDF</button>
           <button type="button" class="btn" id="view-order-modal-edit-btn" style="background:var(--surface2);color:var(--text);border:1.5px solid var(--border);"><i class="fas fa-edit"></i> Editar</button>
@@ -5148,13 +5504,15 @@ class="modal-content">
       <span class="close-button" data-action="close-modal">&times;</span>
       <h2 id="view-quote-modal-title">Detalhes do Orçamento</h2>
       <div id="view-quote-modal-body"></div>
-      <div class="btn-container" style="justify-content: space-between;">
-        <div style="display:flex; gap: 10px;">
+      <div class="btn-container" style="justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+        <button type="button" class="btn" id="view-quote-modal-ir-btn" style="background:linear-gradient(135deg,#ea4335,#c62828);color:#fff;display:none;width:100%;"><i class="fas fa-route"></i> IR ao Evento</button>
+        <button type="button" class="btn" id="view-quote-modal-status-btn" style="background:linear-gradient(135deg,var(--accent),#7c3aed);color:#fff;width:100%;"><i class="fas fa-exchange-alt"></i> Alterar Status</button>
+        <div style="display:flex; gap: 10px; width:100%;">
           <button type="button" class="btn" id="view-quote-modal-download-btn"><i class="fas fa-download"></i> Baixar PDF</button>
           <button type="button" class="btn btn-success" id="view-quote-modal-approve-btn"><i class="fas fa-check"></i> Aprovar e Converter em Pedido</button>
           <button type="button" class="btn btn-danger" id="view-quote-modal-reject-btn"><i class="fas fa-times"></i> Recusar Orçamento</button>
         </div>
-        <button type="button" class="btn btn-danger" data-action="close-modal">Fechar</button>
+        <button type="button" class="btn btn-danger" data-action="close-modal" style="width:100%;">Fechar</button>
       </div>
     </div>
   </div>
@@ -7177,6 +7535,7 @@ function openCommitmentModal(mode, id = null, date = null) {
         <p><strong>Número:</strong> ${order.orderNumber}</p>
         <p><strong>Valor Total:</strong> ${formatCurrency(order.totalValue)}</p>
         <p><strong>Status:</strong> <span style="display:inline-block;font-size:0.75rem;font-weight:700;padding:2px 10px;border-radius:999px;background:${{'pendente':'rgba(245,158,11,0.12)','confirmado':'rgba(59,130,246,0.10)','realizado':'rgba(139,92,246,0.10)','cancelado':'rgba(239,68,68,0.10)','finalizado':'rgba(16,185,129,0.10)'}[order.status||'pendente']||'rgba(245,158,11,0.12)'};color:${{'pendente':'var(--warning)','confirmado':'var(--primary)','realizado':'var(--accent)','cancelado':'var(--danger)','finalizado':'var(--success)'}[order.status||'pendente']||'var(--warning)'};">${{'pendente':'Pendente','confirmado':'Confirmado','realizado':'Realizado','cancelado':'Cancelado','finalizado':'Finalizado ✓'}[order.status||'pendente']||'Pendente'}</span></p>
+        ${order.kmRecord ? `<p><strong>Quilometragem:</strong> <span style="display:inline-flex;align-items:center;gap:6px;font-size:0.78rem;font-weight:700;padding:4px 10px;border-radius:999px;background:rgba(59,130,246,0.1);color:var(--primary);"><i class="fas fa-route"></i> ${order.kmRecord.total.toFixed(1)} km percorridos</span></p>` : ''}
       </div>
       <div class="detail-group">
         <h4><i class="fas fa-user"></i> Dados do Cliente</h4>
@@ -7195,6 +7554,22 @@ function openCommitmentModal(mode, id = null, date = null) {
         <p><strong>Horário:</strong> ${order.eventTime}</p>
         <p><strong>Local:</strong> ${order.eventLocation}</p>
         <p><strong>Convidados:</strong> ${order.eventGuests}</p>
+        ${order.eventLocation ? `
+        <div style="margin-top:12px;border-radius:var(--r-md);overflow:hidden;border:1.5px solid var(--border);position:relative;">
+          <div style="background:var(--surface2);padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);">
+            <i class="fas fa-map-marker-alt" style="color:#ea4335;font-size:0.9rem;"></i>
+            <span style="font-size:0.8rem;font-weight:600;color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${order.eventLocation}</span>
+          </div>
+          <iframe
+            width="100%"
+            height="200"
+            style="border:0;display:block;"
+            loading="lazy"
+            allowfullscreen
+            referrerpolicy="no-referrer-when-downgrade"
+            src="https://www.google.com/maps?q=${encodeURIComponent(order.eventLocation)}&output=embed">
+          </iframe>
+        </div>` : ''}
       </div>
       <div class="detail-group">
         <h4><i class="fas fa-concierge-bell"></i> Serviços Contratados</h4>
@@ -7238,6 +7613,35 @@ function openCommitmentModal(mode, id = null, date = null) {
       const btn = document.getElementById(btnId);
       if (btn) btn.dataset.id = orderId;
     });
+
+    // Botão IR ao Evento
+    const irBtn = document.getElementById('view-order-modal-ir-btn');
+    if (irBtn) {
+      if (order.eventLocation) {
+        irBtn.style.display = 'flex';
+        irBtn.style.gridColumn = '1 / -1';
+        // Mostrar km registrado se houver
+        const kmRec = order.kmRecord;
+        if (kmRec) {
+          irBtn.innerHTML = `<i class="fas fa-route"></i> IR ao Evento <span style="opacity:0.8;font-size:0.75rem;margin-left:4px;">(${kmRec.total.toFixed(1)}km registrado)</span>`;
+        } else {
+          irBtn.innerHTML = `<i class="fas fa-route"></i> IR ao Evento`;
+        }
+        irBtn.onclick = () => {
+          document.getElementById('view-order-modal').classList.remove('active');
+          setTimeout(() => openKmTracker(order.id), 300);
+        };
+      } else {
+        irBtn.style.display = 'none';
+      }
+    }
+
+    // Botão Alterar Status
+    const statusBtn = document.getElementById('view-order-modal-status-btn');
+    if (statusBtn) {
+      statusBtn.dataset.id = orderId;
+      statusBtn.onclick = () => openOrderStatusSheet(orderId);
+    }
 
     // Show/hide finalize button based on current status
     const finalizeBtn = document.getElementById('view-order-modal-finalize-btn');
@@ -7414,6 +7818,22 @@ function openCommitmentModal(mode, id = null, date = null) {
         <p><strong>Data:</strong> ${formatDate(quote.eventDate)}</p>
         <p><strong>Horário:</strong> ${quote.eventTime}</p>
         <p><strong>Local:</strong> ${quote.eventLocation}</p>
+        ${quote.eventLocation ? `
+        <div style="margin-top:12px;border-radius:var(--r-md);overflow:hidden;border:1.5px solid var(--border);position:relative;">
+          <div style="background:var(--surface2);padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);">
+            <i class="fas fa-map-marker-alt" style="color:#ea4335;font-size:0.9rem;"></i>
+            <span style="font-size:0.8rem;font-weight:600;color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${quote.eventLocation}</span>
+          </div>
+          <iframe
+            width="100%"
+            height="200"
+            style="border:0;display:block;"
+            loading="lazy"
+            allowfullscreen
+            referrerpolicy="no-referrer-when-downgrade"
+            src="https://www.google.com/maps?q=${encodeURIComponent(quote.eventLocation)}&output=embed">
+          </iframe>
+        </div>` : ''}
       </div>
       <div class="detail-group">
         <h4><i class="fas fa-concierge-bell"></i> Serviços Ofertados</h4>
@@ -7428,6 +7848,31 @@ function openCommitmentModal(mode, id = null, date = null) {
     document.getElementById('view-quote-modal-download-btn').dataset.id = quoteId;
     document.getElementById('view-quote-modal-approve-btn').dataset.id = quoteId;
     document.getElementById('view-quote-modal-reject-btn').dataset.id = quoteId;
+
+    // Botão IR ao Evento (orçamento)
+    const irBtnQ = document.getElementById('view-quote-modal-ir-btn');
+    if (irBtnQ) {
+      if (quote.eventLocation) {
+        irBtnQ.style.display = 'flex';
+        irBtnQ.onclick = () => {
+          const encoded = encodeURIComponent(quote.eventLocation);
+          const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+          const url = isIOS
+            ? `maps://?daddr=${encoded}&dirflg=d`
+            : `https://www.google.com/maps/dir/?api=1&destination=${encoded}&travelmode=driving`;
+          window.open(url, '_blank');
+        };
+      } else {
+        irBtnQ.style.display = 'none';
+      }
+    }
+
+    // Botão Alterar Status (orçamento)
+    const statusBtnQ = document.getElementById('view-quote-modal-status-btn');
+    if (statusBtnQ) {
+      statusBtnQ.dataset.id = quoteId;
+      statusBtnQ.onclick = () => openQuoteStatusSheet(quoteId);
+    }
 
     if (quote.status === 'aprovado' || quote.status === 'recusado') {
         document.getElementById('view-quote-modal-approve-btn').style.display = 'none';
@@ -7504,8 +7949,351 @@ function openCommitmentModal(mode, id = null, date = null) {
   }
 
 
+
+
+
+  // ══════════════════════════════════════════════════
+  //  STATUS SHEET — Sistema Profissional
+  // ══════════════════════════════════════════════════
+  const ORDER_STATUSES = [
+    { value: 'pendente',   label: 'Pendente',     desc: 'Aguardando confirmação do cliente',   icon: 'fa-clock',           dot: '#f59e0b', bg: 'rgba(245,158,11,0.12)'  },
+    { value: 'confirmado', label: 'Confirmado',   desc: 'Cliente confirmou o evento',           icon: 'fa-thumbs-up',       dot: '#3b82f6', bg: 'rgba(59,130,246,0.12)'  },
+    { value: 'realizado',  label: 'Realizado',    desc: 'Evento executado com sucesso',         icon: 'fa-music',           dot: '#8b5cf6', bg: 'rgba(139,92,246,0.12)' },
+    { value: 'finalizado', label: 'Finalizado ✓', desc: 'Pagamento recebido e encerrado',       icon: 'fa-flag-checkered',  dot: '#10b981', bg: 'rgba(16,185,129,0.12)'  },
+    { value: 'cancelado',  label: 'Cancelado',    desc: 'Evento não irá acontecer',             icon: 'fa-times-circle',    dot: '#ef4444', bg: 'rgba(239,68,68,0.12)'   },
+  ];
+  const QUOTE_STATUSES = [
+    { value: 'emitido',   label: 'Emitido',    desc: 'Aguardando resposta do cliente',    icon: 'fa-hourglass-half',  dot: '#f59e0b', bg: 'rgba(245,158,11,0.12)'  },
+    { value: 'pendente',  label: 'Pendente',   desc: 'Em análise pelo cliente',            icon: 'fa-clock',           dot: '#f59e0b', bg: 'rgba(245,158,11,0.12)'  },
+    { value: 'aprovado',  label: 'Aprovado',   desc: 'Orçamento aceito pelo cliente',      icon: 'fa-check-circle',    dot: '#10b981', bg: 'rgba(16,185,129,0.12)'  },
+    { value: 'recusado',  label: 'Recusado',   desc: 'Cliente não aceitou o orçamento',   icon: 'fa-ban',             dot: '#ef4444', bg: 'rgba(239,68,68,0.12)'   },
+  ];
+
+  function _renderStatusOptions(container, statuses, currentStatus, onSelect) {
+    container.innerHTML = statuses.map(s => `
+      <button type="button" class="status-option-btn ${s.value === currentStatus ? 'is-current' : ''}"
+        style="color:${s.dot};" data-status="${s.value}">
+        <div class="status-dot-wrap" style="background:${s.bg};">
+          <i class="fas ${s.icon}" style="color:${s.dot};"></i>
+        </div>
+        <div class="status-option-info">
+          <div class="status-option-name" style="color:${s.value === currentStatus ? s.dot : 'var(--text)'};">${s.label}</div>
+          <div class="status-option-desc">${s.desc}</div>
+        </div>
+        <div class="status-check-mark" style="color:${s.dot};">
+          <i class="fas fa-check"></i>
+        </div>
+      </button>`).join('');
+    container.querySelectorAll('.status-option-btn').forEach(btn => {
+      btn.addEventListener('click', () => onSelect(btn.dataset.status));
+    });
+  }
+
+  function openOrderStatusSheet(orderId) {
+    const order = eventOrders.find(o => o.id === orderId);
+    if (!order) return;
+    const cur = order.status || 'pendente';
+    const curLabel = ORDER_STATUSES.find(s => s.value === cur)?.label || cur;
+    document.getElementById('order-status-sheet-sub').textContent = `Pedido #${order.orderNumber} · Status atual: ${curLabel}`;
+    _renderStatusOptions(
+      document.getElementById('order-status-options'),
+      ORDER_STATUSES, cur,
+      (newStatus) => {
+        order.status = newStatus;
+        saveData(); updateUI();
+        closeOrderStatusSheet();
+        setTimeout(() => openViewOrderModal(orderId), 320);
+        const lbl = ORDER_STATUSES.find(s => s.value === newStatus)?.label || newStatus;
+        showToast(`Status atualizado para "${lbl}"`, 'success');
+      }
+    );
+    document.getElementById('order-status-sheet-overlay').classList.add('open');
+    document.getElementById('order-status-sheet').classList.add('open');
+  }
+  function closeOrderStatusSheet() {
+    document.getElementById('order-status-sheet-overlay').classList.remove('open');
+    document.getElementById('order-status-sheet').classList.remove('open');
+  }
+
+  function openQuoteStatusSheet(quoteId) {
+    const quote = eventQuotes.find(q => q.id === quoteId);
+    if (!quote) return;
+    const cur = quote.status || 'emitido';
+    const curLabel = QUOTE_STATUSES.find(s => s.value === cur)?.label || cur;
+    document.getElementById('quote-status-sheet-sub').textContent = `Orçamento #${quote.quoteNumber} · Status atual: ${curLabel}`;
+    _renderStatusOptions(
+      document.getElementById('quote-status-options'),
+      QUOTE_STATUSES, cur,
+      (newStatus) => {
+        quote.status = newStatus;
+        saveData(); updateUI();
+        closeQuoteStatusSheet();
+        setTimeout(() => openViewQuoteModal(quoteId), 320);
+        const lbl = QUOTE_STATUSES.find(s => s.value === newStatus)?.label || newStatus;
+        showToast(`Status atualizado para "${lbl}"`, 'success');
+      }
+    );
+    document.getElementById('quote-status-sheet-overlay').classList.add('open');
+    document.getElementById('quote-status-sheet').classList.add('open');
+  }
+  function closeQuoteStatusSheet() {
+    document.getElementById('quote-status-sheet-overlay').classList.remove('open');
+    document.getElementById('quote-status-sheet').classList.remove('open');
+  }
+
+  (function initStatusSheetWiring() {
+    function wire() {
+      document.getElementById('order-status-sheet-overlay')?.addEventListener('click', closeOrderStatusSheet);
+      document.getElementById('order-status-sheet-cancel')?.addEventListener('click', closeOrderStatusSheet);
+      document.getElementById('quote-status-sheet-overlay')?.addEventListener('click', closeQuoteStatusSheet);
+      document.getElementById('quote-status-sheet-cancel')?.addEventListener('click', closeQuoteStatusSheet);
+    }
+    document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', wire) : setTimeout(wire, 200);
+  })();
+
+  // ══════════════════════════════════════════════════
+  //  KM TRACKER — Sistema de Quilometragem
+  // ══════════════════════════════════════════════════
+  const KmTracker = (function() {
+    let _state = {
+      orderId: null, location: null, phase: 'idle',
+      watchId: null, startPos: null, totalDist: 0,
+      idaDist: 0, voltaDist: 0, lastPos: null,
+      startTime: null, timerInterval: null
+    };
+
+    function _haversine(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    function _fmtDist(km) { return km < 1 ? (km*1000).toFixed(0)+'m' : km.toFixed(1)+' km'; }
+    function _fmtTime(sec) {
+      const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = sec%60;
+      if (h > 0) return `${h}h ${String(m).padStart(2,'0')}min`;
+      return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+
+    function _updateUI() {
+      document.getElementById('km-dist-val').textContent = _fmtDist(_state.totalDist);
+      const elapsed = _state.startTime ? Math.floor((Date.now() - _state.startTime)/1000) : 0;
+      document.getElementById('km-time-val').textContent = _fmtTime(elapsed);
+      const phaseLabels = { idle: '—', going: 'Indo', arrived: 'No local', returning: 'Voltando', done: 'Concluído' };
+      document.getElementById('km-phase-val').textContent = phaseLabels[_state.phase] || '—';
+      const row = document.getElementById('km-status-row');
+      row.className = 'km-status-row';
+      const statusMap = {
+        idle: { cls: 'idle', txt: 'Pronto para iniciar o trajeto' },
+        going: { cls: 'tracking', txt: '🔴 Rastreando — Indo ao evento' },
+        arrived: { cls: 'tracking', txt: '📍 No local do evento' },
+        returning: { cls: 'tracking', txt: '🔴 Rastreando — Voltando' },
+        done: { cls: '', txt: '✅ Trajeto concluído e salvo!' },
+      };
+      const st = statusMap[_state.phase] || statusMap.idle;
+      if (st.cls) row.classList.add(st.cls);
+      document.getElementById('km-status-text').textContent = st.txt;
+      const concluirBtn = document.getElementById('km-concluir-btn');
+      concluirBtn.style.display = (['going','arrived','returning'].includes(_state.phase)) ? 'flex' : 'none';
+    }
+
+    function _startGPS() {
+      if (!navigator.geolocation) { showToast('GPS não disponível neste dispositivo', 'warning'); return; }
+      _state.startTime = Date.now();
+      _state.phase = 'going';
+      _state.totalDist = 0; _state.idaDist = 0; _state.voltaDist = 0; _state.lastPos = null;
+      clearInterval(_state.timerInterval);
+      _state.timerInterval = setInterval(() => {
+        const el = document.getElementById('km-time-val');
+        if (el && _state.startTime) {
+          const s = Math.floor((Date.now() - _state.startTime)/1000);
+          el.textContent = _fmtTime(s);
+        }
+      }, 1000);
+      _state.watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          const {latitude: lat, longitude: lng, speed} = pos.coords;
+          if (_state.lastPos) {
+            const d = _haversine(_state.lastPos.lat, _state.lastPos.lng, lat, lng);
+            if (d > 0.01) { // filtro de ruído < 10m
+              _state.totalDist += d;
+              if (_state.phase === 'going') _state.idaDist += d;
+              else if (_state.phase === 'returning') _state.voltaDist += d;
+            }
+          }
+          _state.lastPos = { lat, lng };
+          const speedKmh = speed ? (speed * 3.6).toFixed(0) + ' km/h' : '— km/h';
+          const speedEl = document.getElementById('km-speed-val');
+          if (speedEl) speedEl.textContent = speedKmh;
+          _updateUI();
+        },
+        (err) => { showToast('Erro de GPS: ' + err.message, 'warning'); },
+        { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
+      );
+      _updateUI();
+    }
+
+    function _stopGPS() {
+      if (_state.watchId !== null) { navigator.geolocation.clearWatch(_state.watchId); _state.watchId = null; }
+      clearInterval(_state.timerInterval);
+    }
+
+    function _saveKm(orderId) {
+      try {
+        const key = 'djmgr_km_' + orderId;
+        const elapsed = _state.startTime ? Math.floor((Date.now() - _state.startTime)/1000) : 0;
+        const record = { total: +_state.totalDist.toFixed(2), ida: +_state.idaDist.toFixed(2), volta: +_state.voltaDist.toFixed(2), duration: elapsed, date: new Date().toISOString() };
+        localStorage.setItem(key, JSON.stringify(record));
+        // Salvar também no pedido
+        const order = eventOrders.find(o => o.id === orderId);
+        if (order) { order.kmRecord = record; saveData(); updateUI(); }
+        return record;
+      } catch(e) { return null; }
+    }
+
+    function open(orderId, location) {
+      _state.orderId = orderId;
+      _state.location = location;
+      _state.phase = 'idle';
+      _state.totalDist = 0; _state.idaDist = 0; _state.voltaDist = 0;
+      _state.lastPos = null; _state.startTime = null;
+      clearInterval(_state.timerInterval);
+
+      // Checar se já tem registro salvo
+      const order = eventOrders.find(o => o.id === orderId);
+      const summaryCard = document.getElementById('km-summary-card');
+      const statsGrid = document.getElementById('km-stats-grid');
+      const concluirBtn = document.getElementById('km-concluir-btn');
+
+      if (order && order.kmRecord) {
+        const r = order.kmRecord;
+        summaryCard.style.display = 'block';
+        statsGrid.style.display = 'none';
+        concluirBtn.style.display = 'none';
+        document.getElementById('km-summary-km-val').textContent = r.total.toFixed(1) + ' km';
+        document.getElementById('km-summary-time-val').textContent = 'Duração: ' + _fmtTime(r.duration);
+        document.getElementById('km-summary-ida-val').textContent = r.ida.toFixed(1) + ' km';
+        document.getElementById('km-summary-volta-val').textContent = r.volta.toFixed(1) + ' km';
+        document.getElementById('km-status-text').textContent = '✅ Quilometragem registrada para este evento';
+        document.getElementById('km-status-row').className = 'km-status-row';
+      } else {
+        summaryCard.style.display = 'none';
+        statsGrid.style.display = 'grid';
+        concluirBtn.style.display = 'none';
+        _updateUI();
+      }
+
+      document.getElementById('km-tracker-order-num').textContent = order ? `Pedido #${order.orderNumber}` : '';
+      document.getElementById('km-tracker-dest').textContent = location;
+      document.getElementById('km-dist-val').textContent = '0';
+      document.getElementById('km-time-val').textContent = '00:00';
+      document.getElementById('km-phase-val').textContent = '—';
+      document.getElementById('km-speed-val').textContent = '— km/h';
+      document.getElementById('km-tracker-overlay').classList.add('open');
+    }
+
+    function close() {
+      _stopGPS();
+      document.getElementById('km-tracker-overlay').classList.remove('open');
+    }
+
+    function _openMapsAndStartTracking() {
+      const encoded = encodeURIComponent(_state.location);
+      const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+      const isAndroid = /Android/.test(navigator.userAgent);
+      const url = isIOS
+        ? `maps://?daddr=${encoded}&dirflg=d`
+        : isAndroid
+          ? `https://www.google.com/maps/dir/?api=1&destination=${encoded}&travelmode=driving`
+          : `https://www.google.com/maps/dir/?api=1&destination=${encoded}&travelmode=driving`;
+      window.open(url, '_blank');
+      // Iniciar rastreamento GPS
+      _startGPS();
+      showToast('Rastreamento iniciado! Bom evento! 🚗', 'success');
+    }
+
+    function concluir() {
+      _stopGPS();
+      _state.phase = 'done';
+      const record = _saveKm(_state.orderId);
+      if (!record) { showToast('Erro ao salvar quilometragem', 'error'); return; }
+      // Mostrar resumo
+      const summaryCard = document.getElementById('km-summary-card');
+      const statsGrid = document.getElementById('km-stats-grid');
+      const concluirBtn = document.getElementById('km-concluir-btn');
+      summaryCard.style.display = 'block';
+      statsGrid.style.display = 'none';
+      concluirBtn.style.display = 'none';
+      document.getElementById('km-summary-km-val').textContent = record.total.toFixed(1) + ' km';
+      document.getElementById('km-summary-time-val').textContent = 'Duração: ' + _fmtTime(record.duration);
+      document.getElementById('km-summary-ida-val').textContent = record.ida.toFixed(1) + ' km';
+      document.getElementById('km-summary-volta-val').textContent = record.volta.toFixed(1) + ' km';
+      document.getElementById('km-status-row').className = 'km-status-row';
+      document.getElementById('km-status-text').textContent = '✅ Quilometragem registrada com sucesso!';
+      showToast(`Trajeto salvo! Total: ${record.total.toFixed(1)} km`, 'success');
+    }
+
+    (function wireKmTracker() {
+      function wire() {
+        const overlay = document.getElementById('km-tracker-overlay');
+        document.getElementById('km-tracker-close-btn')?.addEventListener('click', close);
+        document.getElementById('km-open-maps-btn')?.addEventListener('click', _openMapsAndStartTracking);
+        document.getElementById('km-concluir-btn')?.addEventListener('click', concluir);
+        overlay?.addEventListener('click', function(e) { if (e.target === overlay) close(); });
+      }
+      document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', wire) : setTimeout(wire, 300);
+    })();
+
+    return { open, close };
+  })();
+
+  // ── Função global para abrir o KM Tracker ──
+  function openKmTracker(orderId) {
+    const order = eventOrders.find(o => o.id === orderId);
+    if (!order || !order.eventLocation) { showToast('Endereço do evento não cadastrado', 'warning'); return; }
+    KmTracker.open(orderId, order.eventLocation);
+  }
+
+  // ── Preview do Maps nos formulários ──
+  function initLocationMapPreview(inputId, previewContainerId) {
+    var input = document.getElementById(inputId);
+    if (!input) return;
+    var previewDiv = document.getElementById(previewContainerId);
+    if (!previewDiv) {
+      previewDiv = document.createElement('div');
+      previewDiv.id = previewContainerId;
+      previewDiv.style.cssText = 'margin-top:8px;border-radius:var(--r-md);overflow:hidden;border:1.5px solid var(--border);display:none;transition:all 0.3s;';
+      input.parentNode.appendChild(previewDiv);
+    }
+    var debounceTimer;
+    input.addEventListener('input', function() {
+      clearTimeout(debounceTimer);
+      var val = input.value.trim();
+      if (val.length < 6) { previewDiv.style.display = 'none'; return; }
+      debounceTimer = setTimeout(function() {
+        var encoded = encodeURIComponent(val);
+        previewDiv.style.display = 'block';
+        previewDiv.innerHTML =
+          '<div style="background:linear-gradient(135deg,rgba(234,67,53,0.08),rgba(234,67,53,0.04));padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);">' +
+          '<i class="fas fa-map-marker-alt" style="color:#ea4335;font-size:0.85rem;"></i>' +
+          '<span style="font-size:0.78rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">' + val + '</span>' +
+          '<a href="https://www.google.com/maps/search/?q=' + encoded + '" target="_blank" style="font-size:0.65rem;color:#ea4335;font-weight:700;text-decoration:none;white-space:nowrap;flex-shrink:0;">Ver no Maps →</a>' +
+          '</div>' +
+          '<iframe width="100%" height="180" style="border:0;display:block;" loading="lazy" src="https://www.google.com/maps?q=' + encoded + '&output=embed"></iframe>';
+      }, 900);
+    });
+  }
+  (function() {
+    function initPreviews() {
+      initLocationMapPreview('order-event-location-input', 'order-location-map-preview');
+      initLocationMapPreview('quote-event-location-input', 'quote-location-map-preview');
+    }
+    document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', initPreviews) : setTimeout(initPreviews, 500);
+  })();
+
   function updateUI() {
-    recalculateAllBalances();
     updateSummaryCards();
     updateNotificationsBanner();
     updateTransactionsTable();
@@ -8289,8 +9077,11 @@ function updateClientsList() {
                 : quoteStatusBadge}
             </div>
           </div>
-          <div class="card-actions-area" style="display:grid;grid-template-columns:repeat(${(waPhone?1:0)+(isOrder&&orderStatus!=='finalizado'&&orderStatus!=='cancelado'?1:0)+3},1fr);gap:4px;">
+          <div class="card-actions-area" style="display:grid;grid-template-columns:repeat(${(waPhone?1:0)+(isOrder&&item.eventLocation?1:0)+(isOrder&&orderStatus!=='finalizado'&&orderStatus!=='cancelado'?1:0)+3},1fr);gap:4px;">
             ${waPhone ? `<a href="https://wa.me/${waPhone}" target="_blank" rel="noopener" class="btn btn-xs card-action-btn" data-card-action="whatsapp" style="font-size:0.68rem;background:#25d366;color:#fff;border:none;display:flex;align-items:center;justify-content:center;"><i class="fab fa-whatsapp"></i></a>` : ''}
+            ${isOrder && item.eventLocation
+              ? `<button class="btn btn-xs card-action-btn" data-card-action="ir" style="font-size:0.68rem;background:linear-gradient(135deg,#ea4335,#c62828);color:#fff;border:none;display:flex;align-items:center;justify-content:center;gap:3px;" title="IR ao evento"><i class="fas fa-route"></i>${item.kmRecord ? ` ${item.kmRecord.total.toFixed(0)}km` : ''}</button>`
+              : ''}
             ${isOrder && orderStatus !== 'finalizado' && orderStatus !== 'cancelado'
               ? `<button class="btn btn-xs card-action-btn" data-card-action="finalize" style="font-size:0.68rem;background:var(--success-bg);color:var(--success);border:1px solid var(--success);display:flex;align-items:center;justify-content:center;" title="Finalizar pedido"><i class="fas fa-flag-checkered"></i></button>`
               : ''}
@@ -8314,6 +9105,7 @@ function updateClientsList() {
             if (act === 'edit')     { isOrder ? openEventOrderModal('edit', item.id) : openEventQuoteModal('edit', item.id); }
             if (act === 'delete')   { isOrder ? deleteOrderAndCommitment(item.id) : deleteItem(eventQuotes, item.id, 'Orçamento'); }
             if (act === 'finalize') { finalizeOrder(item.id); }
+            if (act === 'ir')       { openKmTracker(item.id); }
           });
         });
 
@@ -11540,6 +12332,26 @@ function showCommitmentsForDay(dateString) {
            </a>`
         : '';
 
+      // IR button (only if linked order with eventLocation)
+      let irHtml = '';
+      let _irOrderId = null;
+      if (c.linkedOrderId) {
+        const _order = eventOrders.find(o => o.id === c.linkedOrderId);
+        if (_order && _order.eventLocation) {
+          const _kmRec = _order.kmRecord;
+          const _kmLabel = _kmRec ? `${_kmRec.total.toFixed(1)}km` : 'IR';
+          _irOrderId = _order.id;
+          irHtml = `<button class="dash-ir-btn"
+            style="display:inline-flex;align-items:center;justify-content:center;gap:5px;
+                   padding:4px 10px;border-radius:var(--r-full);border:none;
+                   background:linear-gradient(135deg,#ea4335,#c62828);color:#fff;
+                   font-size:0.68rem;font-weight:700;cursor:pointer;flex-shrink:0;"
+            title="IR ao evento">
+            <i class="fas fa-route" style="font-size:0.8rem;"></i> ${_kmLabel}
+          </button>`;
+        }
+      }
+
       const item = document.createElement('div');
       item.style.cssText = 'display:flex;align-items:flex-start;gap:12px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border-soft);border-radius:var(--r-md);margin-bottom:8px;cursor:pointer;transition:all 0.15s;';
       item.innerHTML = `
@@ -11551,7 +12363,7 @@ function showCommitmentsForDay(dateString) {
           <div style="font-weight:700;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.title}</div>
           <div style="font-size:0.73rem;color:var(--text3);margin-top:1px;">${timeStr}${c.location ? ' · '+c.location : ''}</div>
           ${valHtml}
-          ${waHtml ? `<div style="margin-top:6px;">${waHtml}</div>` : ''}
+          ${(waHtml || irHtml) ? `<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">${waHtml}${irHtml}</div>` : ''}
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
           <span style="font-size:0.62rem;font-weight:700;padding:2px 7px;border-radius:var(--r-full);background:${countBg};color:${countColor};">${countTxt}</span>
@@ -11560,6 +12372,16 @@ function showCommitmentsForDay(dateString) {
       item.addEventListener('mouseenter', () => { item.style.boxShadow = 'var(--card-shadow-hover)'; item.style.transform = 'translateX(2px)'; });
       item.addEventListener('mouseleave', () => { item.style.boxShadow = ''; item.style.transform = ''; });
       item.addEventListener('click', () => openSingleCommitmentDetail(c.id));
+      // Wire IR button after innerHTML set
+      if (_irOrderId !== null) {
+        const irBtn = item.querySelector('.dash-ir-btn');
+        if (irBtn) {
+          irBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openKmTracker(_irOrderId);
+          });
+        }
+      }
       el.appendChild(item);
     });
   }
@@ -13036,6 +13858,9 @@ function showCommitmentsForDay(dateString) {
   window.openViewOrderModal = openViewOrderModal;
   window.finalizeOrder = finalizeOrder;
   window.batchFinalizeOverdueOrders = batchFinalizeOverdueOrders;
+  window.openKmTracker = openKmTracker;
+  window.openOrderStatusSheet = openOrderStatusSheet;
+  window.openQuoteStatusSheet = openQuoteStatusSheet;
 });
 
 </script>
