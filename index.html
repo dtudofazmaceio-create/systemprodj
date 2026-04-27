@@ -642,8 +642,8 @@
   ========================================== */
   .status-sheet-overlay {
     position: fixed; inset: 0;
-    background: rgba(0,0,0,0.6);
-    z-index: 800;
+    background: rgba(0,0,0,0.65);
+    z-index: 1100;
     opacity: 0; pointer-events: none;
     transition: opacity 0.25s ease;
     backdrop-filter: blur(6px);
@@ -655,11 +655,11 @@
     bottom: 0; left: 0; right: 0;
     background: var(--surface);
     border-radius: 24px 24px 0 0;
-    z-index: 801;
+    z-index: 1101;
     padding: 0 0 calc(20px + env(safe-area-inset-bottom, 0px));
     transform: translateY(100%);
     transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-    box-shadow: 0 -12px 60px rgba(0,0,0,0.25);
+    box-shadow: 0 -12px 60px rgba(0,0,0,0.3);
     max-height: 92vh;
     overflow-y: auto;
   }
@@ -713,8 +713,8 @@
   }
   .status-option-btn:active { transform: scale(0.98); }
   .status-option-btn.is-current {
-    border-color: currentColor;
-    background: color-mix(in srgb, currentColor 8%, var(--surface));
+    border-color: var(--cur-color, #3b82f6);
+    background: rgba(59,130,246,0.07);
   }
   .status-dot-wrap {
     width: 36px; height: 36px;
@@ -728,10 +728,9 @@
   .status-option-desc { font-size: 0.71rem; color: var(--text3); margin-top: 1px; font-weight: 400; }
   .status-check-mark {
     width: 22px; height: 22px; border-radius: 50%;
-    background: currentColor;
     display: flex; align-items: center; justify-content: center;
     opacity: 0; transform: scale(0.5);
-    transition: all 0.2s var(--t-spring);
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     flex-shrink: 0;
   }
   .status-check-mark i { font-size: 0.6rem; color: white; }
@@ -745,10 +744,10 @@
   ========================================== */
   .km-tracker-overlay {
     position: fixed; inset: 0;
-    background: rgba(0,0,0,0.75);
-    z-index: 900;
+    background: rgba(0,0,0,0.8);
+    z-index: 1200;
     opacity: 0; pointer-events: none;
-    transition: opacity 0.25s;
+    transition: opacity 0.25s ease;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     display: flex; align-items: flex-end;
@@ -761,9 +760,9 @@
     width: 100%;
     padding: 0 0 calc(24px + env(safe-area-inset-bottom, 0px));
     transform: translateY(100%);
-    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-    box-shadow: 0 -16px 60px rgba(0,0,0,0.3);
-    max-height: 90vh; overflow-y: auto;
+    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: 0 -16px 60px rgba(0,0,0,0.35);
+    max-height: 92vh; overflow-y: auto;
   }
   .km-tracker-overlay.open .km-tracker-panel { transform: translateY(0); }
   .km-tracker-header {
@@ -1491,9 +1490,66 @@
   .btn-success { background: linear-gradient(135deg, var(--success), #04b88a) !important; color: white !important; }
 
   /* ==========================================
-     LAYOUT IMPROVEMENTS
+     MODAL FORM — PROFESSIONAL UPGRADE
   ========================================== */
-  .empty-state {
+  /* Service item rows inside order/quote modals */
+  .order-service-item {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: center;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 8px 10px;
+    transition: var(--t-fast);
+  }
+  .order-service-item:hover { border-color: var(--primary); }
+  .order-service-item .order-service-desc {
+    flex: 2;
+    padding: 8px 10px;
+    background: var(--input-bg);
+    border: 1.5px solid var(--input-border);
+    border-radius: var(--r-sm);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    outline: none;
+    transition: var(--t-fast);
+  }
+  .order-service-item .order-service-value {
+    flex: 1;
+    padding: 8px 10px;
+    background: var(--input-bg);
+    border: 1.5px solid var(--input-border);
+    border-radius: var(--r-sm);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    outline: none;
+    transition: var(--t-fast);
+  }
+  .order-service-item input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+
+  /* Modal title with icon */
+  .modal h2[style*="display:flex"] { padding-right: 36px; }
+
+  /* Section blocks inside modals */
+  .modal-section {
+    background: var(--surface2);
+    border-radius: var(--r-md);
+    padding: 14px;
+    border: 1px solid var(--border-soft);
+    margin-bottom: 14px;
+  }
+  .modal-section-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+  }
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -3392,6 +3448,12 @@
   .alert-bell-btn.has-alerts i {
     animation: bellShake 2.5s ease-in-out infinite;
   }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+  #km-tracking-badge:hover { opacity: 0.9; transform: scale(1.04); }
+
   @keyframes bellShake {
     0%, 60%, 100% { transform: rotate(0deg); }
     65% { transform: rotate(-15deg); }
@@ -4798,85 +4860,94 @@ fa-download"></i> Baixar Pedido</button>
   </div>
 
   <!-- KM TRACKER MODAL -->
-  <div class="km-tracker-overlay" id="km-tracker-overlay">
-    <div class="km-tracker-panel">
-      <div class="km-tracker-header">
-        <div class="status-sheet-handle"></div>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#ea4335,#c62828);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <i class="fas fa-route" style="color:white;font-size:0.85rem;"></i>
+  <div id="km-tracker-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-handle"></div>
+      <span class="close-button" id="km-tracker-close-btn" style="position:sticky;top:0;float:right;margin-top:-4px;margin-right:-8px;width:36px;height:36px;border-radius:50%;background:var(--surface2);border:none;cursor:pointer;font-size:1.1rem;color:var(--text3);display:flex;align-items:center;justify-content:center;transition:var(--t-fast);z-index:1;">&times;</span>
+
+      <!-- Cabeçalho -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-right:40px;">
+        <div style="width:36px;height:36px;border-radius:var(--r-sm);background:linear-gradient(135deg,#ea4335,#c62828);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="fas fa-route" style="color:white;font-size:0.85rem;"></i>
+        </div>
+        <div>
+          <div style="font-size:1rem;font-weight:800;color:var(--text);">IR ao Evento</div>
+          <div style="font-size:0.75rem;color:var(--text3);" id="km-tracker-order-num"></div>
+        </div>
+      </div>
+
+      <!-- Destino -->
+      <div class="km-dest-chip" style="margin-bottom:14px;">
+        <i class="fas fa-map-marker-alt"></i>
+        <span id="km-tracker-dest"></span>
+      </div>
+
+      <!-- Link direto Google Maps -->
+      <a id="km-maps-link" href="#" target="_blank" rel="noopener"
+        style="display:flex;align-items:center;justify-content:center;gap:8px;
+               padding:13px 16px;border-radius:var(--r-md);margin-bottom:14px;
+               background:linear-gradient(135deg,#4285f4,#1a73e8);color:white;
+               font-size:0.9rem;font-weight:700;text-decoration:none;
+               box-shadow:0 4px 14px rgba(66,133,244,0.35);">
+        <i class="fab fa-google" style="font-size:1rem;"></i>
+        Abrir no Google Maps
+        <i class="fas fa-external-link-alt" style="font-size:0.7rem;opacity:0.8;"></i>
+      </a>
+
+      <!-- Summary card (mostrado após concluir) -->
+      <div class="km-summary-card" id="km-summary-card">
+        <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;opacity:0.5;margin-bottom:8px;">Quilometragem do Evento</div>
+        <div class="km-summary-km" id="km-summary-km-val">0 km</div>
+        <div class="km-summary-sub" id="km-summary-time-val">Duração: —</div>
+        <div style="display:flex;justify-content:center;gap:20px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.1);">
+          <div style="text-align:center;">
+            <div style="font-size:1.1rem;font-weight:800;color:#fbbf24;" id="km-summary-ida-val">— km</div>
+            <div style="font-size:0.62rem;opacity:0.5;margin-top:2px;">Ida</div>
           </div>
-          <div>
-            <div style="font-size:1rem;font-weight:800;color:var(--text);">IR ao Evento</div>
-            <div style="font-size:0.75rem;color:var(--text3);" id="km-tracker-order-num"></div>
+          <div style="text-align:center;">
+            <div style="font-size:1.1rem;font-weight:800;color:#34d399;" id="km-summary-volta-val">— km</div>
+            <div style="font-size:0.62rem;opacity:0.5;margin-top:2px;">Volta</div>
           </div>
         </div>
       </div>
-      <div class="km-tracker-body">
-        <!-- Destino -->
-        <div class="km-dest-chip">
-          <i class="fas fa-map-marker-alt"></i>
-          <span id="km-tracker-dest"></span>
-        </div>
 
-        <!-- Summary card (shown after concluir) -->
-        <div class="km-summary-card" id="km-summary-card">
-          <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;opacity:0.5;margin-bottom:8px;">Quilometragem do Evento</div>
-          <div class="km-summary-km" id="km-summary-km-val">0 km</div>
-          <div class="km-summary-sub" id="km-summary-time-val">Duração: —</div>
-          <div style="display:flex;justify-content:center;gap:20px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.1);">
-            <div style="text-align:center;">
-              <div style="font-size:1.1rem;font-weight:800;color:#fbbf24;" id="km-summary-ida-val">— km</div>
-              <div style="font-size:0.62rem;opacity:0.5;margin-top:2px;">Ida</div>
-            </div>
-            <div style="text-align:center;">
-              <div style="font-size:1.1rem;font-weight:800;color:#34d399;" id="km-summary-volta-val">— km</div>
-              <div style="font-size:0.62rem;opacity:0.5;margin-top:2px;">Volta</div>
-            </div>
-          </div>
+      <!-- Stats grid -->
+      <div id="km-stats-grid" class="km-stat-grid">
+        <div class="km-stat-card highlight">
+          <div class="km-stat-val" id="km-dist-val">0</div>
+          <div style="font-size:0.55rem;font-weight:700;color:var(--text3);margin-bottom:2px;">KM</div>
+          <div class="km-stat-lbl">Percorridos</div>
         </div>
+        <div class="km-stat-card">
+          <div class="km-stat-val" style="color:var(--warning);" id="km-time-val">00:00</div>
+          <div class="km-stat-lbl">Tempo</div>
+        </div>
+        <div class="km-stat-card">
+          <div class="km-stat-val" style="font-size:1rem;color:var(--success);" id="km-phase-val">—</div>
+          <div class="km-stat-lbl">Fase</div>
+        </div>
+        <div class="km-stat-card">
+          <div class="km-stat-val" style="font-size:1rem;color:var(--text2);" id="km-speed-val">— km/h</div>
+          <div class="km-stat-lbl">Velocidade</div>
+        </div>
+      </div>
 
-        <!-- Stats grid (shown during tracking) -->
-        <div id="km-stats-grid" class="km-stat-grid">
-          <div class="km-stat-card highlight">
-            <div class="km-stat-val" id="km-dist-val">0</div>
-            <div style="font-size:0.55rem;font-weight:700;color:var(--text3);margin-bottom:2px;">KM</div>
-            <div class="km-stat-lbl">Percorridos</div>
-          </div>
-          <div class="km-stat-card">
-            <div class="km-stat-val" style="color:var(--warning);" id="km-time-val">00:00</div>
-            <div class="km-stat-lbl">Tempo</div>
-          </div>
-          <div class="km-stat-card">
-            <div class="km-stat-val" style="font-size:1rem;color:var(--success);" id="km-phase-val">—</div>
-            <div class="km-stat-lbl">Fase</div>
-          </div>
-          <div class="km-stat-card">
-            <div class="km-stat-val" style="font-size:1rem;color:var(--text2);" id="km-speed-val">— km/h</div>
-            <div class="km-stat-lbl">Velocidade</div>
-          </div>
-        </div>
+      <!-- Status row -->
+      <div class="km-status-row idle" id="km-status-row">
+        <i class="fas fa-circle" style="font-size:0.5rem;"></i>
+        <span id="km-status-text">Pronto para iniciar o trajeto</span>
+      </div>
 
-        <!-- Status row -->
-        <div class="km-status-row idle" id="km-status-row">
-          <i class="fas fa-circle" style="font-size:0.5rem;"></i>
-          <span id="km-status-text">Pronto para iniciar o trajeto</span>
-        </div>
-
-        <!-- Buttons -->
-        <div class="km-btn-row">
-          <button class="km-ir-btn" id="km-open-maps-btn">
-            <i class="fas fa-diamond-turn-right"></i>
-            Abrir no Google Maps
-          </button>
-          <button class="km-concluir-btn" id="km-concluir-btn">
-            <i class="fas fa-flag-checkered"></i>
-            Concluir Trajeto e Salvar
-          </button>
-          <button type="button" id="km-tracker-close-btn" class="btn" style="width:100%;background:var(--surface2);color:var(--text2);border:1.5px solid var(--border);margin-top:4px;">
-            <i class="fas fa-times"></i> Fechar
-          </button>
-        </div>
+      <!-- Botões de ação -->
+      <div class="km-btn-row">
+        <button class="km-ir-btn" id="km-open-maps-btn">
+          <i class="fas fa-satellite-dish"></i>
+          Iniciar Rastreamento GPS
+        </button>
+        <button class="km-concluir-btn" id="km-concluir-btn">
+          <i class="fas fa-flag-checkered"></i>
+          Concluir Trajeto e Salvar
+        </button>
       </div>
     </div>
   </div>
@@ -5307,84 +5378,90 @@ type="text" id="contract-event-location-input" required>
   </div>
 
   <div id="event-order-modal" class="modal">
-    <div 
-class="modal-content">
+    <div class="modal-content"><div class="modal-handle"></div>
       <span class="close-button" data-action="close-modal">&times;</span>
-      <h2 id="event-order-modal-title">Gerar Pedido de Evento</h2>
+      <h2 id="event-order-modal-title" style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+        <span style="width:36px;height:36px;border-radius:var(--r-sm);background:linear-gradient(135deg,var(--ev-orange),#f97316);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-clipboard-check" style="color:white;font-size:0.85rem;"></i></span>
+        Gerar Pedido de Evento
+      </h2>
       <form id="event-order-form">
         <input type="hidden" id="edit-order-id">
-        <div class="flex-group" style="position:relative;">
-          <div class="form-group" style="flex:1;">
-            <label for="order-client-search">Cliente</label>
-            <input type="text" id="order-client-search" placeholder="Digite o nome do cliente..." autocomplete="off" style="width:100%;">
-            <input type="hidden" id="order-client-select">
-            <div id="order-client-dropdown" style="display:none;position:absolute;z-index:1000;background:var(--surface);border:1.5px solid var(--primary);border-radius:var(--r-sm);max-height:200px;overflow-y:auto;left:0;right:60px;box-shadow:var(--card-shadow);"></div>
+
+        <!-- Cliente -->
+        <div style="background:var(--surface2);border-radius:var(--r-md);padding:14px;border:1px solid var(--border-soft);margin-bottom:16px;">
+          <div style="font-size:0.7rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;"><i class="fas fa-user" style="color:var(--primary);margin-right:5px;"></i>Cliente</div>
+          <div class="flex-group" style="position:relative;margin-bottom:0;">
+            <div class="form-group" style="flex:1;margin-bottom:0;">
+              <input type="text" id="order-client-search" placeholder="Digite o nome do cliente..." autocomplete="off" style="width:100%;">
+              <input type="hidden" id="order-client-select">
+              <div id="order-client-dropdown" style="display:none;position:absolute;z-index:1000;background:var(--surface);border:1.5px solid var(--primary);border-radius:var(--r-sm);max-height:200px;overflow-y:auto;left:0;right:60px;box-shadow:var(--card-shadow);"></div>
+            </div>
+            <button type="button" class="btn" id="add-client-from-order-btn" style="width:auto;background:var(--surface3);color:var(--text2);border:1.5px solid var(--border);" title="Novo cliente"><i class="fas fa-user-plus"></i></button>
           </div>
-          <button type="button" class="btn" id="add-client-from-order-btn" style="width: auto;"><i class="fas fa-user-plus"></i></button>
         </div>
-        
-        <div class="form-group">
-          <label for="order-event-type-input">Tipo de Evento</label>
-          <select id="order-event-type-input" required>
-            <option value="Casamento">Casamento</option>
-            <option value="Aniversário">Aniversário</option>
-            <option value="Corporativo">Corporativo</option>
-            <option value="Formatura">Formatura</option>
-      
-            <option value="Outro">Outro</option>
-          </select>
+
+        <!-- Evento -->
+        <div style="background:var(--surface2);border-radius:var(--r-md);padding:14px;border:1px solid var(--border-soft);margin-bottom:16px;">
+          <div style="font-size:0.7rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;"><i class="fas fa-calendar-alt" style="color:var(--ev-orange);margin-right:5px;"></i>Dados do Evento</div>
+          <div class="form-group">
+            <label for="order-event-type-input">Tipo de Evento</label>
+            <select id="order-event-type-input" required>
+              <option value="Casamento">Casamento</option>
+              <option value="Aniversário">Aniversário</option>
+              <option value="Corporativo">Corporativo</option>
+              <option value="Formatura">Formatura</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="order-event-date-input">Data</label>
+              <input type="date" id="order-event-date-input" required>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="order-event-guests-input">Convidados</label>
+              <input type="number" id="order-event-guests-input" min="1" value="100">
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:10px;">
+            <label for="order-event-time-input">Horário</label>
+            <input type="text" id="order-event-time-input" value="19:00 às 02:00" required>
+          </div>
+          <div class="form-group">
+            <label for="order-event-location-input">Local</label>
+            <input type="text" id="order-event-location-input" required>
+          </div>
         </div>
-        
-        <div class="form-group">
-          <label for="order-event-date-input">Data do Evento</label>
-          <input type="date" id="order-event-date-input" required>
-        </div>
-        
-        <div class="form-group">
-       
-           <label for="order-event-time-input">Horário</label>
-          <input type="text" id="order-event-time-input" value="19:00 às 02:00" required>
-        </div>
-        
-        <div class="form-group">
-          <label for="order-event-location-input">Local</label>
-          <input type="text" id="order-event-location-input" required>
-        </div>
-        
-        <div class="form-group">
-      
-            <label for="order-event-guests-input">Nº de Convidados</label>
-          <input type="number" id="order-event-guests-input" min="1" value="100">
-        </div>
-        
-        <div class="form-group">
-          <label>Serviços</label>
-          <div style="margin-bottom:8px;">
-            <label style="font-size:0.85rem; color:var(--gray);">Carregar Pacote:</label>
-            <select id="order-load-package" style="padding:6px 10px; border:1px solid var(--gray-light); border-radius:6px; font-family:inherit; width:100%;">
+
+        <!-- Serviços -->
+        <div style="background:var(--surface2);border-radius:var(--r-md);padding:14px;border:1px solid var(--border-soft);margin-bottom:16px;">
+          <div style="font-size:0.7rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;"><i class="fas fa-concierge-bell" style="color:var(--success);margin-right:5px;"></i>Serviços</div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <label style="font-size:0.78rem;color:var(--text2);">Carregar Pacote (opcional)</label>
+            <select id="order-load-package" style="padding:10px 12px;border:1.5px solid var(--input-border);border-radius:var(--r-sm);background:var(--input-bg);color:var(--text);font-family:var(--font-body);width:100%;font-size:0.9rem;-webkit-appearance:none;appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;">
               <option value="">-- Selecione um pacote (opcional) --</option>
             </select>
           </div>
-          <div id="order-services-container">
-            </div>
-          <button type="button" class="btn btn-xs" id="add-service-btn" style="margin-top: 5px;"><i class="fas fa-plus"></i> Adicionar Serviço</button>
- 
+          <div id="order-services-container"></div>
+          <button type="button" class="btn btn-xs" id="add-service-btn" style="margin-top:8px;background:var(--primary);color:white;"><i class="fas fa-plus"></i> Adicionar Serviço</button>
         </div>
-        
-        <div class="form-group">
-          <label for="order-payment-terms-input">Condições de Pagamento</label>
-          <textarea id="order-payment-terms-input" rows="3">50% no ato e 50% até 7 dias antes do evento.</textarea>
+
+        <!-- Pagamento & Obs -->
+        <div style="background:var(--surface2);border-radius:var(--r-md);padding:14px;border:1px solid var(--border-soft);margin-bottom:16px;">
+          <div style="font-size:0.7rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;"><i class="fas fa-money-bill-wave" style="color:var(--success);margin-right:5px;"></i>Pagamento & Observações</div>
+          <div class="form-group">
+            <label for="order-payment-terms-input">Condições de Pagamento</label>
+            <textarea id="order-payment-terms-input" rows="2">50% no ato e 50% até 7 dias antes do evento.</textarea>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="order-notes-input">Observações</label>
+            <textarea id="order-notes-input" rows="2"></textarea>
+          </div>
         </div>
-        
-        <div class="form-group">
-          <label for="order-notes-input">Observações</label>
-     
-           <textarea id="order-notes-input" rows="3"></textarea>
-        </div>
-        
-        <div class="btn-container">
-          <button type="button" class="btn btn-danger" data-action="close-modal">Cancelar</button>
-          <button type="submit" class="btn">Salvar Pedido</button>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;">
+          <button type="button" class="btn" data-action="close-modal" style="background:var(--surface3);color:var(--text2);border:1.5px solid var(--border);"><i class="fas fa-times"></i> Cancelar</button>
+          <button type="submit" class="btn" style="background:linear-gradient(135deg,var(--ev-orange),#f97316);"><i class="fas fa-save"></i> Salvar Pedido</button>
         </div>
       </form>
     </div>
@@ -5393,62 +5470,83 @@ class="modal-content">
   <div id="event-quote-modal" class="modal">
     <div class="modal-content"><div class="modal-handle"></div>
       <span class="close-button" data-action="close-modal">&times;</span>
-      <h2 id="event-quote-modal-title">Novo Orçamento</h2>
+      <h2 id="event-quote-modal-title" style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+        <span style="width:36px;height:36px;border-radius:var(--r-sm);background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-file-alt" style="color:white;font-size:0.85rem;"></i></span>
+        Novo Orçamento
+      </h2>
       <form id="event-quote-form">
         <input type="hidden" id="edit-quote-id">
-        <div class="flex-group">
+
+        <!-- Cliente -->
+        <div style="background:var(--surface2);border-radius:var(--r-md);padding:14px;border:1px solid var(--border-soft);margin-bottom:16px;">
+          <div style="font-size:0.7rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;"><i class="fas fa-user" style="color:var(--primary);margin-right:5px;"></i>Cliente</div>
+          <div class="flex-group" style="margin-bottom:0;">
+            <div class="form-group" style="flex:1;margin-bottom:0;">
+              <select id="quote-client-select" required>
+                <option value="">Selecione um cliente</option>
+              </select>
+            </div>
+            <button type="button" class="btn" id="add-client-from-quote-btn" style="width:auto;background:var(--surface3);color:var(--text2);border:1.5px solid var(--border);" title="Novo cliente"><i class="fas fa-user-plus"></i></button>
+          </div>
+        </div>
+
+        <!-- Evento -->
+        <div style="background:var(--surface2);border-radius:var(--r-md);padding:14px;border:1px solid var(--border-soft);margin-bottom:16px;">
+          <div style="font-size:0.7rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;"><i class="fas fa-calendar-alt" style="color:var(--primary);margin-right:5px;"></i>Dados do Evento</div>
           <div class="form-group">
-            <label for="quote-client-select">Cliente</label>
-            <select id="quote-client-select" required>
-              <option value="">Selecione um cliente</option>
+            <label for="quote-event-type-input">Tipo de Evento</label>
+            <select id="quote-event-type-input" required>
+              <option value="Casamento">Casamento</option>
+              <option value="Aniversário">Aniversário</option>
+              <option value="Corporativo">Corporativo</option>
+              <option value="Formatura">Formatura</option>
+              <option value="Outro">Outro</option>
             </select>
           </div>
-          <button type="button" class="btn" id="add-client-from-quote-btn" style="width: auto;"><i class="fas fa-user-plus"></i></button>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="quote-event-date-input">Data</label>
+              <input type="date" id="quote-event-date-input" required>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="quote-validity-input">Validade (dias)</label>
+              <input type="number" id="quote-validity-input" min="1" value="30" required>
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:10px;">
+            <label for="quote-event-time-input">Horário</label>
+            <input type="text" id="quote-event-time-input" value="19:00 às 02:00" required>
+          </div>
+          <div class="form-group">
+            <label for="quote-event-location-input">Local</label>
+            <input type="text" id="quote-event-location-input" required>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="quote-event-type-input">Tipo de Evento</label>
-          <select id="quote-event-type-input" required>
-            <option value="Casamento">Casamento</option>
-            <option value="Aniversário">Aniversário</option>
-            <option value="Corporativo">Corporativo</option>
-            <option value="Formatura">Formatura</option>
-            <option value="Outro">Outro</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="quote-event-date-input">Data do Evento</label>
-          <input type="date" id="quote-event-date-input" required>
-        </div>
-        <div class="form-group">
-          <label for="quote-event-time-input">Horário</label>
-          <input type="text" id="quote-event-time-input" value="19:00 às 02:00" required>
-        </div>
-        <div class="form-group">
-          <label for="quote-event-location-input">Local</label>
-          <input type="text" id="quote-event-location-input" required>
-        </div>
-        <div class="form-group">
-          <label>Serviços</label>
-          <div style="margin-bottom:8px;">
-            <label style="font-size:0.85rem; color:var(--gray);">Carregar Pacote:</label>
-            <select id="quote-load-package" style="padding:6px 10px; border:1px solid var(--gray-light); border-radius:6px; font-family:inherit; width:100%;">
+
+        <!-- Serviços -->
+        <div style="background:var(--surface2);border-radius:var(--r-md);padding:14px;border:1px solid var(--border-soft);margin-bottom:16px;">
+          <div style="font-size:0.7rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;"><i class="fas fa-concierge-bell" style="color:var(--success);margin-right:5px;"></i>Serviços Ofertados</div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <label style="font-size:0.78rem;color:var(--text2);">Carregar Pacote (opcional)</label>
+            <select id="quote-load-package" style="padding:10px 12px;border:1.5px solid var(--input-border);border-radius:var(--r-sm);background:var(--input-bg);color:var(--text);font-family:var(--font-body);width:100%;font-size:0.9rem;-webkit-appearance:none;appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;">
               <option value="">-- Selecione um pacote (opcional) --</option>
             </select>
           </div>
           <div id="quote-services-container"></div>
-          <button type="button" class="btn btn-xs" id="add-service-quote-btn" style="margin-top: 5px;"><i class="fas fa-plus"></i> Adicionar Serviço</button>
+          <button type="button" class="btn btn-xs" id="add-service-quote-btn" style="margin-top:8px;background:var(--primary);color:white;"><i class="fas fa-plus"></i> Adicionar Serviço</button>
         </div>
-        <div class="form-group">
-            <label for="quote-notes-input">Observações</label>
-            <textarea id="quote-notes-input" rows="3"></textarea>
+
+        <!-- Observações -->
+        <div style="background:var(--surface2);border-radius:var(--r-md);padding:14px;border:1px solid var(--border-soft);margin-bottom:16px;">
+          <div style="font-size:0.7rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;"><i class="fas fa-sticky-note" style="color:var(--warning);margin-right:5px;"></i>Observações</div>
+          <div class="form-group" style="margin-bottom:0;">
+            <textarea id="quote-notes-input" rows="3" placeholder="Condições especiais, detalhes adicionais..."></textarea>
+          </div>
         </div>
-        <div class="form-group">
-            <label for="quote-validity-input">Validade (dias)</label>
-            <input type="number" id="quote-validity-input" min="1" value="30" required>
-        </div>
-        <div class="btn-container">
-          <button type="button" class="btn btn-danger" data-action="close-modal">Cancelar</button>
-          <button type="submit" class="btn">Salvar Orçamento</button>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;">
+          <button type="button" class="btn" data-action="close-modal" style="background:var(--surface3);color:var(--text2);border:1.5px solid var(--border);"><i class="fas fa-times"></i> Cancelar</button>
+          <button type="submit" class="btn" style="background:linear-gradient(135deg,var(--primary),var(--accent));"><i class="fas fa-save"></i> Salvar Orçamento</button>
         </div>
       </form>
     </div>
@@ -5466,18 +5564,25 @@ class="modal-content">
   <div id="view-order-modal" class="modal">
     <div class="modal-content"><div class="modal-handle"></div>
       <span class="close-button" data-action="close-modal">&times;</span>
-      <h2 id="view-order-modal-title">Detalhes do Pedido</h2>
+      <h2 id="view-order-modal-title" style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+        <span style="width:36px;height:36px;border-radius:var(--r-sm);background:linear-gradient(135deg,var(--ev-orange),#f97316);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-clipboard-check" style="color:white;font-size:0.9rem;"></i></span>
+        Detalhes do Pedido
+      </h2>
       <div id="view-order-modal-body"></div>
-      <div id="view-order-modal-actions" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;">
-          <button type="button" class="btn" id="view-order-modal-whatsapp-btn" style="background:#25d366;color:#fff;display:none;grid-column:1/-1;"><i class="fab fa-whatsapp"></i> WhatsApp</button>
-          <button type="button" class="btn" id="view-order-modal-ir-btn" style="background:linear-gradient(135deg,#ea4335,#c62828);color:#fff;grid-column:1/-1;display:none;"><i class="fas fa-route"></i> IR ao Evento</button>
-          <button type="button" class="btn" id="view-order-modal-status-btn" style="background:linear-gradient(135deg,var(--accent),#7c3aed);color:#fff;grid-column:1/-1;"><i class="fas fa-exchange-alt"></i> Alterar Status</button>
-          <button type="button" class="btn" id="view-order-modal-finalize-btn" style="background:linear-gradient(135deg,var(--success),#059669);color:#fff;grid-column:1/-1;display:none;"><i class="fas fa-flag-checkered"></i> Finalizar Pedido</button>
-          <button type="button" class="btn" id="view-order-modal-download-btn" style="background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;"><i class="fas fa-file-pdf"></i> Baixar PDF</button>
-          <button type="button" class="btn" id="view-order-modal-edit-btn" style="background:var(--surface2);color:var(--text);border:1.5px solid var(--border);"><i class="fas fa-edit"></i> Editar</button>
-          <button type="button" class="btn" id="view-order-modal-receipt-btn" style="background:var(--success-bg);color:var(--success);border:1.5px solid var(--success);"><i class="fas fa-receipt"></i> Criar Recibo</button>
-          <button type="button" class="btn" id="view-order-modal-checklist-btn" style="background:var(--warning-bg);color:var(--warning);border:1.5px solid var(--warning);"><i class="fas fa-tasks"></i> Checklist</button>
-          <button type="button" class="btn btn-danger" data-action="close-modal" style="grid-column:1/-1;"><i class="fas fa-times"></i> Fechar</button>
+      <div id="view-order-modal-actions" style="display:flex;flex-direction:column;gap:8px;margin-top:16px;">
+          <button type="button" class="btn" id="view-order-modal-whatsapp-btn" style="background:#25d366;color:#fff;display:none;"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+          <button type="button" class="btn" id="view-order-modal-ir-btn" style="background:linear-gradient(135deg,#ea4335,#c62828);color:#fff;display:none;"><i class="fas fa-route"></i> IR ao Evento</button>
+          <button type="button" class="btn" id="view-order-modal-status-btn" style="background:linear-gradient(135deg,var(--accent),#7c3aed);color:#fff;"><i class="fas fa-exchange-alt"></i> Alterar Status</button>
+          <button type="button" class="btn" id="view-order-modal-finalize-btn" style="background:linear-gradient(135deg,var(--success),#059669);color:#fff;display:none;"><i class="fas fa-flag-checkered"></i> Finalizar Pedido</button>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <button type="button" class="btn" id="view-order-modal-download-btn" style="background:var(--surface2);color:var(--text);border:1.5px solid var(--border);"><i class="fas fa-file-pdf"></i> Baixar PDF</button>
+            <button type="button" class="btn" id="view-order-modal-edit-btn" style="background:var(--surface2);color:var(--text);border:1.5px solid var(--border);"><i class="fas fa-edit"></i> Editar</button>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <button type="button" class="btn" id="view-order-modal-receipt-btn" style="background:var(--success-bg);color:var(--success);border:1.5px solid var(--success);"><i class="fas fa-receipt"></i> Criar Recibo</button>
+            <button type="button" class="btn" id="view-order-modal-checklist-btn" style="background:var(--warning-bg);color:var(--warning);border:1.5px solid var(--warning);"><i class="fas fa-tasks"></i> Checklist</button>
+          </div>
+          <button type="button" class="btn" data-action="close-modal" style="background:var(--surface3);color:var(--text2);"><i class="fas fa-times"></i> Fechar</button>
       </div>
     </div>
   </div>
@@ -5502,17 +5607,23 @@ class="modal-content">
   <div id="view-quote-modal" class="modal">
     <div class="modal-content"><div class="modal-handle"></div>
       <span class="close-button" data-action="close-modal">&times;</span>
-      <h2 id="view-quote-modal-title">Detalhes do Orçamento</h2>
+      <h2 id="view-quote-modal-title" style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+        <span style="width:36px;height:36px;border-radius:var(--r-sm);background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-file-alt" style="color:white;font-size:0.9rem;"></i></span>
+        Detalhes do Orçamento
+      </h2>
       <div id="view-quote-modal-body"></div>
-      <div class="btn-container" style="justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-        <button type="button" class="btn" id="view-quote-modal-ir-btn" style="background:linear-gradient(135deg,#ea4335,#c62828);color:#fff;display:none;width:100%;"><i class="fas fa-route"></i> IR ao Evento</button>
-        <button type="button" class="btn" id="view-quote-modal-status-btn" style="background:linear-gradient(135deg,var(--accent),#7c3aed);color:#fff;width:100%;"><i class="fas fa-exchange-alt"></i> Alterar Status</button>
-        <div style="display:flex; gap: 10px; width:100%;">
-          <button type="button" class="btn" id="view-quote-modal-download-btn"><i class="fas fa-download"></i> Baixar PDF</button>
-          <button type="button" class="btn btn-success" id="view-quote-modal-approve-btn"><i class="fas fa-check"></i> Aprovar e Converter em Pedido</button>
-          <button type="button" class="btn btn-danger" id="view-quote-modal-reject-btn"><i class="fas fa-times"></i> Recusar Orçamento</button>
+      <div id="view-quote-modal-actions" style="display:flex;flex-direction:column;gap:8px;margin-top:16px;">
+        <button type="button" class="btn" id="view-quote-modal-ir-btn" style="background:linear-gradient(135deg,#ea4335,#c62828);color:#fff;display:none;"><i class="fas fa-route"></i> IR ao Evento</button>
+        <button type="button" class="btn" id="view-quote-modal-status-btn" style="background:linear-gradient(135deg,var(--accent),#7c3aed);color:#fff;"><i class="fas fa-exchange-alt"></i> Alterar Status</button>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <button type="button" class="btn" id="view-quote-modal-approve-btn" style="background:linear-gradient(135deg,var(--success),#059669);color:#fff;"><i class="fas fa-check"></i> Aprovar → Pedido</button>
+          <button type="button" class="btn btn-danger" id="view-quote-modal-reject-btn"><i class="fas fa-times"></i> Recusar</button>
         </div>
-        <button type="button" class="btn btn-danger" data-action="close-modal" style="width:100%;">Fechar</button>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <button type="button" class="btn" id="view-quote-modal-download-btn" style="background:var(--surface2);color:var(--text);border:1.5px solid var(--border);"><i class="fas fa-file-pdf"></i> Baixar PDF</button>
+          <button type="button" class="btn" id="view-quote-modal-edit-btn" style="background:var(--surface2);color:var(--text);border:1.5px solid var(--border);"><i class="fas fa-edit"></i> Editar</button>
+        </div>
+        <button type="button" class="btn" data-action="close-modal" style="background:var(--surface3);color:var(--text2);"><i class="fas fa-times"></i> Fechar</button>
       </div>
     </div>
   </div>
@@ -6952,14 +7063,16 @@ if (typeof activeModalCallback === 'function') {
         totalValue: totalValue,
         notes: document.getElementById('quote-notes-input').value,
         validity: parseInt(document.getElementById('quote-validity-input').value) || 30,
-        status: 'emitido',
     };
     if (id) {
         const index = eventQuotes.findIndex(o => o.id === parseFloat(id));
         if (index > -1) {
+            // Preserve existing status when editing — do NOT reset to 'emitido'
             eventQuotes[index] = { ...eventQuotes[index], ...quoteData };
         }
+        showToast('Orçamento atualizado com sucesso!', 'success');
     } else {
+        quoteData.status = 'emitido';
         const newQuote = {
             ...quoteData,
             id: Date.now(),
@@ -7021,13 +7134,10 @@ if (typeof activeModalCallback === 'function') {
     const container = type === 'order' ? document.getElementById('order-services-container') : document.getElementById('quote-services-container');
     const newItem = document.createElement('div');
     newItem.className = 'order-service-item';
-    newItem.style.display = 'flex';
-    newItem.style.gap = '10px';
-    newItem.style.marginBottom = '10px';
     newItem.innerHTML = `
-      <input type="text" placeholder="Descrição" class="order-service-desc" style="flex: 2;" value="${desc}">
-      <input type="number" placeholder="Valor" step="0.01" min="0" class="order-service-value" style="flex: 1;" value="${value}">
-      <button type="button" class="btn btn-xs btn-danger" data-action="remove-service"><i class="fas fa-times"></i></button>
+      <input type="text" placeholder="Descrição do serviço" class="order-service-desc" value="${desc}">
+      <input type="number" placeholder="R$ 0,00" step="0.01" min="0" class="order-service-value" value="${value}">
+      <button type="button" class="btn btn-xs btn-danger" data-action="remove-service" style="flex-shrink:0;padding:6px 10px;"><i class="fas fa-trash"></i></button>
     `;
     container.appendChild(newItem);
   }
@@ -7480,7 +7590,11 @@ function openCommitmentModal(mode, id = null, date = null) {
   if (mode === 'edit' && id) {
     const quote = eventQuotes.find(q => q.id === id);
     if (quote) {
-      modal.querySelector('#event-quote-modal-title').textContent = 'Editar Orçamento';
+      const isApproved = quote.status === 'aprovado';
+      modal.querySelector('#event-quote-modal-title').innerHTML = `
+        <span style="width:36px;height:36px;border-radius:var(--r-sm);background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-edit" style="color:white;font-size:0.85rem;"></i></span>
+        Editar Orçamento${isApproved ? ' <span style="font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(16,185,129,0.12);color:var(--success);vertical-align:middle;margin-left:6px;">Aprovado</span>' : ''}
+      `;
       document.getElementById('edit-quote-id').value = quote.id;
       clientSelect.value = quote.clientId;
       modal.querySelector('#quote-event-type-input').value = quote.eventType;
@@ -7527,87 +7641,103 @@ function openCommitmentModal(mode, id = null, date = null) {
     
     const modal = document.getElementById('view-order-modal');
     const body = document.getElementById('view-order-modal-body');
-    let servicesHtml = order.services.map(s => `<p>${s.description}: <strong>${formatCurrency(s.value)}</strong></p>`).join('');
+    const statusMap = {
+      pendente:   { label: 'Pendente',     color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',   icon: 'fa-clock' },
+      confirmado: { label: 'Confirmado',   color: '#3b82f6', bg: 'rgba(59,130,246,0.12)',   icon: 'fa-thumbs-up' },
+      realizado:  { label: 'Realizado',    color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)',   icon: 'fa-music' },
+      finalizado: { label: 'Finalizado ✓', color: '#10b981', bg: 'rgba(16,185,129,0.12)',  icon: 'fa-flag-checkered' },
+      cancelado:  { label: 'Cancelado',    color: '#ef4444', bg: 'rgba(239,68,68,0.12)',    icon: 'fa-times-circle' },
+    };
+    const st = statusMap[order.status||'pendente'] || statusMap.pendente;
+    const totalPaid = receipts.filter(r => r.orderId === orderId && r.status === 'pago').reduce((s, r) => s + r.amount, 0);
+    const saldo = order.totalValue - totalPaid;
+
+    let servicesHtml = (order.services||[]).map((s, i) => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border-soft);">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="width:22px;height:22px;background:var(--primary);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;flex-shrink:0;">${i+1}</span>
+          <span style="font-size:0.88rem;color:var(--text);">${s.description}</span>
+        </div>
+        <span style="font-size:0.88rem;font-weight:700;color:var(--primary);">${formatCurrency(s.value)}</span>
+      </div>`).join('');
 
     body.innerHTML = `
-      <div class="detail-group">
-        <h4><i class="fas fa-file-invoice"></i> Detalhes do Pedido</h4>
-        <p><strong>Número:</strong> ${order.orderNumber}</p>
-        <p><strong>Valor Total:</strong> ${formatCurrency(order.totalValue)}</p>
-        <p><strong>Status:</strong> <span style="display:inline-block;font-size:0.75rem;font-weight:700;padding:2px 10px;border-radius:999px;background:${{'pendente':'rgba(245,158,11,0.12)','confirmado':'rgba(59,130,246,0.10)','realizado':'rgba(139,92,246,0.10)','cancelado':'rgba(239,68,68,0.10)','finalizado':'rgba(16,185,129,0.10)'}[order.status||'pendente']||'rgba(245,158,11,0.12)'};color:${{'pendente':'var(--warning)','confirmado':'var(--primary)','realizado':'var(--accent)','cancelado':'var(--danger)','finalizado':'var(--success)'}[order.status||'pendente']||'var(--warning)'};">${{'pendente':'Pendente','confirmado':'Confirmado','realizado':'Realizado','cancelado':'Cancelado','finalizado':'Finalizado ✓'}[order.status||'pendente']||'Pendente'}</span></p>
-        ${order.kmRecord ? `<p><strong>Quilometragem:</strong> <span style="display:inline-flex;align-items:center;gap:6px;font-size:0.78rem;font-weight:700;padding:4px 10px;border-radius:999px;background:rgba(59,130,246,0.1);color:var(--primary);"><i class="fas fa-route"></i> ${order.kmRecord.total.toFixed(1)} km percorridos</span></p>` : ''}
+      <!-- Status badge -->
+      <div style="display:flex;align-items:center;justify-content:space-between;background:${st.bg};border-radius:var(--r-md);padding:10px 14px;margin-bottom:14px;border:1.5px solid ${st.color}22;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <i class="fas ${st.icon}" style="color:${st.color};font-size:1rem;"></i>
+          <span style="font-size:0.9rem;font-weight:700;color:${st.color};">${st.label}</span>
+        </div>
+        <div style="font-size:0.75rem;font-weight:700;color:var(--text2);">#${order.orderNumber}</div>
       </div>
-      <div class="detail-group">
-        <h4><i class="fas fa-user"></i> Dados do Cliente</h4>
-        <p><strong>Nome:</strong> ${client.name}</p>
-        <p><strong>Documento:</strong> ${client.document || 'N/A'}</p>
-        <p><strong>Contato:</strong> ${client.phone || 'N/A'} | ${client.email || 'N/A'}</p>
-        ${client.phone ? `<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
-          <a href="tel:${client.phone}" class="btn btn-xs" style="background:var(--success-bg);color:var(--success);border:1px solid var(--success);text-decoration:none;font-size:0.75rem;padding:6px 12px;border-radius:var(--r-full);" onclick="event.stopPropagation()"><i class="fas fa-phone"></i> Ligar</a>
-          ${client.email ? `<a href="mailto:${client.email}" class="btn btn-xs" style="background:var(--info-bg);color:var(--info);border:1px solid var(--info);text-decoration:none;font-size:0.75rem;padding:6px 12px;border-radius:var(--r-full);" onclick="event.stopPropagation()"><i class="fas fa-envelope"></i> E-mail</a>` : ''}
-        </div>` : ''}
-      </div>
-      <div class="detail-group">
-        <h4><i class="fas fa-calendar-check"></i> Detalhes do Evento</h4>
-        <p><strong>Tipo:</strong> ${order.eventType}</p>
-        <p><strong>Data:</strong> ${formatDate(order.eventDate)}</p>
-        <p><strong>Horário:</strong> ${order.eventTime}</p>
-        <p><strong>Local:</strong> ${order.eventLocation}</p>
-        <p><strong>Convidados:</strong> ${order.eventGuests}</p>
-        ${order.eventLocation ? `
-        <div style="margin-top:12px;border-radius:var(--r-md);overflow:hidden;border:1.5px solid var(--border);position:relative;">
-          <div style="background:var(--surface2);padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);">
-            <i class="fas fa-map-marker-alt" style="color:#ea4335;font-size:0.9rem;"></i>
-            <span style="font-size:0.8rem;font-weight:600;color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${order.eventLocation}</span>
-          </div>
-          <iframe
-            width="100%"
-            height="200"
-            style="border:0;display:block;"
-            loading="lazy"
-            allowfullscreen
-            referrerpolicy="no-referrer-when-downgrade"
-            src="https://www.google.com/maps?q=${encodeURIComponent(order.eventLocation)}&output=embed">
-          </iframe>
-        </div>` : ''}
-      </div>
-      <div class="detail-group">
-        <h4><i class="fas fa-concierge-bell"></i> Serviços Contratados</h4>
-        ${servicesHtml}
-      </div>
-      <div class="detail-group">
-        <h4><i class="fas fa-money-check-alt"></i> Condições de Pagamento</h4>
-        <p>${order.paymentTerms.replace(/\n/g, '<br>')}</p>
-      </div>
-      <div class="detail-group">
-        <h4><i class="fas fa-info-circle"></i> Observações</h4>
-        <p>${order.notes.replace(/\n/g, '<br>') || 'Nenhuma.'}</p>
-      </div>
-    `;
-    const relatedReceipts = receipts.filter(r => r.orderId === orderId && r.status === 'pago');
-    const totalPaid = relatedReceipts.reduce((sum, r) => sum + r.amount, 0);
-    const balanceDue = order.totalValue - totalPaid;
-    let financialDetailsHtml = `
-      <div class="detail-group" style="background-color: #f8f9fa; border-left: 4px solid var(--primary-light); padding: 15px; border-radius: 8px;">
-        <h4 style="color: var(--primary-light);"><i class="fas fa-dollar-sign"></i> Detalhes Financeiros (Uso Interno)</h4>
-    `;
-    if (relatedReceipts.length > 0) {
-        financialDetailsHtml += '<h5>Histórico de Pagamentos:</h5><ul>';
-        relatedReceipts.sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(r => {
-            financialDetailsHtml += `<li>${formatDate(r.date)}: ${formatCurrency(r.amount)} (Recibo #${r.id.toString().slice(-4)})</li>`;
-        });
-        financialDetailsHtml += '</ul>';
-    } else {
-        financialDetailsHtml += '<p>Nenhum pagamento registrado para este pedido.</p>';
-    }
 
-    financialDetailsHtml += `
-        <p style="margin-top: 10px;"><strong>Total Pago:</strong> ${formatCurrency(totalPaid)}</p>
-        <p><strong>Saldo Devedor:</strong> <strong style="color: var(--danger);">${formatCurrency(balanceDue)}</strong></p>
+      <!-- Financeiro resumo -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+        <div style="background:var(--surface2);border-radius:var(--r-md);padding:10px 12px;border:1px solid var(--border-soft);text-align:center;">
+          <div style="font-size:0.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Total</div>
+          <div style="font-size:1.1rem;font-weight:800;color:var(--primary);margin-top:2px;">${formatCurrency(order.totalValue)}</div>
+        </div>
+        <div style="background:${saldo>0?'rgba(239,68,68,0.06)':'rgba(16,185,129,0.06)'};border-radius:var(--r-md);padding:10px 12px;border:1px solid ${saldo>0?'rgba(239,68,68,0.15)':'rgba(16,185,129,0.15)'};text-align:center;">
+          <div style="font-size:0.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Saldo</div>
+          <div style="font-size:1.1rem;font-weight:800;color:${saldo>0?'var(--danger)':'var(--success)'};margin-top:2px;">${formatCurrency(saldo)}</div>
+        </div>
       </div>
+
+      <!-- Cliente -->
+      <div style="background:var(--surface2);border-radius:var(--r-md);padding:12px 14px;border:1px solid var(--border-soft);margin-bottom:10px;">
+        <div style="font-size:0.65rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;"><i class="fas fa-user" style="color:var(--primary);margin-right:4px;"></i>Cliente</div>
+        <div style="font-size:0.95rem;font-weight:700;color:var(--text);">${client.name}</div>
+        ${client.document && client.document !== 'N/A' ? `<div style="font-size:0.78rem;color:var(--text3);margin-top:2px;">${client.document}</div>` : ''}
+        ${client.phone && client.phone !== 'N/A' ? `<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+          <a href="tel:${client.phone}" class="btn btn-xs" style="background:var(--success-bg);color:var(--success);border:1px solid var(--success);text-decoration:none;" onclick="event.stopPropagation()"><i class="fas fa-phone"></i> ${client.phone}</a>
+          ${client.email && client.email !== 'N/A' ? `<a href="mailto:${client.email}" class="btn btn-xs" style="background:var(--info-bg);color:var(--info);border:1px solid var(--info);text-decoration:none;" onclick="event.stopPropagation()"><i class="fas fa-envelope"></i> E-mail</a>` : ''}
+        </div>` : ''}
+      </div>
+
+      <!-- Evento -->
+      <div style="background:var(--surface2);border-radius:var(--r-md);padding:12px 14px;border:1px solid var(--border-soft);margin-bottom:10px;">
+        <div style="font-size:0.65rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;"><i class="fas fa-calendar-alt" style="color:var(--ev-orange);margin-right:4px;"></i>Evento</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div><div style="font-size:0.62rem;color:var(--text3);">Tipo</div><div style="font-size:0.85rem;font-weight:600;color:var(--text);">${order.eventType}</div></div>
+          <div><div style="font-size:0.62rem;color:var(--text3);">Data</div><div style="font-size:0.85rem;font-weight:600;color:var(--text);">${formatDate(order.eventDate)}</div></div>
+          <div><div style="font-size:0.62rem;color:var(--text3);">Horário</div><div style="font-size:0.85rem;font-weight:600;color:var(--text);">${order.eventTime}</div></div>
+          <div><div style="font-size:0.62rem;color:var(--text3);">Convidados</div><div style="font-size:0.85rem;font-weight:600;color:var(--text);">${order.eventGuests}</div></div>
+        </div>
+        <div style="margin-top:8px;"><div style="font-size:0.62rem;color:var(--text3);">Local</div><div style="font-size:0.85rem;font-weight:600;color:var(--text);">${order.eventLocation}</div></div>
+        ${order.kmRecord ? `<div style="margin-top:8px;display:inline-flex;align-items:center;gap:5px;font-size:0.75rem;font-weight:700;padding:4px 10px;border-radius:999px;background:rgba(59,130,246,0.1);color:var(--primary);"><i class="fas fa-route"></i> ${order.kmRecord.total.toFixed(1)} km percorridos</div>` : ''}
+      </div>
+
+      <!-- Serviços -->
+      <div style="background:var(--surface2);border-radius:var(--r-md);padding:12px 14px;border:1px solid var(--border-soft);margin-bottom:10px;">
+        <div style="font-size:0.65rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;"><i class="fas fa-concierge-bell" style="color:var(--success);margin-right:4px;"></i>Serviços</div>
+        ${servicesHtml}
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;margin-top:4px;">
+          <span style="font-size:0.78rem;font-weight:700;color:var(--text3);">TOTAL</span>
+          <span style="font-size:1rem;font-weight:800;color:var(--primary);">${formatCurrency(order.totalValue)}</span>
+        </div>
+      </div>
+
+      ${order.paymentTerms ? `<div style="background:var(--surface2);border-radius:var(--r-md);padding:12px 14px;border:1px solid var(--border-soft);margin-bottom:10px;">
+        <div style="font-size:0.65rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;"><i class="fas fa-money-bill-wave" style="color:var(--success);margin-right:4px;"></i>Pagamento</div>
+        <div style="font-size:0.85rem;color:var(--text2);">${order.paymentTerms}</div>
+      </div>` : ''}
+
+      ${order.notes ? `<div style="background:var(--warning-bg);border-radius:var(--r-md);padding:12px 14px;border:1px solid rgba(245,158,11,0.2);margin-bottom:10px;">
+        <div style="font-size:0.65rem;font-weight:700;color:var(--warning);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;"><i class="fas fa-sticky-note" style="margin-right:4px;"></i>Observações</div>
+        <div style="font-size:0.85rem;color:var(--text2);">${order.notes.replace(/\n/g,'<br>')}</div>
+      </div>` : ''}
+
+      ${order.eventLocation ? `
+      <div style="border-radius:var(--r-md);overflow:hidden;border:1.5px solid var(--border);margin-bottom:10px;">
+        <div style="background:var(--surface2);padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);">
+          <i class="fas fa-map-marker-alt" style="color:#ea4335;font-size:0.9rem;"></i>
+          <span style="font-size:0.8rem;font-weight:600;color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${order.eventLocation}</span>
+        </div>
+        <iframe width="100%" height="180" style="border:0;display:block;" loading="lazy" allowfullscreen
+          src="https://www.google.com/maps?q=${encodeURIComponent(order.eventLocation)}&output=embed"></iframe>
+      </div>` : ''}
     `;
-    body.innerHTML += financialDetailsHtml;
-    
+
     // Set orderId on all action buttons
     ['view-order-modal-download-btn','view-order-modal-edit-btn','view-order-modal-receipt-btn','view-order-modal-checklist-btn','view-order-modal-finalize-btn'].forEach(btnId => {
       const btn = document.getElementById(btnId);
@@ -7620,17 +7750,13 @@ function openCommitmentModal(mode, id = null, date = null) {
       if (order.eventLocation) {
         irBtn.style.display = 'flex';
         irBtn.style.gridColumn = '1 / -1';
-        // Mostrar km registrado se houver
         const kmRec = order.kmRecord;
         if (kmRec) {
-          irBtn.innerHTML = `<i class="fas fa-route"></i> IR ao Evento <span style="opacity:0.8;font-size:0.75rem;margin-left:4px;">(${kmRec.total.toFixed(1)}km registrado)</span>`;
+          irBtn.innerHTML = `<i class="fas fa-route"></i> IR ao Evento <span style="opacity:0.8;font-size:0.75rem;margin-left:6px;background:rgba(255,255,255,0.2);padding:1px 6px;border-radius:8px;">${kmRec.total.toFixed(1)}km</span>`;
         } else {
           irBtn.innerHTML = `<i class="fas fa-route"></i> IR ao Evento`;
         }
-        irBtn.onclick = () => {
-          document.getElementById('view-order-modal').classList.remove('active');
-          setTimeout(() => openKmTracker(order.id), 300);
-        };
+        irBtn.onclick = () => openKmTracker(order.id);
       } else {
         irBtn.style.display = 'none';
       }
@@ -7796,53 +7922,91 @@ function openCommitmentModal(mode, id = null, date = null) {
     const modal = document.getElementById('view-quote-modal');
     const body = document.getElementById('view-quote-modal-body');
     const totalValue = quote.services.reduce((sum, s) => sum + s.value, 0);
-    let servicesHtml = quote.services.map(s => `<p>${s.description}: <strong>${formatCurrency(s.value)}</strong></p>`).join('');
+    const statusMap = {
+      emitido:  { label: 'Emitido',   color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  icon: 'fa-hourglass-half' },
+      pendente: { label: 'Pendente',  color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  icon: 'fa-clock' },
+      aprovado: { label: 'Aprovado',  color: '#10b981', bg: 'rgba(16,185,129,0.12)',  icon: 'fa-check-circle' },
+      recusado: { label: 'Recusado',  color: '#ef4444', bg: 'rgba(239,68,68,0.12)',   icon: 'fa-ban' },
+    };
+    const st = statusMap[quote.status] || statusMap.emitido;
+
+    let servicesHtml = (quote.services||[]).map((s, i) => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border-soft);">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="width:22px;height:22px;background:var(--primary);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;flex-shrink:0;">${i+1}</span>
+          <span style="font-size:0.88rem;color:var(--text);">${s.description}</span>
+        </div>
+        <span style="font-size:0.88rem;font-weight:700;color:var(--primary);">${formatCurrency(s.value)}</span>
+      </div>`).join('');
 
     body.innerHTML = `
-      <div class="detail-group">
-        <h4><i class="fas fa-file-alt"></i> Detalhes do Orçamento</h4>
-        <p><strong>Número:</strong> ${quote.quoteNumber}</p>
-        <p><strong>Data de Emissão:</strong> ${formatDate(quote.emissionDate)}</p>
-        <p><strong>Validade:</strong> ${quote.validity} dias</p>
-        <p><strong>Valor Total:</strong> ${formatCurrency(totalValue)}</p>
-        <p><strong>Status:</strong> <span class="quote-status ${quote.status}">${quote.status.charAt(0).toUpperCase() + quote.status.slice(1)}</span></p>
+      <!-- Status badge -->
+      <div style="display:flex;align-items:center;justify-content:space-between;background:${st.bg};border-radius:var(--r-md);padding:10px 14px;margin-bottom:14px;border:1.5px solid ${st.color}22;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <i class="fas ${st.icon}" style="color:${st.color};font-size:1rem;"></i>
+          <span style="font-size:0.9rem;font-weight:700;color:${st.color};">${st.label}</span>
+        </div>
+        <div style="font-size:0.75rem;font-weight:700;color:var(--text2);">#${quote.quoteNumber}</div>
       </div>
-      <div class="detail-group">
-        <h4><i class="fas fa-user"></i> Dados do Cliente</h4>
-        <p><strong>Nome:</strong> ${client.name}</p>
-        <p><strong>Contato:</strong> ${client.phone || 'N/A'} | ${client.email || 'N/A'}</p>
+
+      <!-- Total + Validade -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+        <div style="background:var(--surface2);border-radius:var(--r-md);padding:10px 12px;border:1px solid var(--border-soft);text-align:center;">
+          <div style="font-size:0.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Total</div>
+          <div style="font-size:1.1rem;font-weight:800;color:var(--primary);margin-top:2px;">${formatCurrency(totalValue)}</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:var(--r-md);padding:10px 12px;border:1px solid var(--border-soft);text-align:center;">
+          <div style="font-size:0.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Validade</div>
+          <div style="font-size:1.1rem;font-weight:800;color:var(--accent);margin-top:2px;">${quote.validity} dias</div>
+        </div>
       </div>
-      <div class="detail-group">
-        <h4><i class="fas fa-calendar-check"></i> Detalhes do Evento</h4>
-        <p><strong>Tipo:</strong> ${quote.eventType}</p>
-        <p><strong>Data:</strong> ${formatDate(quote.eventDate)}</p>
-        <p><strong>Horário:</strong> ${quote.eventTime}</p>
-        <p><strong>Local:</strong> ${quote.eventLocation}</p>
-        ${quote.eventLocation ? `
-        <div style="margin-top:12px;border-radius:var(--r-md);overflow:hidden;border:1.5px solid var(--border);position:relative;">
-          <div style="background:var(--surface2);padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);">
-            <i class="fas fa-map-marker-alt" style="color:#ea4335;font-size:0.9rem;"></i>
-            <span style="font-size:0.8rem;font-weight:600;color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${quote.eventLocation}</span>
-          </div>
-          <iframe
-            width="100%"
-            height="200"
-            style="border:0;display:block;"
-            loading="lazy"
-            allowfullscreen
-            referrerpolicy="no-referrer-when-downgrade"
-            src="https://www.google.com/maps?q=${encodeURIComponent(quote.eventLocation)}&output=embed">
-          </iframe>
+
+      <!-- Cliente -->
+      <div style="background:var(--surface2);border-radius:var(--r-md);padding:12px 14px;border:1px solid var(--border-soft);margin-bottom:10px;">
+        <div style="font-size:0.65rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;"><i class="fas fa-user" style="color:var(--primary);margin-right:4px;"></i>Cliente</div>
+        <div style="font-size:0.95rem;font-weight:700;color:var(--text);">${client.name}</div>
+        ${client.phone && client.phone !== 'N/A' ? `<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+          <a href="tel:${client.phone}" class="btn btn-xs" style="background:var(--success-bg);color:var(--success);border:1px solid var(--success);text-decoration:none;" onclick="event.stopPropagation()"><i class="fas fa-phone"></i> ${client.phone}</a>
+          ${client.email && client.email !== 'N/A' ? `<a href="mailto:${client.email}" class="btn btn-xs" style="background:var(--info-bg);color:var(--info);border:1px solid var(--info);text-decoration:none;" onclick="event.stopPropagation()"><i class="fas fa-envelope"></i> E-mail</a>` : ''}
         </div>` : ''}
       </div>
-      <div class="detail-group">
-        <h4><i class="fas fa-concierge-bell"></i> Serviços Ofertados</h4>
+
+      <!-- Evento -->
+      <div style="background:var(--surface2);border-radius:var(--r-md);padding:12px 14px;border:1px solid var(--border-soft);margin-bottom:10px;">
+        <div style="font-size:0.65rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;"><i class="fas fa-calendar-alt" style="color:var(--primary);margin-right:4px;"></i>Evento</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div><div style="font-size:0.62rem;color:var(--text3);">Tipo</div><div style="font-size:0.85rem;font-weight:600;color:var(--text);">${quote.eventType}</div></div>
+          <div><div style="font-size:0.62rem;color:var(--text3);">Data</div><div style="font-size:0.85rem;font-weight:600;color:var(--text);">${formatDate(quote.eventDate)}</div></div>
+          <div><div style="font-size:0.62rem;color:var(--text3);">Horário</div><div style="font-size:0.85rem;font-weight:600;color:var(--text);">${quote.eventTime}</div></div>
+          <div><div style="font-size:0.62rem;color:var(--text3);">Emissão</div><div style="font-size:0.85rem;font-weight:600;color:var(--text);">${formatDate(quote.emissionDate)}</div></div>
+        </div>
+        <div style="margin-top:8px;"><div style="font-size:0.62rem;color:var(--text3);">Local</div><div style="font-size:0.85rem;font-weight:600;color:var(--text);">${quote.eventLocation}</div></div>
+      </div>
+
+      <!-- Serviços -->
+      <div style="background:var(--surface2);border-radius:var(--r-md);padding:12px 14px;border:1px solid var(--border-soft);margin-bottom:10px;">
+        <div style="font-size:0.65rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;"><i class="fas fa-concierge-bell" style="color:var(--success);margin-right:4px;"></i>Serviços Ofertados</div>
         ${servicesHtml}
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;margin-top:4px;">
+          <span style="font-size:0.78rem;font-weight:700;color:var(--text3);">TOTAL</span>
+          <span style="font-size:1rem;font-weight:800;color:var(--primary);">${formatCurrency(totalValue)}</span>
+        </div>
       </div>
-      <div class="detail-group">
-        <h4><i class="fas fa-info-circle"></i> Observações</h4>
-        <p>${quote.notes.replace(/\n/g, '<br>') || 'Nenhuma.'}</p>
-      </div>
+
+      ${quote.notes ? `<div style="background:var(--warning-bg);border-radius:var(--r-md);padding:12px 14px;border:1px solid rgba(245,158,11,0.2);margin-bottom:10px;">
+        <div style="font-size:0.65rem;font-weight:700;color:var(--warning);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;"><i class="fas fa-sticky-note" style="margin-right:4px;"></i>Observações</div>
+        <div style="font-size:0.85rem;color:var(--text2);">${quote.notes.replace(/\n/g,'<br>')}</div>
+      </div>` : ''}
+
+      ${quote.eventLocation ? `
+      <div style="border-radius:var(--r-md);overflow:hidden;border:1.5px solid var(--border);margin-bottom:10px;">
+        <div style="background:var(--surface2);padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);">
+          <i class="fas fa-map-marker-alt" style="color:#ea4335;font-size:0.9rem;"></i>
+          <span style="font-size:0.8rem;font-weight:600;color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${quote.eventLocation}</span>
+        </div>
+        <iframe width="100%" height="180" style="border:0;display:block;" loading="lazy" allowfullscreen
+          src="https://www.google.com/maps?q=${encodeURIComponent(quote.eventLocation)}&output=embed"></iframe>
+      </div>` : ''}
     `;
 
     document.getElementById('view-quote-modal-download-btn').dataset.id = quoteId;
@@ -7874,12 +8038,24 @@ function openCommitmentModal(mode, id = null, date = null) {
       statusBtnQ.onclick = () => openQuoteStatusSheet(quoteId);
     }
 
+    const approveBtn = document.getElementById('view-quote-modal-approve-btn');
+    const rejectBtn = document.getElementById('view-quote-modal-reject-btn');
+    const editQBtn = document.getElementById('view-quote-modal-edit-btn');
     if (quote.status === 'aprovado' || quote.status === 'recusado') {
-        document.getElementById('view-quote-modal-approve-btn').style.display = 'none';
-        document.getElementById('view-quote-modal-reject-btn').style.display = 'none';
+        approveBtn.style.display = 'none';
+        rejectBtn.style.display = 'none';
     } else {
-        document.getElementById('view-quote-modal-approve-btn').style.display = 'inline-flex';
-        document.getElementById('view-quote-modal-reject-btn').style.display = 'inline-flex';
+        approveBtn.style.display = 'inline-flex';
+        rejectBtn.style.display = 'inline-flex';
+    }
+    // Always show edit button — even for approved quotes
+    if (editQBtn) {
+        editQBtn.style.display = 'inline-flex';
+        editQBtn.dataset.id = quoteId;
+        editQBtn.onclick = () => {
+            document.getElementById('view-quote-modal').classList.remove('active');
+            setTimeout(() => openEventQuoteModal('edit', quoteId), 200);
+        };
     }
 
     modal.classList.add('active');
@@ -7972,7 +8148,8 @@ function openCommitmentModal(mode, id = null, date = null) {
   function _renderStatusOptions(container, statuses, currentStatus, onSelect) {
     container.innerHTML = statuses.map(s => `
       <button type="button" class="status-option-btn ${s.value === currentStatus ? 'is-current' : ''}"
-        style="color:${s.dot};" data-status="${s.value}">
+        data-status="${s.value}"
+        style="${s.value === currentStatus ? `border-color:${s.dot};background:${s.bg};` : ''}">
         <div class="status-dot-wrap" style="background:${s.bg};">
           <i class="fas ${s.icon}" style="color:${s.dot};"></i>
         </div>
@@ -7980,7 +8157,7 @@ function openCommitmentModal(mode, id = null, date = null) {
           <div class="status-option-name" style="color:${s.value === currentStatus ? s.dot : 'var(--text)'};">${s.label}</div>
           <div class="status-option-desc">${s.desc}</div>
         </div>
-        <div class="status-check-mark" style="color:${s.dot};">
+        <div class="status-check-mark" style="background:${s.dot};opacity:${s.value === currentStatus ? '1' : '0'};transform:scale(${s.value === currentStatus ? '1' : '0.5'});">
           <i class="fas fa-check"></i>
         </div>
       </button>`).join('');
@@ -7992,53 +8169,185 @@ function openCommitmentModal(mode, id = null, date = null) {
   function openOrderStatusSheet(orderId) {
     const order = eventOrders.find(o => o.id === orderId);
     if (!order) return;
+
+    // Fechar qualquer modal aberto antes
+    document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
+
+    let overlay = document.getElementById('_os_overlay');
+    if (overlay) overlay.remove();
+
+    overlay = document.createElement('div');
+    overlay.id = '_os_overlay';
+    overlay.style.cssText = `
+      position:fixed;inset:0;z-index:900;
+      background:var(--modal-bg);
+      backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+      display:flex;align-items:flex-end;justify-content:center;
+      animation:fadeIn 0.2s ease both;
+    `;
+
     const cur = order.status || 'pendente';
-    const curLabel = ORDER_STATUSES.find(s => s.value === cur)?.label || cur;
-    document.getElementById('order-status-sheet-sub').textContent = `Pedido #${order.orderNumber} · Status atual: ${curLabel}`;
-    _renderStatusOptions(
-      document.getElementById('order-status-options'),
-      ORDER_STATUSES, cur,
-      (newStatus) => {
-        order.status = newStatus;
+    const statuses = ORDER_STATUSES;
+    const panel = document.createElement('div');
+    panel.style.cssText = `
+      background:var(--surface);width:100%;max-width:600px;
+      border-radius:var(--r-xl) var(--r-xl) 0 0;
+      padding:0 20px calc(20px + env(safe-area-inset-bottom,0px));
+      max-height:80vh;overflow-y:auto;
+      animation:sheetUp 0.3s cubic-bezier(0.4,0,0.2,1) both;
+      box-shadow:0 -10px 50px rgba(0,0,0,0.2);
+    `;
+
+    const curLabel = statuses.find(s => s.value === cur)?.label || cur;
+    panel.innerHTML = `
+      <div style="width:40px;height:4px;background:var(--border-soft);border-radius:999px;margin:14px auto 18px;"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <div style="font-size:1rem;font-weight:800;color:var(--text);">Alterar Status</div>
+          <div style="font-size:0.75rem;color:var(--text3);margin-top:2px;">Pedido #${order.orderNumber} · atual: <strong>${curLabel}</strong></div>
+        </div>
+        <button id="_os_close" style="width:34px;height:34px;border-radius:50%;background:var(--surface2);border:none;cursor:pointer;font-size:1rem;color:var(--text3);display:flex;align-items:center;justify-content:center;">&times;</button>
+      </div>
+      <div id="_os_options" style="display:flex;flex-direction:column;gap:8px;"></div>
+    `;
+
+    statuses.forEach(s => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      const isCurrent = s.value === cur;
+      btn.style.cssText = `
+        display:flex;align-items:center;gap:12px;padding:12px 14px;
+        border-radius:var(--r-md);border:1.5px solid ${isCurrent ? s.dot : 'var(--border-soft)'};
+        background:${isCurrent ? s.bg : 'var(--surface2)'};
+        cursor:pointer;text-align:left;width:100%;transition:all 0.15s;
+        font-family:var(--font-body);
+      `;
+      btn.innerHTML = `
+        <div style="width:36px;height:36px;border-radius:var(--r-sm);background:${s.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="fas ${s.icon}" style="color:${s.dot};font-size:1rem;"></i>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:0.9rem;font-weight:700;color:${isCurrent ? s.dot : 'var(--text)'};">${s.label}</div>
+          <div style="font-size:0.75rem;color:var(--text3);margin-top:1px;">${s.desc}</div>
+        </div>
+        ${isCurrent ? `<i class="fas fa-check-circle" style="color:${s.dot};font-size:1.1rem;flex-shrink:0;"></i>` : ''}
+      `;
+      btn.addEventListener('click', () => {
+        overlay.remove();
+        if (s.value === cur) return;
+        order.status = s.value;
         saveData(); updateUI();
-        closeOrderStatusSheet();
-        setTimeout(() => openViewOrderModal(orderId), 320);
-        const lbl = ORDER_STATUSES.find(s => s.value === newStatus)?.label || newStatus;
-        showToast(`Status atualizado para "${lbl}"`, 'success');
-      }
-    );
-    document.getElementById('order-status-sheet-overlay').classList.add('open');
-    document.getElementById('order-status-sheet').classList.add('open');
+        showToast(`Status alterado para "${s.label}"`, 'success');
+      });
+      panel.querySelector('#_os_options').appendChild(btn);
+    });
+
+    overlay.appendChild(panel);
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+    panel.querySelector('#_os_close').addEventListener('click', () => overlay.remove());
+    document.addEventListener('keydown', function esc(e) {
+      if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', esc); }
+    });
   }
   function closeOrderStatusSheet() {
-    document.getElementById('order-status-sheet-overlay').classList.remove('open');
-    document.getElementById('order-status-sheet').classList.remove('open');
+    document.getElementById('_os_overlay')?.remove();
+    document.getElementById('order-status-sheet-overlay')?.classList.remove('open');
+    document.getElementById('order-status-sheet')?.classList.remove('open');
   }
 
   function openQuoteStatusSheet(quoteId) {
     const quote = eventQuotes.find(q => q.id === quoteId);
     if (!quote) return;
+
+    // Fechar qualquer modal aberto antes de mostrar o seletor
+    document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
+
+    // Criar overlay de seleção de status inline (não usa status-sheet)
+    let overlay = document.getElementById('_qs_overlay');
+    if (overlay) overlay.remove();
+
+    overlay = document.createElement('div');
+    overlay.id = '_qs_overlay';
+    overlay.style.cssText = `
+      position:fixed;inset:0;z-index:900;
+      background:var(--modal-bg);
+      backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+      display:flex;align-items:flex-end;justify-content:center;
+      animation:fadeIn 0.2s ease both;
+    `;
+
     const cur = quote.status || 'emitido';
-    const curLabel = QUOTE_STATUSES.find(s => s.value === cur)?.label || cur;
-    document.getElementById('quote-status-sheet-sub').textContent = `Orçamento #${quote.quoteNumber} · Status atual: ${curLabel}`;
-    _renderStatusOptions(
-      document.getElementById('quote-status-options'),
-      QUOTE_STATUSES, cur,
-      (newStatus) => {
-        quote.status = newStatus;
+    const statuses = QUOTE_STATUSES;
+    const panel = document.createElement('div');
+    panel.style.cssText = `
+      background:var(--surface);width:100%;max-width:600px;
+      border-radius:var(--r-xl) var(--r-xl) 0 0;
+      padding:0 20px calc(20px + env(safe-area-inset-bottom,0px));
+      max-height:80vh;overflow-y:auto;
+      animation:sheetUp 0.3s cubic-bezier(0.4,0,0.2,1) both;
+      box-shadow:0 -10px 50px rgba(0,0,0,0.2);
+    `;
+
+    const curLabel = statuses.find(s => s.value === cur)?.label || cur;
+    panel.innerHTML = `
+      <div style="width:40px;height:4px;background:var(--border-soft);border-radius:999px;margin:14px auto 18px;"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <div style="font-size:1rem;font-weight:800;color:var(--text);">Alterar Status</div>
+          <div style="font-size:0.75rem;color:var(--text3);margin-top:2px;">Orçamento #${quote.quoteNumber} · atual: <strong>${curLabel}</strong></div>
+        </div>
+        <button id="_qs_close" style="width:34px;height:34px;border-radius:50%;background:var(--surface2);border:none;cursor:pointer;font-size:1rem;color:var(--text3);display:flex;align-items:center;justify-content:center;">&times;</button>
+      </div>
+      <div id="_qs_options" style="display:flex;flex-direction:column;gap:8px;"></div>
+    `;
+
+    statuses.forEach(s => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      const isCurrent = s.value === cur;
+      btn.style.cssText = `
+        display:flex;align-items:center;gap:12px;padding:12px 14px;
+        border-radius:var(--r-md);border:1.5px solid ${isCurrent ? s.dot : 'var(--border-soft)'};
+        background:${isCurrent ? s.bg : 'var(--surface2)'};
+        cursor:pointer;text-align:left;width:100%;transition:all 0.15s;
+        font-family:var(--font-body);
+      `;
+      btn.innerHTML = `
+        <div style="width:36px;height:36px;border-radius:var(--r-sm);background:${s.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="fas ${s.icon}" style="color:${s.dot};font-size:1rem;"></i>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:0.9rem;font-weight:700;color:${isCurrent ? s.dot : 'var(--text)'};">${s.label}</div>
+          <div style="font-size:0.75rem;color:var(--text3);margin-top:1px;">${s.desc}</div>
+        </div>
+        ${isCurrent ? `<i class="fas fa-check-circle" style="color:${s.dot};font-size:1.1rem;flex-shrink:0;"></i>` : ''}
+      `;
+      btn.addEventListener('click', () => {
+        overlay.remove();
+        if (s.value === cur) return;
+        quote.status = s.value;
         saveData(); updateUI();
-        closeQuoteStatusSheet();
-        setTimeout(() => openViewQuoteModal(quoteId), 320);
-        const lbl = QUOTE_STATUSES.find(s => s.value === newStatus)?.label || newStatus;
-        showToast(`Status atualizado para "${lbl}"`, 'success');
-      }
-    );
-    document.getElementById('quote-status-sheet-overlay').classList.add('open');
-    document.getElementById('quote-status-sheet').classList.add('open');
+        showToast(`Status alterado para "${s.label}"`, 'success');
+      });
+      panel.querySelector('#_qs_options').appendChild(btn);
+    });
+
+    overlay.appendChild(panel);
+    document.body.appendChild(overlay);
+
+    // Fechar ao clicar fora ou no X
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+    panel.querySelector('#_qs_close').addEventListener('click', () => overlay.remove());
+    document.addEventListener('keydown', function esc(e) {
+      if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', esc); }
+    });
   }
   function closeQuoteStatusSheet() {
-    document.getElementById('quote-status-sheet-overlay').classList.remove('open');
-    document.getElementById('quote-status-sheet').classList.remove('open');
+    document.getElementById('_qs_overlay')?.remove();
+    document.getElementById('quote-status-sheet-overlay')?.classList.remove('open');
+    document.getElementById('quote-status-sheet')?.classList.remove('open');
   }
 
   (function initStatusSheetWiring() {
@@ -8161,6 +8470,12 @@ function openCommitmentModal(mode, id = null, date = null) {
       _state.lastPos = null; _state.startTime = null;
       clearInterval(_state.timerInterval);
 
+      // Fechar todos os modais ativos primeiro
+      document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
+      // Fechar status sheets se abertos
+      closeOrderStatusSheet && closeOrderStatusSheet();
+      closeQuoteStatusSheet && closeQuoteStatusSheet();
+
       // Checar se já tem registro salvo
       const order = eventOrders.find(o => o.id === orderId);
       const summaryCard = document.getElementById('km-summary-card');
@@ -8187,35 +8502,75 @@ function openCommitmentModal(mode, id = null, date = null) {
 
       document.getElementById('km-tracker-order-num').textContent = order ? `Pedido #${order.orderNumber}` : '';
       document.getElementById('km-tracker-dest').textContent = location;
-      document.getElementById('km-dist-val').textContent = '0';
-      document.getElementById('km-time-val').textContent = '00:00';
-      document.getElementById('km-phase-val').textContent = '—';
-      document.getElementById('km-speed-val').textContent = '— km/h';
-      document.getElementById('km-tracker-overlay').classList.add('open');
+      if (!order || !order.kmRecord) {
+        document.getElementById('km-dist-val').textContent = '0';
+        document.getElementById('km-time-val').textContent = '00:00';
+        document.getElementById('km-phase-val').textContent = '—';
+        document.getElementById('km-speed-val').textContent = '— km/h';
+      }
+
+      // Montar URL do Google Maps e aplicar ao link inline
+      const encoded = encodeURIComponent(location);
+      const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+      const mapsUrl = isIOS
+        ? `maps://?daddr=${encoded}&dirflg=d`
+        : `https://www.google.com/maps/dir/?api=1&destination=${encoded}&travelmode=driving`;
+      const mapsLink = document.getElementById('km-maps-link');
+      if (mapsLink) mapsLink.href = mapsUrl;
+
+      // Abrir com pequeno delay para garantir que modais fecharam
+      setTimeout(() => {
+        _hideTrackingBadge();
+        document.getElementById('km-tracker-modal').classList.add('active');
+      }, 100);
     }
 
     function close() {
-      _stopGPS();
-      document.getElementById('km-tracker-overlay').classList.remove('open');
+      // Se estiver rastreando, apenas fecha o modal (não para o GPS)
+      const isTracking = ['going','arrived','returning'].includes(_state.phase);
+      document.getElementById('km-tracker-modal').classList.remove('active');
+      if (isTracking) {
+        _showTrackingBadge();
+        showToast('Rastreamento ativo em segundo plano 🔴', 'warning');
+      }
+    }
+
+    function _showTrackingBadge() {
+      let badge = document.getElementById('km-tracking-badge');
+      if (!badge) {
+        badge = document.createElement('button');
+        badge.id = 'km-tracking-badge';
+        badge.style.cssText = `
+          position:fixed;bottom:80px;right:16px;z-index:600;
+          background:linear-gradient(135deg,#ea4335,#c62828);color:white;
+          border:none;border-radius:var(--r-full);padding:8px 14px;
+          display:flex;align-items:center;gap:7px;font-size:0.78rem;font-weight:700;
+          cursor:pointer;box-shadow:0 4px 16px rgba(234,67,53,0.4);
+          animation:badgePop 0.4s var(--t-spring) both;
+          font-family:var(--font-body);
+        `;
+        badge.innerHTML = '<i class="fas fa-circle" style="font-size:0.5rem;animation:pulse 1s infinite;"></i> Rastreando';
+        badge.addEventListener('click', () => {
+          badge.remove();
+          document.getElementById('km-tracker-modal').classList.add('active');
+        });
+        document.body.appendChild(badge);
+      }
+    }
+
+    function _hideTrackingBadge() {
+      document.getElementById('km-tracking-badge')?.remove();
     }
 
     function _openMapsAndStartTracking() {
-      const encoded = encodeURIComponent(_state.location);
-      const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-      const isAndroid = /Android/.test(navigator.userAgent);
-      const url = isIOS
-        ? `maps://?daddr=${encoded}&dirflg=d`
-        : isAndroid
-          ? `https://www.google.com/maps/dir/?api=1&destination=${encoded}&travelmode=driving`
-          : `https://www.google.com/maps/dir/?api=1&destination=${encoded}&travelmode=driving`;
-      window.open(url, '_blank');
-      // Iniciar rastreamento GPS
+      // Iniciar rastreamento GPS apenas
       _startGPS();
-      showToast('Rastreamento iniciado! Bom evento! 🚗', 'success');
+      showToast('Rastreamento GPS iniciado! 🚗', 'success');
     }
 
     function concluir() {
       _stopGPS();
+      _hideTrackingBadge();
       _state.phase = 'done';
       const record = _saveKm(_state.orderId);
       if (!record) { showToast('Erro ao salvar quilometragem', 'error'); return; }
@@ -8237,11 +8592,19 @@ function openCommitmentModal(mode, id = null, date = null) {
 
     (function wireKmTracker() {
       function wire() {
-        const overlay = document.getElementById('km-tracker-overlay');
+        const modal = document.getElementById('km-tracker-modal');
+        // Botão X fecha
         document.getElementById('km-tracker-close-btn')?.addEventListener('click', close);
+        // Clique no backdrop (fora do modal-content) também fecha
+        modal?.addEventListener('click', function(e) {
+          if (e.target === modal) close();
+        });
         document.getElementById('km-open-maps-btn')?.addEventListener('click', _openMapsAndStartTracking);
         document.getElementById('km-concluir-btn')?.addEventListener('click', concluir);
-        overlay?.addEventListener('click', function(e) { if (e.target === overlay) close(); });
+        // Tecla Escape
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && modal?.classList.contains('active')) close();
+        });
       }
       document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', wire) : setTimeout(wire, 300);
     })();
@@ -12378,6 +12741,17 @@ function showCommitmentsForDay(dateString) {
         if (irBtn) {
           irBtn.addEventListener('click', (e) => {
             e.stopPropagation();
+            const _ord = eventOrders.find(o => o.id === _irOrderId);
+            if (_ord && _ord.eventLocation) {
+              // Abrir Google Maps imediatamente
+              const enc = encodeURIComponent(_ord.eventLocation);
+              const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+              const mapsUrl = isIOS
+                ? `maps://?daddr=${enc}&dirflg=d`
+                : `https://www.google.com/maps/dir/?api=1&destination=${enc}&travelmode=driving`;
+              window.open(mapsUrl, '_blank');
+            }
+            // Abrir painel de rastreamento
             openKmTracker(_irOrderId);
           });
         }
