@@ -6886,12 +6886,20 @@ if (typeof activeModalCallback === 'function') {
       const index = commitments.findIndex(c => c.id === parseFloat(id));
       if (index > -1) {
         commitments[index] = { ...commitments[index], ...data };
+        // Sincroniza o endereço de volta ao pedido vinculado, garantindo sempre o dado mais recente
+        const linkedId = commitments[index].linkedOrderId;
+        if (linkedId) {
+          const orderIndex = eventOrders.findIndex(o => o.id === linkedId);
+          if (orderIndex > -1 && data.location) {
+            eventOrders[orderIndex] = { ...eventOrders[orderIndex], eventLocation: data.location };
+          }
+        }
       }
     } else {
       commitments.push({ ...data, id: Date.now() });
     }
     saveData(); 
-    updateCommitmentsList();
+    updateUI();
     renderCalendar(calendarCurrentDate);
     document.getElementById('commitment-modal').classList.remove('active');
     showTab('Agenda');
