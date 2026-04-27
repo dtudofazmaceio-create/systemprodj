@@ -8818,6 +8818,18 @@ function openCommitmentModal(mode, id = null, date = null) {
               const statusLabels = { agendado: 'Agendado', confirmado: 'Confirmado', realizado: 'Realizado', cancelado: 'Cancelado' };
               const dotColor = statusColors[c.status] || 'var(--text3)';
               const statusLabel = statusLabels[c.status] || c.status;
+
+              // Saldo do pedido vinculado
+              let _7saldo = 0, _7orderId = null;
+              if (c.linkedOrderId) {
+                const _7ord = eventOrders.find(o => o.id === c.linkedOrderId);
+                if (_7ord) {
+                  const _7paid = receipts.filter(r => r.orderId === _7ord.id && r.status === 'pago').reduce((s,r) => s+r.amount, 0);
+                  _7saldo = (_7ord.totalValue||0) - _7paid;
+                  _7orderId = _7ord.id;
+                }
+              }
+
               const item = document.createElement('div');
               item.style.cssText = 'display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--border-soft);cursor:pointer;transition:background 0.15s ease;-webkit-tap-highlight-color:transparent;user-select:none;';
               item.innerHTML = `
@@ -8830,6 +8842,8 @@ function openCommitmentModal(mode, id = null, date = null) {
                     <span>${dayLabel} · ${timeStr}</span>
                     ${c.location ? `<span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">· ${c.location}</span>` : ''}
                   </div>
+                  ${_7saldo > 0 ? `<div style="font-size:0.72rem;font-weight:700;color:var(--warning);margin-top:2px;">Saldo: ${formatCurrency(_7saldo)}</div>` : (_7orderId ? `<div style="font-size:0.72rem;font-weight:700;color:var(--success);margin-top:2px;">✓ Quitado</div>` : '')}
+                  ${_7saldo > 0 && _7orderId ? `<div style="margin-top:6px;"><button class="notif7-recv-btn" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:var(--r-full);border:none;background:linear-gradient(135deg,var(--success),#059669);color:#fff;font-size:0.68rem;font-weight:700;cursor:pointer;font-family:var(--font-body);"><i class="fas fa-hand-holding-usd"></i> Receber</button></div>` : ''}
                 </div>
                 <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
                   <span style="font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:999px;background:${dotColor}22;color:${dotColor};">${statusLabel}</span>
@@ -8842,6 +8856,13 @@ function openCommitmentModal(mode, id = null, date = null) {
               item.addEventListener('touchend', () => { setTimeout(() => item.style.background = '', 200); }, { passive: true });
               // Click opens event detail
               item.addEventListener('click', () => openSingleCommitmentDetail(c.id));
+              // Wire Receber button
+              if (_7orderId) {
+                const recBtn = item.querySelector('.notif7-recv-btn');
+                if (recBtn) {
+                  recBtn.addEventListener('click', e => { e.stopPropagation(); openReceberPedido(_7orderId); });
+                }
+              }
               eventsWrapper.appendChild(item);
           });
           // Remove last border
@@ -9440,10 +9461,13 @@ function updateClientsList() {
                 : quoteStatusBadge}
             </div>
           </div>
-          <div class="card-actions-area" style="display:grid;grid-template-columns:repeat(${(waPhone?1:0)+(isOrder&&item.eventLocation?1:0)+(isOrder&&orderStatus!=='finalizado'&&orderStatus!=='cancelado'?1:0)+3},1fr);gap:4px;">
+          <div class="card-actions-area" style="display:grid;grid-template-columns:repeat(${(waPhone?1:0)+(isOrder&&item.eventLocation?1:0)+(isOrder&&saldo>0&&orderStatus!=='cancelado'?1:0)+(isOrder&&orderStatus!=='finalizado'&&orderStatus!=='cancelado'?1:0)+3},1fr);gap:4px;">
             ${waPhone ? `<a href="https://wa.me/${waPhone}" target="_blank" rel="noopener" class="btn btn-xs card-action-btn" data-card-action="whatsapp" style="font-size:0.68rem;background:#25d366;color:#fff;border:none;display:flex;align-items:center;justify-content:center;"><i class="fab fa-whatsapp"></i></a>` : ''}
             ${isOrder && item.eventLocation
               ? `<button class="btn btn-xs card-action-btn" data-card-action="ir" style="font-size:0.68rem;background:linear-gradient(135deg,#ea4335,#c62828);color:#fff;border:none;display:flex;align-items:center;justify-content:center;gap:3px;" title="IR ao evento"><i class="fas fa-route"></i>${item.kmRecord ? ` ${item.kmRecord.total.toFixed(0)}km` : ''}</button>`
+              : ''}
+            ${isOrder && saldo > 0 && orderStatus !== 'cancelado'
+              ? `<button class="btn btn-xs card-action-btn" data-card-action="receber" style="font-size:0.68rem;background:linear-gradient(135deg,var(--success),#059669);color:#fff;border:none;display:flex;align-items:center;justify-content:center;gap:3px;font-weight:700;" title="Receber pagamento"><i class="fas fa-hand-holding-usd"></i></button>`
               : ''}
             ${isOrder && orderStatus !== 'finalizado' && orderStatus !== 'cancelado'
               ? `<button class="btn btn-xs card-action-btn" data-card-action="finalize" style="font-size:0.68rem;background:var(--success-bg);color:var(--success);border:1px solid var(--success);display:flex;align-items:center;justify-content:center;" title="Finalizar pedido"><i class="fas fa-flag-checkered"></i></button>`
@@ -9469,12 +9493,367 @@ function updateClientsList() {
             if (act === 'delete')   { isOrder ? deleteOrderAndCommitment(item.id) : deleteItem(eventQuotes, item.id, 'Orçamento'); }
             if (act === 'finalize') { finalizeOrder(item.id); }
             if (act === 'ir')       { openKmTracker(item.id); }
+            if (act === 'receber')  { openReceberPedido(item.id); }
           });
         });
 
         grid.appendChild(card);
     });
     list.appendChild(grid);
+  }
+
+  // =====================================================
+  // RECEBER PAGAMENTO — Direto do card de pedido
+  // =====================================================
+  function openReceberPedido(orderId) {
+    const order = eventOrders.find(o => o.id === orderId);
+    if (!order) return;
+    const client = clients.find(c => c.id === order.clientId) || { name: 'N/A' };
+
+    const paid = receipts.filter(r => r.orderId === orderId && r.status === 'pago').reduce((s,r) => s + r.amount, 0);
+    const saldo = order.totalValue - paid;
+
+    if (saldo <= 0) { showToast('Este pedido já está quitado!', 'success'); return; }
+
+    // Remove overlay anterior se existir
+    document.getElementById('_recv_overlay')?.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = '_recv_overlay';
+    overlay.style.cssText = `
+      position:fixed;inset:0;z-index:900;
+      background:var(--modal-bg);
+      backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+      display:flex;align-items:flex-end;justify-content:center;
+      animation:fadeIn 0.2s ease both;
+    `;
+
+    // Conta padrão (primeira disponível)
+    const defaultAccount = accounts[0] || { id: '', name: 'Nenhuma conta cadastrada' };
+    const accountOptions = accounts.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+
+    const panel = document.createElement('div');
+    panel.style.cssText = `
+      background:var(--surface);width:100%;max-width:600px;
+      border-radius:var(--r-xl) var(--r-xl) 0 0;
+      padding:0 20px calc(24px + env(safe-area-inset-bottom,0px));
+      max-height:88vh;overflow-y:auto;
+      animation:sheetUp 0.35s cubic-bezier(0.4,0,0.2,1) both;
+      box-shadow:0 -10px 50px rgba(0,0,0,0.25);
+    `;
+
+    panel.innerHTML = `
+      <div style="width:40px;height:4px;background:var(--border-soft);border-radius:999px;margin:14px auto 18px;"></div>
+
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:38px;height:38px;border-radius:var(--r-sm);background:linear-gradient(135deg,var(--success),#059669);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fas fa-hand-holding-usd" style="color:white;font-size:0.95rem;"></i>
+          </div>
+          <div>
+            <div style="font-size:1rem;font-weight:800;color:var(--text);">Receber Pagamento</div>
+            <div style="font-size:0.75rem;color:var(--text3);">${client.name} · Pedido #${order.orderNumber}</div>
+          </div>
+        </div>
+        <button id="_recv_close" style="width:34px;height:34px;border-radius:50%;background:var(--surface2);border:none;cursor:pointer;font-size:1.1rem;color:var(--text3);display:flex;align-items:center;justify-content:center;">&times;</button>
+      </div>
+
+      <!-- Resumo financeiro -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px;">
+        <div style="background:var(--surface2);border-radius:var(--r-md);padding:10px 12px;border:1px solid var(--border-soft);text-align:center;">
+          <div style="font-size:0.6rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Total do Pedido</div>
+          <div style="font-size:1rem;font-weight:800;color:var(--primary);margin-top:3px;">${formatCurrency(order.totalValue)}</div>
+        </div>
+        <div style="background:rgba(239,68,68,0.06);border-radius:var(--r-md);padding:10px 12px;border:1px solid rgba(239,68,68,0.15);text-align:center;">
+          <div style="font-size:0.6rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Saldo em Aberto</div>
+          <div style="font-size:1rem;font-weight:800;color:var(--danger);margin-top:3px;">${formatCurrency(saldo)}</div>
+        </div>
+      </div>
+
+      <!-- Tipo: Total ou Parcial -->
+      <div style="margin-bottom:14px;">
+        <div style="font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Tipo de Recebimento</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <button id="_recv_btn_total" type="button" style="
+            padding:12px;border-radius:var(--r-md);border:2px solid var(--success);
+            background:var(--success-bg);color:var(--success);font-family:var(--font-body);
+            font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.15s;
+            display:flex;flex-direction:column;align-items:center;gap:4px;">
+            <i class="fas fa-check-double" style="font-size:1.1rem;"></i>
+            <span>Total</span>
+            <span style="font-size:0.7rem;opacity:0.8;">${formatCurrency(saldo)}</span>
+          </button>
+          <button id="_recv_btn_parcial" type="button" style="
+            padding:12px;border-radius:var(--r-md);border:2px solid var(--border);
+            background:var(--surface2);color:var(--text2);font-family:var(--font-body);
+            font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.15s;
+            display:flex;flex-direction:column;align-items:center;gap:4px;">
+            <i class="fas fa-percentage" style="font-size:1.1rem;"></i>
+            <span>Parcial</span>
+            <span style="font-size:0.7rem;opacity:0.8;">Outro valor</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Campo de valor (inicialmente oculto para parcial) -->
+      <div id="_recv_valor_group" style="margin-bottom:14px;display:none;">
+        <div style="font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Valor a Receber (R$)</div>
+        <input id="_recv_valor_input" type="number" step="0.01" min="0.01" max="${saldo.toFixed(2)}"
+          placeholder="0,00"
+          style="width:100%;padding:14px;background:var(--input-bg);border:1.5px solid var(--input-border);
+                 border-radius:var(--r-md);color:var(--text);font-family:var(--font-display);
+                 font-size:1.2rem;font-weight:700;outline:none;text-align:center;
+                 transition:border-color 0.15s;">
+        <div id="_recv_valor_hint" style="font-size:0.72rem;color:var(--text3);margin-top:5px;text-align:center;">
+          Máximo: ${formatCurrency(saldo)}
+        </div>
+      </div>
+
+      <!-- Conta de destino -->
+      <div style="margin-bottom:14px;">
+        <div style="font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Conta de Destino</div>
+        <select id="_recv_conta" style="width:100%;padding:12px 14px;background:var(--input-bg);border:1.5px solid var(--input-border);
+          border-radius:var(--r-md);color:var(--text);font-family:var(--font-body);font-size:0.9rem;
+          -webkit-appearance:none;appearance:none;outline:none;
+          background-image:url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%2712%27 viewBox=%270 0 12 12%27%3E%3Cpath fill=%27%2394a3b8%27 d=%27M6 8L1 3h10z%27/%3E%3C/svg%3E');
+          background-repeat:no-repeat;background-position:right 14px center;padding-right:38px;">
+          ${accountOptions || '<option value="">Nenhuma conta cadastrada</option>'}
+        </select>
+      </div>
+
+      <!-- Observação -->
+      <div style="margin-bottom:18px;">
+        <div style="font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Observação (opcional)</div>
+        <input id="_recv_obs" type="text" placeholder="Ex: Sinal, 2ª parcela..."
+          style="width:100%;padding:12px 14px;background:var(--input-bg);border:1.5px solid var(--input-border);
+                 border-radius:var(--r-md);color:var(--text);font-family:var(--font-body);font-size:0.9rem;outline:none;">
+      </div>
+
+      <!-- Botão confirmar -->
+      <button id="_recv_confirmar" type="button" style="
+        width:100%;padding:15px;border-radius:var(--r-md);border:none;
+        background:linear-gradient(135deg,var(--success),#059669);color:white;
+        font-family:var(--font-body);font-size:1rem;font-weight:700;
+        cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+        box-shadow:0 4px 14px rgba(16,185,129,0.35);transition:opacity 0.15s;
+        opacity:0.5;pointer-events:none;">
+        <i class="fas fa-check"></i> Confirmar Recebimento
+      </button>
+    `;
+
+    overlay.appendChild(panel);
+    document.body.appendChild(overlay);
+
+    // Estado interno
+    let tipoRecebimento = null; // 'total' | 'parcial'
+    let valorSelecionado = 0;
+
+    const btnTotal   = panel.querySelector('#_recv_btn_total');
+    const btnParcial = panel.querySelector('#_recv_btn_parcial');
+    const valorGroup = panel.querySelector('#_recv_valor_group');
+    const valorInput = panel.querySelector('#_recv_valor_input');
+    const btnConfirm = panel.querySelector('#_recv_confirmar');
+
+    function atualizarBotaoConfirmar() {
+      const ok = tipoRecebimento && valorSelecionado > 0 && valorSelecionado <= saldo + 0.01;
+      btnConfirm.style.opacity = ok ? '1' : '0.5';
+      btnConfirm.style.pointerEvents = ok ? 'all' : 'none';
+    }
+
+    function selecionarTipo(tipo) {
+      tipoRecebimento = tipo;
+      if (tipo === 'total') {
+        valorSelecionado = saldo;
+        valorGroup.style.display = 'none';
+        btnTotal.style.border = '2px solid var(--success)';
+        btnTotal.style.background = 'var(--success-bg)';
+        btnTotal.style.color = 'var(--success)';
+        btnParcial.style.border = '2px solid var(--border)';
+        btnParcial.style.background = 'var(--surface2)';
+        btnParcial.style.color = 'var(--text2)';
+      } else {
+        valorSelecionado = 0;
+        valorGroup.style.display = 'block';
+        valorInput.value = '';
+        valorInput.focus();
+        btnParcial.style.border = '2px solid var(--primary)';
+        btnParcial.style.background = 'rgba(59,130,246,0.08)';
+        btnParcial.style.color = 'var(--primary)';
+        btnTotal.style.border = '2px solid var(--border)';
+        btnTotal.style.background = 'var(--surface2)';
+        btnTotal.style.color = 'var(--text2)';
+      }
+      atualizarBotaoConfirmar();
+    }
+
+    btnTotal.addEventListener('click', () => selecionarTipo('total'));
+    btnParcial.addEventListener('click', () => selecionarTipo('parcial'));
+
+    valorInput.addEventListener('input', () => {
+      const v = parseFloat(valorInput.value) || 0;
+      valorSelecionado = Math.min(v, saldo);
+      const hint = panel.querySelector('#_recv_valor_hint');
+      if (v > saldo) {
+        valorInput.style.borderColor = 'var(--danger)';
+        hint.textContent = `⚠ Valor maior que o saldo (máx. ${formatCurrency(saldo)})`;
+        hint.style.color = 'var(--danger)';
+        valorSelecionado = 0;
+      } else {
+        valorInput.style.borderColor = 'var(--success)';
+        hint.textContent = `Máximo: ${formatCurrency(saldo)}`;
+        hint.style.color = 'var(--text3)';
+      }
+      atualizarBotaoConfirmar();
+    });
+
+    // Confirmar recebimento
+    btnConfirm.addEventListener('click', () => {
+      const contaId = parseFloat(panel.querySelector('#_recv_conta').value);
+      const obs = panel.querySelector('#_recv_obs').value.trim();
+      if (!contaId) { showToast('Selecione uma conta de destino', 'warning'); return; }
+      if (valorSelecionado <= 0) { showToast('Informe um valor válido', 'warning'); return; }
+
+      // Criar recibo
+      const today = new Date();
+      const dateStr = today.toISOString().split('T')[0];
+      const descricao = `Pagamento ${tipoRecebimento === 'total' ? 'total' : 'parcial'} do Pedido #${order.orderNumber}${obs ? ' — ' + obs : ''}`;
+
+      const newReceipt = {
+        id: Date.now(),
+        clientId: order.clientId,
+        orderId: orderId,
+        destinationAccountId: contaId,
+        amount: valorSelecionado,
+        description: descricao,
+        date: dateStr,
+        status: 'pago',
+        createdAt: today.toISOString(),
+      };
+      receipts.push(newReceipt);
+
+      // Criar transação de receita
+      const newTx = {
+        id: Date.now() + 1,
+        linkedReceiptId: newReceipt.id,
+        type: 'receita',
+        amount: valorSelecionado,
+        date: dateStr,
+        description: `Recebimento ${tipoRecebimento === 'total' ? 'total' : 'parcial'} — Pedido #${order.orderNumber} (${client.name})`,
+        category: 'Recebimento de Evento',
+        status: 'confirmada',
+        toAccount: contaId,
+      };
+      transactions.push(newTx);
+
+      // Se quitou tudo, finalizar pedido automaticamente
+      const novoPago = paid + valorSelecionado;
+      if (novoPago >= order.totalValue - 0.01 && order.status !== 'finalizado') {
+        order.status = 'finalizado';
+      }
+
+      saveData();
+      recalculateAllBalances();
+      updateUI();
+
+      overlay.remove();
+
+      // Mostrar confirmação com opção de PDF
+      _mostrarConfirmacaoRecebimento(newReceipt, client, order, tipoRecebimento, valorSelecionado, novoPago >= order.totalValue - 0.01);
+    });
+
+    // Fechar
+    panel.querySelector('#_recv_close').addEventListener('click', () => overlay.remove());
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+    document.addEventListener('keydown', function esc(e) {
+      if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', esc); }
+    });
+  }
+
+  function _mostrarConfirmacaoRecebimento(receipt, client, order, tipo, valor, quitado) {
+    document.getElementById('_recv_confirm_overlay')?.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = '_recv_confirm_overlay';
+    overlay.style.cssText = `
+      position:fixed;inset:0;z-index:900;
+      background:var(--modal-bg);
+      backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+      display:flex;align-items:flex-end;justify-content:center;
+      animation:fadeIn 0.2s ease both;
+    `;
+
+    const panel = document.createElement('div');
+    panel.style.cssText = `
+      background:var(--surface);width:100%;max-width:600px;
+      border-radius:var(--r-xl) var(--r-xl) 0 0;
+      padding:0 20px calc(24px + env(safe-area-inset-bottom,0px));
+      animation:sheetUp 0.35s cubic-bezier(0.4,0,0.2,1) both;
+      box-shadow:0 -10px 50px rgba(0,0,0,0.25);
+    `;
+
+    panel.innerHTML = `
+      <div style="width:40px;height:4px;background:var(--border-soft);border-radius:999px;margin:14px auto 20px;"></div>
+
+      <!-- Ícone de sucesso -->
+      <div style="text-align:center;margin-bottom:18px;">
+        <div style="width:64px;height:64px;border-radius:50%;background:var(--success-bg);
+             display:flex;align-items:center;justify-content:center;margin:0 auto 12px;
+             border:3px solid var(--success);">
+          <i class="fas fa-check" style="font-size:1.8rem;color:var(--success);"></i>
+        </div>
+        <div style="font-size:1.1rem;font-weight:800;color:var(--text);">Recebimento Registrado!</div>
+        <div style="font-size:0.82rem;color:var(--text3);margin-top:4px;">${client.name} · Pedido #${order.orderNumber}</div>
+      </div>
+
+      <!-- Valor recebido -->
+      <div style="background:var(--success-bg);border:1.5px solid rgba(16,185,129,0.25);border-radius:var(--r-md);padding:14px;text-align:center;margin-bottom:${quitado?'10px':'14px'};">
+        <div style="font-size:0.65rem;font-weight:700;color:var(--success);text-transform:uppercase;letter-spacing:0.06em;">${tipo === 'total' ? 'Pagamento Total' : 'Pagamento Parcial'}</div>
+        <div style="font-size:1.6rem;font-weight:800;color:var(--success);margin-top:4px;">${formatCurrency(valor)}</div>
+      </div>
+
+      <!-- Badge quitado -->
+      ${quitado ? `
+      <div style="background:linear-gradient(135deg,rgba(16,185,129,0.1),rgba(16,185,129,0.05));border-radius:var(--r-md);padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:8px;border:1px solid rgba(16,185,129,0.2);">
+        <i class="fas fa-flag-checkered" style="color:var(--success);font-size:1rem;"></i>
+        <div>
+          <div style="font-size:0.82rem;font-weight:700;color:var(--success);">Pedido Finalizado!</div>
+          <div style="font-size:0.72rem;color:var(--text3);">Pagamento total recebido — pedido encerrado automaticamente.</div>
+        </div>
+      </div>` : ''}
+
+      <!-- Pergunta PDF -->
+      <div style="font-size:0.82rem;font-weight:600;color:var(--text2);text-align:center;margin-bottom:12px;">
+        Deseja baixar o recibo em PDF?
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0;">
+        <button id="_recv_sim_pdf" type="button" style="
+          padding:13px;border-radius:var(--r-md);border:none;
+          background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;
+          font-family:var(--font-body);font-size:0.9rem;font-weight:700;cursor:pointer;
+          display:flex;align-items:center;justify-content:center;gap:7px;">
+          <i class="fas fa-file-pdf"></i> Sim, baixar
+        </button>
+        <button id="_recv_nao_pdf" type="button" style="
+          padding:13px;border-radius:var(--r-md);border:1.5px solid var(--border);
+          background:var(--surface2);color:var(--text2);
+          font-family:var(--font-body);font-size:0.9rem;font-weight:700;cursor:pointer;">
+          Não, fechar
+        </button>
+      </div>
+    `;
+
+    overlay.appendChild(panel);
+    document.body.appendChild(overlay);
+
+    panel.querySelector('#_recv_sim_pdf').addEventListener('click', () => {
+      overlay.remove();
+      downloadReceiptAsPDF(receipt.id);
+    });
+
+    panel.querySelector('#_recv_nao_pdf').addEventListener('click', () => {
+      overlay.remove();
+    });
   }
 
   // =====================================================
@@ -12715,6 +13094,28 @@ function showCommitmentsForDay(dateString) {
         }
       }
 
+      // Receber button (only if linked order with saldo > 0)
+      let recHtml = '';
+      let _recOrderId = null;
+      if (c.linkedOrderId) {
+        const _recOrd = eventOrders.find(o => o.id === c.linkedOrderId);
+        if (_recOrd && _recOrd.status !== 'cancelado') {
+          const _recPaid = receipts.filter(r => r.orderId === _recOrd.id && r.status === 'pago').reduce((s,r) => s+r.amount, 0);
+          const _recSaldo = (_recOrd.totalValue||0) - _recPaid;
+          if (_recSaldo > 0) {
+            _recOrderId = _recOrd.id;
+            recHtml = `<button class="dash-recv-btn"
+              style="display:inline-flex;align-items:center;justify-content:center;gap:5px;
+                     padding:4px 10px;border-radius:var(--r-full);border:none;
+                     background:linear-gradient(135deg,var(--success),#059669);color:#fff;
+                     font-size:0.68rem;font-weight:700;cursor:pointer;flex-shrink:0;font-family:var(--font-body);"
+              title="Receber pagamento">
+              <i class="fas fa-hand-holding-usd" style="font-size:0.8rem;"></i> Receber
+            </button>`;
+          }
+        }
+      }
+
       const item = document.createElement('div');
       item.style.cssText = 'display:flex;align-items:flex-start;gap:12px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border-soft);border-radius:var(--r-md);margin-bottom:8px;cursor:pointer;transition:all 0.15s;';
       item.innerHTML = `
@@ -12726,7 +13127,7 @@ function showCommitmentsForDay(dateString) {
           <div style="font-weight:700;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.title}</div>
           <div style="font-size:0.73rem;color:var(--text3);margin-top:1px;">${timeStr}${c.location ? ' · '+c.location : ''}</div>
           ${valHtml}
-          ${(waHtml || irHtml) ? `<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">${waHtml}${irHtml}</div>` : ''}
+          ${(waHtml || irHtml || recHtml) ? `<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">${waHtml}${irHtml}${recHtml}</div>` : ''}
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
           <span style="font-size:0.62rem;font-weight:700;padding:2px 7px;border-radius:var(--r-full);background:${countBg};color:${countColor};">${countTxt}</span>
@@ -12743,7 +13144,6 @@ function showCommitmentsForDay(dateString) {
             e.stopPropagation();
             const _ord = eventOrders.find(o => o.id === _irOrderId);
             if (_ord && _ord.eventLocation) {
-              // Abrir Google Maps imediatamente
               const enc = encodeURIComponent(_ord.eventLocation);
               const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
               const mapsUrl = isIOS
@@ -12751,9 +13151,15 @@ function showCommitmentsForDay(dateString) {
                 : `https://www.google.com/maps/dir/?api=1&destination=${enc}&travelmode=driving`;
               window.open(mapsUrl, '_blank');
             }
-            // Abrir painel de rastreamento
             openKmTracker(_irOrderId);
           });
+        }
+      }
+      // Wire Receber button
+      if (_recOrderId !== null) {
+        const recBtn = item.querySelector('.dash-recv-btn');
+        if (recBtn) {
+          recBtn.addEventListener('click', e => { e.stopPropagation(); openReceberPedido(_recOrderId); });
         }
       }
       el.appendChild(item);
