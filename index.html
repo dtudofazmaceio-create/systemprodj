@@ -4866,9 +4866,49 @@ fa-download"></i> Baixar Pedido</button>
     </div>
   </div>
 
-  <!-- KM TRACKER MODAL -->
-  <div id="km-tracker-modal" class="modal">
+  <!-- FUEL REPORT MODAL -->
+  <div id="fuel-report-modal" class="modal">
     <div class="modal-content">
+      <div class="modal-handle"></div>
+      <span class="close-button" data-action="close-modal">&times;</span>
+      <h2 style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+        <span style="width:36px;height:36px;border-radius:var(--r-sm);background:linear-gradient(135deg,var(--ev-orange),var(--warning));display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="fas fa-gas-pump" style="color:white;font-size:0.9rem;"></i>
+        </span>
+        Relatório de Combustível
+      </h2>
+      <p style="font-size:0.82rem;color:var(--text3);margin-bottom:16px;">Distâncias percorridas e custo de combustível por período.</p>
+
+      <!-- Filtro de período -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label style="font-size:0.76rem;">Data Início</label>
+          <input type="date" id="fuel-rpt-start" style="font-size:0.85rem;width:100%;padding:8px 10px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);outline:none;">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label style="font-size:0.76rem;">Data Fim</label>
+          <input type="date" id="fuel-rpt-end" style="font-size:0.85rem;width:100%;padding:8px 10px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);outline:none;">
+        </div>
+      </div>
+
+      <!-- KPI cards -->
+      <div id="fuel-rpt-kpis" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;"></div>
+
+      <!-- Lista de trajetos -->
+      <div id="fuel-rpt-list" style="max-height:340px;overflow-y:auto;"></div>
+
+      <!-- Rodapé -->
+      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+        <button class="btn" id="fuel-rpt-filter-btn" style="flex:1;background:var(--primary);"><i class="fas fa-filter"></i> Filtrar</button>
+        <button class="btn" id="fuel-rpt-pdf-btn" style="flex:1;background:linear-gradient(135deg,#ef4444,#dc2626);"><i class="fas fa-file-pdf"></i> Baixar PDF</button>
+        <button class="btn" id="fuel-rpt-clear-btn" style="flex:1;background:var(--danger-bg);color:var(--danger);border:1.5px solid var(--danger);"><i class="fas fa-trash"></i> Limpar Log</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- KM TRACKER MODAL -->
+  <div id="km-tracker-modal" class="modal" style="align-items:center;padding:12px;">
+    <div class="modal-content" style="border-radius:var(--r-xl);max-height:calc(100dvh - 24px);overflow-y:auto;padding-bottom:24px;">
       <div class="modal-handle"></div>
       <span class="close-button" id="km-tracker-close-btn" style="position:sticky;top:0;float:right;margin-top:-4px;margin-right:-8px;width:36px;height:36px;border-radius:50%;background:var(--surface2);border:none;cursor:pointer;font-size:1.1rem;color:var(--text3);display:flex;align-items:center;justify-content:center;transition:var(--t-fast);z-index:1;">&times;</span>
 
@@ -4886,8 +4926,11 @@ fa-download"></i> Baixar Pedido</button>
       <!-- Destino -->
       <div class="km-dest-chip" style="margin-bottom:14px;">
         <i class="fas fa-map-marker-alt"></i>
-        <span id="km-tracker-dest"></span>
+        <span id="km-tracker-dest" style="word-break:break-word;"></span>
       </div>
+
+      <!-- GPS Status Banner -->
+      <div id="km-gps-banner" style="display:none;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--r-md);margin-bottom:14px;font-size:0.82rem;font-weight:600;"></div>
 
       <!-- Link direto Google Maps -->
       <a id="km-maps-link" href="#" target="_blank" rel="noopener"
@@ -4917,6 +4960,8 @@ fa-download"></i> Baixar Pedido</button>
           </div>
         </div>
       </div>
+      <!-- Custo de combustível (mostrado após concluir) -->
+      <div id="km-fuel-cost-result" style="display:none;"></div>
 
       <!-- Stats grid -->
       <div id="km-stats-grid" class="km-stat-grid">
@@ -4934,7 +4979,7 @@ fa-download"></i> Baixar Pedido</button>
           <div class="km-stat-lbl">Fase</div>
         </div>
         <div class="km-stat-card">
-          <div class="km-stat-val" style="font-size:1rem;color:var(--text2);" id="km-speed-val">— km/h</div>
+          <div class="km-stat-val" style="font-size:1rem;color:var(--text2);" id="km-speed-val">—</div>
           <div class="km-stat-lbl">Velocidade</div>
         </div>
       </div>
@@ -4943,6 +4988,16 @@ fa-download"></i> Baixar Pedido</button>
       <div class="km-status-row idle" id="km-status-row">
         <i class="fas fa-circle" style="font-size:0.5rem;"></i>
         <span id="km-status-text">Pronto para iniciar o trajeto</span>
+      </div>
+
+      <!-- Fase buttons (Ida / Chegou / Volta) -->
+      <div id="km-phase-btns" style="display:none;display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <button id="km-btn-chegou" class="btn" style="flex:1;background:rgba(16,185,129,0.12);color:var(--success);border:1.5px solid var(--success);font-size:0.82rem;padding:9px 8px;">
+          <i class="fas fa-map-pin"></i> Cheguei no Local
+        </button>
+        <button id="km-btn-voltando" class="btn" style="flex:1;background:rgba(59,130,246,0.1);color:var(--primary);border:1.5px solid var(--primary);font-size:0.82rem;padding:9px 8px;">
+          <i class="fas fa-undo"></i> Voltando
+        </button>
       </div>
 
       <!-- Botões de ação -->
@@ -4956,6 +5011,11 @@ fa-download"></i> Baixar Pedido</button>
           Concluir Trajeto e Salvar
         </button>
       </div>
+
+      <!-- Nota sobre GPS -->
+      <p id="km-gps-note" style="font-size:0.72rem;color:var(--text3);text-align:center;margin-top:10px;line-height:1.4;">
+        <i class="fas fa-info-circle"></i> O rastreamento GPS continua em segundo plano quando você fecha este painel.
+      </p>
     </div>
   </div>
     <div class="confirm-sheet-icon" id="confirm-sheet-icon"><i class="fas fa-trash"></i></div>
@@ -5739,6 +5799,10 @@ type="text" id="contract-event-location-input" required>
           </div>
         </div>
         <div id="fuel-config-preview" style="margin-top:14px;padding:12px;background:var(--surface2);border-radius:var(--r-md);font-size:0.85rem;color:var(--text2);display:none;"></div>
+        <!-- Botão Relatório de Combustível -->
+        <button class="btn" id="fuel-report-btn" style="width:100%;margin-top:14px;background:linear-gradient(135deg,#f59e0b,#d97706);gap:8px;">
+          <i class="fas fa-file-chart-column"></i> Relatório de Combustível
+        </button>
       </div>
 
       <!-- Equipamentos do catálogo global -->
@@ -5790,6 +5854,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let fuelConfig = parseLocalStorage('fuelConfig', { type: 'Gasolina', pricePerLiter: 0, consumption: 10 }); // consumption = km/L
   let shoppingItems = parseLocalStorage('shoppingItems', []);
   let savedDocuments = parseLocalStorage('savedDocuments', []);
+  let fuelLog = parseLocalStorage('fuelLog', []); // log de trajetos com custo de combustível
 
   const pageTitles = {
     dashboard: 'Início', transacoes: 'Transações', contas: 'Contas',
@@ -5907,6 +5972,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('add-client-btn-aba')?.addEventListener('click', () => openClientModal('new'));
     document.getElementById('add-commitment-btn-aba')?.addEventListener('click', () => openCommitmentModal('new'));
     document.getElementById('relatorio-eventos-btn')?.addEventListener('click', () => openRelatorioEventosModal());
+    document.getElementById('fuel-report-btn')?.addEventListener('click', openFuelReportModal);
     document.getElementById('add-new-order-btn-aba')?.addEventListener('click', () => openEventOrderModal('new'));
     document.getElementById('generate-dj-contract-doc-tab')?.addEventListener('click', () => openDJContractModal());
     document.getElementById('generate-event-order-doc-tab')?.addEventListener('click', () => openEventOrderModal('new'));
@@ -6553,6 +6619,7 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
         localStorage.setItem('eventChecklists', JSON.stringify(eventChecklists));
         localStorage.setItem('fuelConfig', JSON.stringify(fuelConfig));
         localStorage.setItem('shoppingItems', JSON.stringify(shoppingItems));
+        localStorage.setItem('fuelLog', JSON.stringify(fuelLog));
         try { localStorage.setItem('savedDocuments', JSON.stringify(savedDocuments)); } catch(e2) { /* skip if quota exceeded */ }
         if (typeof updateOrdersKPI === 'function') updateOrdersKPI();
     } catch (e) {
@@ -7719,8 +7786,110 @@ function openCommitmentModal(mode, id = null, date = null) {
           <div><div style="font-size:0.62rem;color:var(--text3);">Convidados</div><div style="font-size:0.85rem;font-weight:600;color:var(--text);">${order.eventGuests}</div></div>
         </div>
         <div style="margin-top:8px;"><div style="font-size:0.62rem;color:var(--text3);">Local</div><div style="font-size:0.85rem;font-weight:600;color:var(--text);">${order.eventLocation}</div></div>
-        ${order.kmRecord ? `<div style="margin-top:8px;display:inline-flex;align-items:center;gap:5px;font-size:0.75rem;font-weight:700;padding:4px 10px;border-radius:999px;background:rgba(59,130,246,0.1);color:var(--primary);"><i class="fas fa-route"></i> ${order.kmRecord.total.toFixed(1)} km percorridos</div>` : ''}
       </div>
+
+      ${(() => {
+        // Busca kmRecord no objeto ou no localStorage como fallback
+        let km = order.kmRecord;
+        if (!km) {
+          try { const raw = localStorage.getItem('djmgr_km_' + order.id); if (raw) { km = JSON.parse(raw); order.kmRecord = km; } } catch(e) {}
+        }
+        const fmtTime = s => { if (!s) return '—'; const h=Math.floor(s/3600),m=Math.floor((s%3600)/60); return h>0?`${h}h ${String(m).padStart(2,'0')}min`:`${String(m).padStart(2,'0')}min`; };
+
+        if (km) {
+          const litros = (km.total > 0 && fuelConfig.consumption > 0) ? km.total / fuelConfig.consumption : 0;
+          const custo  = (litros > 0 && fuelConfig.pricePerLiter > 0) ? litros * fuelConfig.pricePerLiter : 0;
+          return `
+      <div style="background:linear-gradient(135deg,rgba(234,67,53,0.07),rgba(234,67,53,0.03));border-radius:var(--r-md);border:1.5px solid rgba(234,67,53,0.18);padding:14px;margin-bottom:10px;">
+        <div style="font-size:0.65rem;font-weight:700;color:#ea4335;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="display:flex;align-items:center;gap:6px;"><i class="fas fa-route"></i> Trajeto Realizado</span>
+          <span style="font-size:0.6rem;color:var(--text3);font-weight:500;">${km.date ? new Date(km.date).toLocaleDateString('pt-BR') : ''}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">
+          <div style="background:var(--surface);border-radius:var(--r-sm);padding:10px 8px;text-align:center;border:1px solid var(--border-soft);">
+            <div style="font-size:1.15rem;font-weight:800;color:var(--primary);line-height:1;">${km.total.toFixed(1)}</div>
+            <div style="font-size:0.6rem;font-weight:700;color:var(--text3);text-transform:uppercase;margin-top:3px;">km total</div>
+          </div>
+          <div style="background:var(--surface);border-radius:var(--r-sm);padding:10px 8px;text-align:center;border:1px solid var(--border-soft);">
+            <div style="font-size:1rem;font-weight:800;color:var(--warning);line-height:1;">${fmtTime(km.duration)}</div>
+            <div style="font-size:0.6rem;font-weight:700;color:var(--text3);text-transform:uppercase;margin-top:3px;">duração</div>
+          </div>
+          <div style="background:var(--surface);border-radius:var(--r-sm);padding:10px 8px;text-align:center;border:1px solid var(--border-soft);">
+            <div style="font-size:0.82rem;font-weight:700;color:var(--text2);line-height:1.3;">${(km.ida||0).toFixed(1)} / ${(km.volta||0).toFixed(1)}</div>
+            <div style="font-size:0.6rem;font-weight:700;color:var(--text3);text-transform:uppercase;margin-top:3px;">ida / volta</div>
+          </div>
+        </div>
+        ${custo > 0 ? `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(245,158,11,0.1);border-radius:var(--r-sm);border:1px solid rgba(245,158,11,0.22);">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <i class="fas fa-gas-pump" style="color:var(--ev-orange);font-size:1.1rem;"></i>
+            <div>
+              <div style="font-size:0.72rem;font-weight:700;color:var(--text2);">${fuelConfig.type} · ${litros.toFixed(2)} L</div>
+              <div style="font-size:0.65rem;color:var(--text3);">R$ ${fuelConfig.pricePerLiter.toFixed(2)}/L · ${fuelConfig.consumption} km/L</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:0.6rem;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:2px;">Custo</div>
+            <div style="font-size:1.2rem;font-weight:800;color:var(--ev-orange);">${formatCurrency(custo)}</div>
+          </div>
+        </div>` : `
+        <div style="font-size:0.75rem;color:var(--text3);text-align:center;padding:8px 0;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <i class="fas fa-info-circle" style="color:var(--warning);"></i>
+          Configure o combustível na aba <strong style="margin-left:3px;">Checklist</strong> para ver o custo.
+        </div>`}
+        <button onclick="(function(){
+          const cur=${km.total.toFixed(3)};
+          const v=prompt('Editar distância total percorrida (km):', cur);
+          if(v===null) return;
+          const n=parseFloat(v);
+          if(isNaN(n)||n<0){alert('Valor inválido');return;}
+          const o=eventOrders.find(x=>x.id===${order.id});
+          if(o){o.kmRecord={...o.kmRecord,total:n};saveData();openViewOrderModal(${order.id});}
+        })()" style="margin-top:10px;width:100%;padding:7px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text3);font-size:0.72rem;font-family:var(--font-body);cursor:pointer;">
+          <i class="fas fa-pencil-alt" style="margin-right:4px;"></i>Editar distância
+        </button>
+      </div>`;
+        } else {
+          // Sem registro GPS — mostrar botão para registrar manualmente
+          return `
+      <div style="background:var(--surface2);border-radius:var(--r-md);border:1.5px dashed var(--border);padding:14px;margin-bottom:10px;">
+        <div style="font-size:0.65rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+          <i class="fas fa-route" style="color:var(--text3);"></i> Trajeto / Combustível
+        </div>
+        <p style="font-size:0.82rem;color:var(--text3);margin-bottom:12px;line-height:1.4;">Nenhum trajeto registrado por GPS. Informe a distância manualmente para calcular o custo de combustível.</p>
+        <div style="display:flex;gap:8px;align-items:flex-end;">
+          <div style="flex:1;">
+            <label style="font-size:0.72rem;color:var(--text3);font-weight:600;display:block;margin-bottom:4px;">Distância total (km)</label>
+            <input id="manual-km-input-${order.id}" type="number" min="0" step="0.1" placeholder="Ex: 28.5"
+              style="width:100%;padding:9px 12px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.95rem;outline:none;">
+          </div>
+          <button onclick="(function(){
+            const input=document.getElementById('manual-km-input-${order.id}');
+            const n=parseFloat(input.value);
+            if(isNaN(n)||n<=0){input.style.borderColor='var(--danger)';return;}
+            const o=eventOrders.find(x=>x.id===${order.id});
+            if(o){
+              o.kmRecord={total:n,ida:n*0.5,volta:n*0.5,duration:0,date:new Date().toISOString(),manual:true};
+              saveData();
+              openViewOrderModal(${order.id});
+              showToast('Distância registrada: '+n.toFixed(1)+' km','success');
+            }
+          })()" style="padding:9px 16px;background:linear-gradient(135deg,#ea4335,#c62828);color:white;border:none;border-radius:var(--r-sm);font-size:0.85rem;font-weight:700;cursor:pointer;font-family:var(--font-body);white-space:nowrap;flex-shrink:0;">
+            <i class="fas fa-save"></i> Salvar
+          </button>
+        </div>
+        ${(fuelConfig.pricePerLiter > 0 && fuelConfig.consumption > 0) ? `
+        <div style="margin-top:8px;font-size:0.72rem;color:var(--text3);">
+          <i class="fas fa-gas-pump" style="color:var(--ev-orange);margin-right:4px;"></i>
+          ${fuelConfig.type} · R$ ${fuelConfig.pricePerLiter.toFixed(2)}/L · ${fuelConfig.consumption} km/L configurado
+        </div>` : `
+        <div style="margin-top:8px;font-size:0.72rem;color:var(--text3);">
+          <i class="fas fa-info-circle" style="color:var(--warning);margin-right:4px;"></i>
+          Configure o combustível na aba <strong>Checklist</strong> para calcular o custo automaticamente.
+        </div>`}
+      </div>`;
+        }
+      })()}
 
       <!-- Serviços -->
       <div style="background:var(--surface2);border-radius:var(--r-md);padding:12px 14px;border:1px solid var(--border-soft);margin-bottom:10px;">
@@ -8253,6 +8422,10 @@ function openCommitmentModal(mode, id = null, date = null) {
         order.status = s.value;
         saveData(); updateUI();
         showToast(`Status alterado para "${s.label}"`, 'success');
+        // Se marcou como realizado ou finalizado, mostrar painel de trajeto
+        if (s.value === 'realizado' || s.value === 'finalizado') {
+          setTimeout(() => showTravelSummaryPanel(orderId), 350);
+        }
       });
       panel.querySelector('#_os_options').appendChild(btn);
     });
@@ -8376,14 +8549,15 @@ function openCommitmentModal(mode, id = null, date = null) {
   })();
 
   // ══════════════════════════════════════════════════
-  //  KM TRACKER — Sistema de Quilometragem
+  //  KM TRACKER — Sistema de Quilometragem (v3)
   // ══════════════════════════════════════════════════
   const KmTracker = (function() {
     let _state = {
       orderId: null, location: null, phase: 'idle',
       watchId: null, startPos: null, totalDist: 0,
       idaDist: 0, voltaDist: 0, lastPos: null,
-      startTime: null, timerInterval: null
+      startTime: null, timerInterval: null,
+      gpsOk: false, lastAccuracy: null, posCount: 0
     };
 
     function _haversine(lat1, lon1, lat2, lon2) {
@@ -8394,83 +8568,195 @@ function openCommitmentModal(mode, id = null, date = null) {
       return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     }
 
-    function _fmtDist(km) { return km < 1 ? (km*1000).toFixed(0)+'m' : km.toFixed(1)+' km'; }
+    function _fmtDist(km) {
+      if (km === 0) return '0 m';
+      return km < 1 ? (km*1000).toFixed(0)+' m' : km.toFixed(2)+' km';
+    }
     function _fmtTime(sec) {
       const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = sec%60;
       if (h > 0) return `${h}h ${String(m).padStart(2,'0')}min`;
       return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     }
 
-    function _updateUI() {
-      document.getElementById('km-dist-val').textContent = _fmtDist(_state.totalDist);
-      const elapsed = _state.startTime ? Math.floor((Date.now() - _state.startTime)/1000) : 0;
-      document.getElementById('km-time-val').textContent = _fmtTime(elapsed);
-      const phaseLabels = { idle: '—', going: 'Indo', arrived: 'No local', returning: 'Voltando', done: 'Concluído' };
-      document.getElementById('km-phase-val').textContent = phaseLabels[_state.phase] || '—';
-      const row = document.getElementById('km-status-row');
-      row.className = 'km-status-row';
-      const statusMap = {
-        idle: { cls: 'idle', txt: 'Pronto para iniciar o trajeto' },
-        going: { cls: 'tracking', txt: '🔴 Rastreando — Indo ao evento' },
-        arrived: { cls: 'tracking', txt: '📍 No local do evento' },
-        returning: { cls: 'tracking', txt: '🔴 Rastreando — Voltando' },
-        done: { cls: '', txt: '✅ Trajeto concluído e salvo!' },
+    function _setGpsBanner(msg, type) {
+      // type: 'ok' | 'warn' | 'error' | 'info' | ''
+      const el = document.getElementById('km-gps-banner');
+      if (!el) return;
+      if (!msg) { el.style.display = 'none'; return; }
+      const styles = {
+        ok:    { bg: 'rgba(16,185,129,0.1)', color: 'var(--success)', border: 'rgba(16,185,129,0.25)', icon: 'fa-satellite' },
+        warn:  { bg: 'rgba(245,158,11,0.1)', color: 'var(--warning)', border: 'rgba(245,158,11,0.25)', icon: 'fa-exclamation-triangle' },
+        error: { bg: 'rgba(239,68,68,0.1)',  color: 'var(--danger)',  border: 'rgba(239,68,68,0.25)', icon: 'fa-times-circle' },
+        info:  { bg: 'rgba(59,130,246,0.1)', color: 'var(--primary)', border: 'rgba(59,130,246,0.2)', icon: 'fa-info-circle' },
+        tracking: { bg: 'rgba(234,67,53,0.1)', color: '#ea4335', border: 'rgba(234,67,53,0.25)', icon: 'fa-circle' },
       };
-      const st = statusMap[_state.phase] || statusMap.idle;
-      if (st.cls) row.classList.add(st.cls);
-      document.getElementById('km-status-text').textContent = st.txt;
+      const s = styles[type] || styles.info;
+      el.style.display = 'flex';
+      el.style.background = s.bg;
+      el.style.color = s.color;
+      el.style.border = `1px solid ${s.border}`;
+      const pulse = type === 'tracking' ? 'animation:pulseKm 1.5s infinite;' : '';
+      el.innerHTML = `<i class="fas ${s.icon}" style="font-size:0.85rem;flex-shrink:0;${pulse}"></i><span>${msg}</span>`;
+    }
+
+    function _updateUI() {
+      const distEl = document.getElementById('km-dist-val');
+      const timeEl = document.getElementById('km-time-val');
+      const phaseEl = document.getElementById('km-phase-val');
+      const speedEl = document.getElementById('km-speed-val');
+      if (distEl) distEl.textContent = _fmtDist(_state.totalDist);
+      const elapsed = _state.startTime ? Math.floor((Date.now() - _state.startTime)/1000) : 0;
+      if (timeEl) timeEl.textContent = _fmtTime(elapsed);
+      const phaseLabels = { idle: '—', going: '🚗 Indo', arrived: '📍 Local', returning: '🔄 Voltando', done: '✅ Fim' };
+      if (phaseEl) phaseEl.textContent = phaseLabels[_state.phase] || '—';
+      if (speedEl) speedEl.textContent = _state.lastSpeed || '—';
+
+      const row = document.getElementById('km-status-row');
+      if (row) {
+        row.className = 'km-status-row';
+        const statusMap = {
+          idle:      { cls: 'idle',     txt: 'Toque em "Iniciar" para começar o rastreamento' },
+          going:     { cls: 'tracking', txt: '🔴 Rastreando — Indo ao evento' },
+          arrived:   { cls: 'tracking', txt: '📍 No local — rastreamento pausado' },
+          returning: { cls: 'tracking', txt: '🔴 Rastreando — Voltando para casa' },
+          done:      { cls: '',         txt: '✅ Trajeto concluído e salvo!' },
+        };
+        const st = statusMap[_state.phase] || statusMap.idle;
+        if (st.cls) row.classList.add(st.cls);
+        const stEl = document.getElementById('km-status-text');
+        if (stEl) stEl.textContent = st.txt;
+      }
+
+      // Phase control buttons
+      const phaseDiv = document.getElementById('km-phase-btns');
       const concluirBtn = document.getElementById('km-concluir-btn');
-      concluirBtn.style.display = (['going','arrived','returning'].includes(_state.phase)) ? 'flex' : 'none';
+      const iniciarBtn = document.getElementById('km-open-maps-btn');
+      if (['going','arrived','returning'].includes(_state.phase)) {
+        if (phaseDiv) phaseDiv.style.display = 'flex';
+        if (concluirBtn) concluirBtn.style.display = 'flex';
+        if (iniciarBtn) iniciarBtn.style.display = 'none';
+        // Update phase button labels/styles
+        const chegouBtn = document.getElementById('km-btn-chegou');
+        const voltandoBtn = document.getElementById('km-btn-voltando');
+        if (chegouBtn) {
+          chegouBtn.style.opacity = _state.phase === 'arrived' ? '0.5' : '1';
+          chegouBtn.disabled = _state.phase === 'arrived';
+        }
+        if (voltandoBtn) {
+          voltandoBtn.style.opacity = _state.phase === 'returning' ? '0.5' : '1';
+          voltandoBtn.disabled = _state.phase === 'returning';
+        }
+      } else {
+        if (phaseDiv) phaseDiv.style.display = 'none';
+        if (concluirBtn) concluirBtn.style.display = 'none';
+        if (iniciarBtn) iniciarBtn.style.display = _state.phase === 'done' ? 'none' : 'flex';
+      }
     }
 
     function _startGPS() {
-      if (!navigator.geolocation) { showToast('GPS não disponível neste dispositivo', 'warning'); return; }
+      if (!navigator.geolocation) {
+        _setGpsBanner('GPS não disponível neste dispositivo ou navegador.', 'error');
+        showToast('GPS não disponível neste dispositivo', 'warning');
+        return false;
+      }
+
+      // Check permission first (modern API)
+      if (navigator.permissions) {
+        navigator.permissions.query({ name: 'geolocation' }).then(result => {
+          if (result.state === 'denied') {
+            _setGpsBanner('Permissão de localização bloqueada. Libere nas configurações do navegador.', 'error');
+          }
+        }).catch(() => {});
+      }
+
+      _setGpsBanner('Aguardando sinal GPS...', 'info');
       _state.startTime = Date.now();
       _state.phase = 'going';
-      _state.totalDist = 0; _state.idaDist = 0; _state.voltaDist = 0; _state.lastPos = null;
+      _state.totalDist = 0; _state.idaDist = 0; _state.voltaDist = 0;
+      _state.lastPos = null; _state.posCount = 0; _state.lastSpeed = null;
+
+      // Timer tick
       clearInterval(_state.timerInterval);
       _state.timerInterval = setInterval(() => {
-        const el = document.getElementById('km-time-val');
-        if (el && _state.startTime) {
-          const s = Math.floor((Date.now() - _state.startTime)/1000);
-          el.textContent = _fmtTime(s);
+        const timeEl = document.getElementById('km-time-val');
+        if (timeEl && _state.startTime) {
+          timeEl.textContent = _fmtTime(Math.floor((Date.now() - _state.startTime)/1000));
         }
       }, 1000);
+
+      // Start watching
       _state.watchId = navigator.geolocation.watchPosition(
         (pos) => {
-          const {latitude: lat, longitude: lng, speed} = pos.coords;
-          if (_state.lastPos) {
+          const { latitude: lat, longitude: lng, speed, accuracy } = pos.coords;
+          _state.lastAccuracy = accuracy;
+          _state.posCount++;
+          _state.gpsOk = true;
+
+          // Speed display
+          if (speed !== null && speed >= 0) {
+            _state.lastSpeed = (speed * 3.6).toFixed(0) + ' km/h';
+          }
+
+          // Only accumulate if accuracy is reasonable (< 50m) and phase is moving
+          if (_state.lastPos && accuracy < 80 && _state.phase !== 'arrived') {
             const d = _haversine(_state.lastPos.lat, _state.lastPos.lng, lat, lng);
-            if (d > 0.01) { // filtro de ruído < 10m
+            // Filter noise: only count if moved > 15m and speed looks real
+            if (d > 0.015) {
               _state.totalDist += d;
               if (_state.phase === 'going') _state.idaDist += d;
               else if (_state.phase === 'returning') _state.voltaDist += d;
             }
           }
           _state.lastPos = { lat, lng };
-          const speedKmh = speed ? (speed * 3.6).toFixed(0) + ' km/h' : '— km/h';
-          const speedEl = document.getElementById('km-speed-val');
-          if (speedEl) speedEl.textContent = speedKmh;
+
+          // Update GPS banner
+          if (_state.posCount === 1) {
+            _setGpsBanner(`GPS ativo · Precisão: ~${Math.round(accuracy)}m`, 'tracking');
+          } else {
+            const accTxt = accuracy < 20 ? '✓ Ótimo' : accuracy < 50 ? 'Bom' : `~${Math.round(accuracy)}m`;
+            _setGpsBanner(`🔴 Rastreando · GPS: ${accTxt}`, 'tracking');
+          }
+
           _updateUI();
         },
-        (err) => { showToast('Erro de GPS: ' + err.message, 'warning'); },
-        { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
+        (err) => {
+          _state.gpsOk = false;
+          let msg = '';
+          switch (err.code) {
+            case 1: msg = 'Permissão negada. Libere a localização nas configurações.'; break;
+            case 2: msg = 'Posição indisponível. Verifique o GPS do dispositivo.'; break;
+            case 3: msg = 'Tempo esgotado ao obter localização. Tentando novamente...'; break;
+            default: msg = 'Erro de GPS: ' + err.message;
+          }
+          _setGpsBanner(msg, err.code === 1 ? 'error' : 'warn');
+          // Don't stop tracking on timeout — watchPosition will retry
+        },
+        { enableHighAccuracy: true, maximumAge: 3000, timeout: 20000 }
       );
+
       _updateUI();
+      return true;
     }
 
     function _stopGPS() {
-      if (_state.watchId !== null) { navigator.geolocation.clearWatch(_state.watchId); _state.watchId = null; }
+      if (_state.watchId !== null) {
+        navigator.geolocation.clearWatch(_state.watchId);
+        _state.watchId = null;
+      }
       clearInterval(_state.timerInterval);
     }
 
     function _saveKm(orderId) {
       try {
-        const key = 'djmgr_km_' + orderId;
         const elapsed = _state.startTime ? Math.floor((Date.now() - _state.startTime)/1000) : 0;
-        const record = { total: +_state.totalDist.toFixed(2), ida: +_state.idaDist.toFixed(2), volta: +_state.voltaDist.toFixed(2), duration: elapsed, date: new Date().toISOString() };
-        localStorage.setItem(key, JSON.stringify(record));
-        // Salvar também no pedido
+        const record = {
+          total: +_state.totalDist.toFixed(3),
+          ida: +_state.idaDist.toFixed(3),
+          volta: +_state.voltaDist.toFixed(3),
+          duration: elapsed,
+          date: new Date().toISOString()
+        };
+        localStorage.setItem('djmgr_km_' + orderId, JSON.stringify(record));
         const order = eventOrders.find(o => o.id === orderId);
         if (order) { order.kmRecord = record; saveData(); updateUI(); }
         return record;
@@ -8480,51 +8766,65 @@ function openCommitmentModal(mode, id = null, date = null) {
     function open(orderId, location) {
       _state.orderId = orderId;
       _state.location = location;
-      _state.phase = 'idle';
-      _state.totalDist = 0; _state.idaDist = 0; _state.voltaDist = 0;
-      _state.lastPos = null; _state.startTime = null;
-      clearInterval(_state.timerInterval);
 
-      // Fechar todos os modais ativos primeiro
+      // Close any open modals first
       document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
-      // Fechar status sheets se abertos
       closeOrderStatusSheet && closeOrderStatusSheet();
       closeQuoteStatusSheet && closeQuoteStatusSheet();
 
-      // Checar se já tem registro salvo
       const order = eventOrders.find(o => o.id === orderId);
       const summaryCard = document.getElementById('km-summary-card');
       const statsGrid = document.getElementById('km-stats-grid');
-      const concluirBtn = document.getElementById('km-concluir-btn');
+      const fuelResult = document.getElementById('km-fuel-cost-result');
+
+      // If already tracking in background, just re-show state
+      if (['going','arrived','returning'].includes(_state.phase) && _state.orderId === orderId) {
+        _hideTrackingBadge();
+        _setGpsBanner(_state.gpsOk ? '🔴 Rastreamento ativo' : 'Aguardando GPS...', _state.gpsOk ? 'tracking' : 'info');
+        if (summaryCard) summaryCard.style.display = 'none';
+        if (statsGrid) statsGrid.style.display = 'grid';
+        if (fuelResult) fuelResult.style.display = 'none';
+        _updateUI();
+        document.getElementById('km-tracker-modal').classList.add('active');
+        return;
+      }
+
+      // Fresh open
+      _state.phase = 'idle';
+      _state.totalDist = 0; _state.idaDist = 0; _state.voltaDist = 0;
+      _state.lastPos = null; _state.startTime = null; _state.gpsOk = false; _state.posCount = 0;
+      clearInterval(_state.timerInterval);
 
       if (order && order.kmRecord) {
         const r = order.kmRecord;
-        summaryCard.style.display = 'block';
-        statsGrid.style.display = 'none';
-        concluirBtn.style.display = 'none';
-        document.getElementById('km-summary-km-val').textContent = r.total.toFixed(1) + ' km';
+        if (summaryCard) summaryCard.style.display = 'block';
+        if (statsGrid) statsGrid.style.display = 'none';
+        document.getElementById('km-summary-km-val').textContent = r.total.toFixed(2) + ' km';
         document.getElementById('km-summary-time-val').textContent = 'Duração: ' + _fmtTime(r.duration);
-        document.getElementById('km-summary-ida-val').textContent = r.ida.toFixed(1) + ' km';
-        document.getElementById('km-summary-volta-val').textContent = r.volta.toFixed(1) + ' km';
+        document.getElementById('km-summary-ida-val').textContent = r.ida.toFixed(2) + ' km';
+        document.getElementById('km-summary-volta-val').textContent = r.volta.toFixed(2) + ' km';
         document.getElementById('km-status-text').textContent = '✅ Quilometragem registrada para este evento';
         document.getElementById('km-status-row').className = 'km-status-row';
+        _setGpsBanner('Trajeto já registrado para este evento', 'ok');
       } else {
-        summaryCard.style.display = 'none';
-        statsGrid.style.display = 'grid';
-        concluirBtn.style.display = 'none';
+        if (summaryCard) summaryCard.style.display = 'none';
+        if (statsGrid) statsGrid.style.display = 'grid';
+        if (fuelResult) fuelResult.style.display = 'none';
+        _setGpsBanner('', '');
         _updateUI();
       }
 
       document.getElementById('km-tracker-order-num').textContent = order ? `Pedido #${order.orderNumber}` : '';
       document.getElementById('km-tracker-dest').textContent = location;
+
       if (!order || !order.kmRecord) {
-        document.getElementById('km-dist-val').textContent = '0';
+        document.getElementById('km-dist-val').textContent = '0 m';
         document.getElementById('km-time-val').textContent = '00:00';
         document.getElementById('km-phase-val').textContent = '—';
-        document.getElementById('km-speed-val').textContent = '— km/h';
+        document.getElementById('km-speed-val').textContent = '—';
       }
 
-      // Montar URL do Google Maps e aplicar ao link inline
+      // Google Maps link
       const encoded = encodeURIComponent(location);
       const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
       const mapsUrl = isIOS
@@ -8533,20 +8833,18 @@ function openCommitmentModal(mode, id = null, date = null) {
       const mapsLink = document.getElementById('km-maps-link');
       if (mapsLink) mapsLink.href = mapsUrl;
 
-      // Abrir com pequeno delay para garantir que modais fecharam
       setTimeout(() => {
         _hideTrackingBadge();
         document.getElementById('km-tracker-modal').classList.add('active');
-      }, 100);
+      }, 80);
     }
 
     function close() {
-      // Se estiver rastreando, apenas fecha o modal (não para o GPS)
       const isTracking = ['going','arrived','returning'].includes(_state.phase);
       document.getElementById('km-tracker-modal').classList.remove('active');
       if (isTracking) {
         _showTrackingBadge();
-        showToast('Rastreamento ativo em segundo plano 🔴', 'warning');
+        showToast('Rastreamento GPS ativo em segundo plano 🔴', 'warning');
       }
     }
 
@@ -8564,10 +8862,10 @@ function openCommitmentModal(mode, id = null, date = null) {
           animation:badgePop 0.4s var(--t-spring) both;
           font-family:var(--font-body);
         `;
-        badge.innerHTML = '<i class="fas fa-circle" style="font-size:0.5rem;animation:pulse 1s infinite;"></i> Rastreando';
+        badge.innerHTML = '<i class="fas fa-circle" style="font-size:0.5rem;animation:pulseKm 1s infinite;"></i> Rastreando';
         badge.addEventListener('click', () => {
           badge.remove();
-          document.getElementById('km-tracker-modal').classList.add('active');
+          open(_state.orderId, _state.location);
         });
         document.body.appendChild(badge);
       }
@@ -8578,53 +8876,184 @@ function openCommitmentModal(mode, id = null, date = null) {
     }
 
     function _openMapsAndStartTracking() {
-      // Iniciar rastreamento GPS apenas
-      _startGPS();
-      showToast('Rastreamento GPS iniciado! 🚗', 'success');
+      // Abrir mapa + iniciar GPS
+      if (_state.location) {
+        const enc = encodeURIComponent(_state.location);
+        const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+        const mapsUrl = isIOS
+          ? `maps://?daddr=${enc}&dirflg=d`
+          : `https://www.google.com/maps/dir/?api=1&destination=${enc}&travelmode=driving`;
+        window.open(mapsUrl, '_blank');
+      }
+      const started = _startGPS();
+      if (started) showToast('Rastreamento GPS iniciado! 🚗', 'success');
+    }
+
+    function startAutoTracking(orderId) {
+      const order = eventOrders.find(o => o.id === orderId);
+      if (!order || !order.eventLocation) { showToast('Endereço do evento não cadastrado', 'warning'); return; }
+
+      // If already tracking this order, just open the panel
+      if (['going','arrived','returning'].includes(_state.phase) && _state.orderId === orderId) {
+        _hideTrackingBadge();
+        document.getElementById('km-tracker-modal').classList.add('active');
+        return;
+      }
+
+      _state.orderId = orderId;
+      _state.location = order.eventLocation;
+      _state.phase = 'idle';
+      _state.totalDist = 0; _state.idaDist = 0; _state.voltaDist = 0;
+      _state.lastPos = null; _state.startTime = null; _state.gpsOk = false; _state.posCount = 0;
+      clearInterval(_state.timerInterval);
+
+      // Open maps immediately
+      const enc = encodeURIComponent(order.eventLocation);
+      const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+      const mapsUrl = isIOS
+        ? `maps://?daddr=${enc}&dirflg=d`
+        : `https://www.google.com/maps/dir/?api=1&destination=${enc}&travelmode=driving`;
+      window.open(mapsUrl, '_blank');
+
+      // Set up panel state
+      document.getElementById('km-tracker-order-num').textContent = `Pedido #${order.orderNumber}`;
+      document.getElementById('km-tracker-dest').textContent = order.eventLocation;
+      const mapsLink = document.getElementById('km-maps-link');
+      if (mapsLink) mapsLink.href = mapsUrl;
+      const summaryCard = document.getElementById('km-summary-card');
+      const statsGrid = document.getElementById('km-stats-grid');
+      if (summaryCard) summaryCard.style.display = 'none';
+      if (statsGrid) statsGrid.style.display = 'grid';
+      document.getElementById('km-fuel-cost-result').style.display = 'none';
+      document.getElementById('km-dist-val').textContent = '0 m';
+      document.getElementById('km-time-val').textContent = '00:00';
+      document.getElementById('km-phase-val').textContent = '—';
+      document.getElementById('km-speed-val').textContent = '—';
+
+      // Start GPS and show badge
+      const started = _startGPS();
+      if (started) {
+        _showTrackingBadge();
+        showToast('📍 Mapa aberto · GPS rastreando em segundo plano', 'success');
+      }
+      setTimeout(() => updateDashboardUpcoming(), 400);
     }
 
     function concluir() {
       _stopGPS();
       _hideTrackingBadge();
       _state.phase = 'done';
+      _setGpsBanner('', '');
+
       const record = _saveKm(_state.orderId);
       if (!record) { showToast('Erro ao salvar quilometragem', 'error'); return; }
-      // Mostrar resumo
+
+      // Fuel cost
+      let fuelCost = 0, litros = 0;
+      if (record.total > 0 && fuelConfig.consumption > 0 && fuelConfig.pricePerLiter > 0) {
+        litros = record.total / fuelConfig.consumption;
+        fuelCost = litros * fuelConfig.pricePerLiter;
+      }
+
+      // Save to fuel log
+      const order = eventOrders.find(o => o.id === _state.orderId);
+      const fuelLogEntry = {
+        id: Date.now(),
+        date: new Date().toISOString().split('T')[0],
+        orderId: _state.orderId,
+        orderNumber: order ? order.orderNumber : '',
+        eventLocation: _state.location || '',
+        distanceKm: record.total,
+        idaKm: record.ida,
+        voltaKm: record.volta,
+        durationSec: record.duration,
+        fuelType: fuelConfig.type || 'Gasolina',
+        pricePerLiter: fuelConfig.pricePerLiter || 0,
+        consumptionKmL: fuelConfig.consumption || 0,
+        liters: +litros.toFixed(3),
+        fuelCost: +fuelCost.toFixed(2),
+      };
+      fuelLog.push(fuelLogEntry);
+      saveData();
+
+      // Show summary
       const summaryCard = document.getElementById('km-summary-card');
       const statsGrid = document.getElementById('km-stats-grid');
-      const concluirBtn = document.getElementById('km-concluir-btn');
-      summaryCard.style.display = 'block';
-      statsGrid.style.display = 'none';
-      concluirBtn.style.display = 'none';
-      document.getElementById('km-summary-km-val').textContent = record.total.toFixed(1) + ' km';
+      if (summaryCard) summaryCard.style.display = 'block';
+      if (statsGrid) statsGrid.style.display = 'none';
+      document.getElementById('km-summary-km-val').textContent = record.total.toFixed(2) + ' km';
       document.getElementById('km-summary-time-val').textContent = 'Duração: ' + _fmtTime(record.duration);
-      document.getElementById('km-summary-ida-val').textContent = record.ida.toFixed(1) + ' km';
-      document.getElementById('km-summary-volta-val').textContent = record.volta.toFixed(1) + ' km';
+      document.getElementById('km-summary-ida-val').textContent = record.ida.toFixed(2) + ' km (ida)';
+      document.getElementById('km-summary-volta-val').textContent = record.volta.toFixed(2) + ' km (volta)';
       document.getElementById('km-status-row').className = 'km-status-row';
       document.getElementById('km-status-text').textContent = '✅ Quilometragem registrada com sucesso!';
-      showToast(`Trajeto salvo! Total: ${record.total.toFixed(1)} km`, 'success');
+
+      // Fuel cost card
+      const fuelCostEl = document.getElementById('km-fuel-cost-result');
+      if (fuelCostEl) {
+        fuelCostEl.style.display = 'block';
+        if (fuelCost > 0) {
+          fuelCostEl.innerHTML = `
+            <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(245,158,11,0.1);border:1.5px solid rgba(245,158,11,0.25);border-radius:var(--r-md);margin-top:12px;">
+              <i class="fas fa-gas-pump" style="color:var(--ev-orange);font-size:1.2rem;flex-shrink:0;"></i>
+              <div style="flex:1;">
+                <div style="font-size:0.7rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;">Custo de Combustível</div>
+                <div style="font-size:1.3rem;font-weight:800;color:var(--ev-orange);margin-top:2px;">${formatCurrency(fuelCost)}</div>
+                <div style="font-size:0.72rem;color:var(--text3);margin-top:1px;">${litros.toFixed(2)} L · ${fuelConfig.type} R$${fuelConfig.pricePerLiter.toFixed(2)}/L · ${record.total.toFixed(2)} km</div>
+              </div>
+            </div>`;
+        } else {
+          fuelCostEl.innerHTML = `<div style="font-size:0.78rem;color:var(--text3);margin-top:8px;text-align:center;padding:10px;background:var(--surface2);border-radius:var(--r-sm);"><i class="fas fa-info-circle" style="margin-right:4px;"></i>Configure o combustível na aba <strong>Checklist</strong> para ver o custo.</div>`;
+        }
+      }
+
+      _updateUI();
+      const msg = fuelCost > 0
+        ? `Trajeto salvo! ${record.total.toFixed(2)} km · Custo: ${formatCurrency(fuelCost)}`
+        : `Trajeto salvo! Total: ${record.total.toFixed(2)} km`;
+      showToast(msg, 'success');
     }
 
     (function wireKmTracker() {
       function wire() {
         const modal = document.getElementById('km-tracker-modal');
-        // Botão X fecha
+
         document.getElementById('km-tracker-close-btn')?.addEventListener('click', close);
-        // Clique no backdrop (fora do modal-content) também fecha
         modal?.addEventListener('click', function(e) {
           if (e.target === modal) close();
         });
+
         document.getElementById('km-open-maps-btn')?.addEventListener('click', _openMapsAndStartTracking);
         document.getElementById('km-concluir-btn')?.addEventListener('click', concluir);
-        // Tecla Escape
+
+        document.getElementById('km-btn-chegou')?.addEventListener('click', () => {
+          if (_state.phase === 'going') {
+            _state.phase = 'arrived';
+            _setGpsBanner('📍 No local do evento — rastreamento pausado', 'ok');
+            _updateUI();
+            showToast('Marcado como: Cheguei no local!', 'success');
+          }
+        });
+
+        document.getElementById('km-btn-voltando')?.addEventListener('click', () => {
+          if (_state.phase === 'going' || _state.phase === 'arrived') {
+            _state.phase = 'returning';
+            _setGpsBanner('🔴 Rastreando — Voltando para casa', 'tracking');
+            _updateUI();
+            showToast('Fase: Voltando para casa', 'success');
+          }
+        });
+
         document.addEventListener('keydown', (e) => {
           if (e.key === 'Escape' && modal?.classList.contains('active')) close();
         });
       }
-      document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', wire) : setTimeout(wire, 300);
+      document.readyState === 'loading'
+        ? document.addEventListener('DOMContentLoaded', wire)
+        : setTimeout(wire, 300);
     })();
 
-    return { open, close };
+    return { open, close, startAutoTracking };
   })();
 
   // ── Função global para abrir o KM Tracker ──
@@ -11273,6 +11702,8 @@ function showCommitmentsForDay(dateString) {
       }
       saveData();
       updateUI();
+      // Mostrar painel de trajeto/combustível
+      setTimeout(() => showTravelSummaryPanel(orderId), 400);
     }
 
     if (saldo > 0) {
@@ -11339,6 +11770,216 @@ function showCommitmentsForDay(dateString) {
     const sh = document.getElementById('_finalize-sheet');
     if (ov) ov.style.display = 'none';
     if (sh) sh.style.display = 'none';
+  }
+
+  // =====================================================
+  // PAINEL DE TRAJETO/COMBUSTÍVEL — aparece ao marcar realizado
+  // =====================================================
+  function showTravelSummaryPanel(orderId) {
+    const order = eventOrders.find(o => o.id === orderId);
+    if (!order) return;
+
+    // Busca kmRecord no objeto ou localStorage
+    let km = order.kmRecord;
+    if (!km) {
+      try { const raw = localStorage.getItem('djmgr_km_' + orderId); if (raw) { km = JSON.parse(raw); order.kmRecord = km; } } catch(e) {}
+    }
+
+    const client = clients.find(c => c.id === order.clientId) || {};
+    const fmtTime = s => { if (!s) return '—'; const h=Math.floor(s/3600),m=Math.floor((s%3600)/60); return h>0?`${h}h ${String(m).padStart(2,'0')}min`:`${String(m).padStart(2,'0')}min`; };
+
+    // Remover painel anterior se existir
+    document.getElementById('_travel-panel-overlay')?.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = '_travel-panel-overlay';
+    overlay.style.cssText = `position:fixed;inset:0;z-index:1500;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.2s ease both;`;
+
+    const panel = document.createElement('div');
+    panel.style.cssText = `background:var(--surface);width:100%;max-width:600px;border-radius:24px 24px 0 0;padding:0 20px calc(28px + env(safe-area-inset-bottom,0px));animation:sheetUp 0.35s cubic-bezier(0.4,0,0.2,1) both;box-shadow:0 -12px 60px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto;`;
+
+    const litros = km && km.total > 0 && fuelConfig.consumption > 0 ? km.total / fuelConfig.consumption : 0;
+    const custo  = litros > 0 && fuelConfig.pricePerLiter > 0 ? litros * fuelConfig.pricePerLiter : 0;
+    const hasFuel = fuelConfig.pricePerLiter > 0 && fuelConfig.consumption > 0;
+
+    // Calcular lucro líquido se houver custo de combustível
+    const totalPaid = receipts.filter(r => r.orderId === orderId && r.status === 'pago').reduce((s,r) => s+r.amount, 0);
+    const lucroLiquido = custo > 0 ? (order.totalValue || 0) - custo : null;
+
+    panel.innerHTML = `
+      <div style="width:40px;height:4px;background:var(--border-soft);border-radius:999px;margin:14px auto 0;"></div>
+
+      <!-- Header -->
+      <div style="display:flex;align-items:center;gap:12px;padding:18px 0 16px;border-bottom:1px solid var(--border-soft);">
+        <div style="width:44px;height:44px;border-radius:var(--r-md);background:linear-gradient(135deg,#8b5cf6,#7c3aed);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="fas fa-flag-checkered" style="color:white;font-size:1.1rem;"></i>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1rem;font-weight:800;color:var(--text);">Evento Realizado! 🎉</div>
+          <div style="font-size:0.78rem;color:var(--text3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${client.name || ''} · ${order.eventType || ''} · #${order.orderNumber}</div>
+        </div>
+        <button id="_tp_close" style="width:34px;height:34px;border-radius:50%;background:var(--surface2);border:none;cursor:pointer;font-size:1.1rem;color:var(--text3);display:flex;align-items:center;justify-content:center;flex-shrink:0;">&times;</button>
+      </div>
+
+      ${km ? `
+      <!-- Trajeto -->
+      <div style="margin-top:16px;">
+        <div style="font-size:0.65rem;font-weight:700;color:#ea4335;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+          <i class="fas fa-route"></i> Trajeto Realizado
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:${hasFuel?'12':'4'}px;">
+          <div style="background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(59,130,246,0.04));border:1px solid rgba(59,130,246,0.15);border-radius:var(--r-md);padding:12px 8px;text-align:center;">
+            <div style="font-size:1.4rem;font-weight:800;color:var(--primary);line-height:1;">${km.total.toFixed(1)}</div>
+            <div style="font-size:0.6rem;font-weight:700;color:var(--text3);text-transform:uppercase;margin-top:4px;">km total</div>
+          </div>
+          <div style="background:linear-gradient(135deg,rgba(245,158,11,0.1),rgba(245,158,11,0.04));border:1px solid rgba(245,158,11,0.15);border-radius:var(--r-md);padding:12px 8px;text-align:center;">
+            <div style="font-size:1rem;font-weight:800;color:var(--warning);line-height:1;">${fmtTime(km.duration)}</div>
+            <div style="font-size:0.6rem;font-weight:700;color:var(--text3);text-transform:uppercase;margin-top:4px;">duração</div>
+          </div>
+          <div style="background:var(--surface2);border:1px solid var(--border-soft);border-radius:var(--r-md);padding:12px 8px;text-align:center;">
+            <div style="font-size:0.9rem;font-weight:800;color:var(--text2);line-height:1.3;">${(km.ida||0).toFixed(1)} <span style="font-size:0.55rem;opacity:0.6;">IDA</span><br>${(km.volta||0).toFixed(1)} <span style="font-size:0.55rem;opacity:0.6;">VOLTA</span></div>
+            <div style="font-size:0.6rem;font-weight:700;color:var(--text3);text-transform:uppercase;margin-top:4px;">ida / volta</div>
+          </div>
+        </div>
+        ${hasFuel ? `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(245,158,11,0.08);border-radius:var(--r-md);border:1.5px solid rgba(245,158,11,0.2);margin-bottom:${lucroLiquido!==null?'10':'0'}px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <i class="fas fa-gas-pump" style="color:var(--ev-orange);font-size:1.2rem;"></i>
+            <div>
+              <div style="font-size:0.8rem;font-weight:700;color:var(--text2);">${fuelConfig.type} · ${litros.toFixed(2)} L</div>
+              <div style="font-size:0.68rem;color:var(--text3);">R$ ${fuelConfig.pricePerLiter.toFixed(2)}/L · ${fuelConfig.consumption} km/L</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:0.6rem;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:2px;">Combustível</div>
+            <div style="font-size:1.3rem;font-weight:800;color:var(--ev-orange);">${formatCurrency(custo)}</div>
+          </div>
+        </div>
+        ${lucroLiquido !== null ? `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(16,185,129,0.08);border-radius:var(--r-md);border:1.5px solid rgba(16,185,129,0.2);">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <i class="fas fa-hand-holding-usd" style="color:var(--success);font-size:1.2rem;"></i>
+            <div>
+              <div style="font-size:0.8rem;font-weight:700;color:var(--text2);">Receita − Combustível</div>
+              <div style="font-size:0.68rem;color:var(--text3);">${formatCurrency(order.totalValue)} − ${formatCurrency(custo)}</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:0.6rem;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:2px;">Lucro Líquido</div>
+            <div style="font-size:1.3rem;font-weight:800;color:var(--success);">${formatCurrency(lucroLiquido)}</div>
+          </div>
+        </div>` : ''}
+        ` : `
+        <div style="padding:10px 14px;background:var(--surface2);border-radius:var(--r-md);font-size:0.78rem;color:var(--text3);display:flex;align-items:center;gap:8px;">
+          <i class="fas fa-info-circle" style="color:var(--warning);flex-shrink:0;"></i>
+          Configure o combustível na aba <strong style="margin:0 2px;">Checklist</strong> para calcular o custo automaticamente.
+        </div>`}
+      </div>` : `
+      <!-- Sem trajeto GPS — entrada manual -->
+      <div style="margin-top:16px;">
+        <div style="font-size:0.65rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+          <i class="fas fa-route"></i> Registrar Distância Percorrida
+        </div>
+        <p style="font-size:0.85rem;color:var(--text3);margin-bottom:14px;line-height:1.5;">Nenhum rastreamento GPS foi feito. Informe a distância total do trajeto para calcular o custo de combustível.</p>
+        <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:${hasFuel?'12':'0'}px;">
+          <div style="flex:1;">
+            <label style="font-size:0.75rem;color:var(--text2);font-weight:600;display:block;margin-bottom:5px;">Distância total (km)</label>
+            <input id="_tp_km_input" type="number" min="0" step="0.1" placeholder="Ex: 28.5"
+              style="width:100%;padding:12px 14px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:1rem;outline:none;transition:0.15s;"
+              onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--input-border)'">
+          </div>
+          <button id="_tp_km_save" style="padding:12px 18px;background:linear-gradient(135deg,#ea4335,#c62828);color:white;border:none;border-radius:var(--r-sm);font-size:0.9rem;font-weight:700;cursor:pointer;font-family:var(--font-body);white-space:nowrap;flex-shrink:0;box-shadow:0 3px 10px rgba(234,67,53,0.3);">
+            <i class="fas fa-save"></i> Salvar
+          </button>
+        </div>
+        ${hasFuel ? `<div style="font-size:0.75rem;color:var(--text3);padding:8px 12px;background:var(--surface2);border-radius:var(--r-sm);display:flex;align-items:center;gap:6px;"><i class="fas fa-gas-pump" style="color:var(--ev-orange);"></i>${fuelConfig.type} · R$ ${fuelConfig.pricePerLiter.toFixed(2)}/L · ${fuelConfig.consumption} km/L configurado</div>` : `<div style="font-size:0.75rem;color:var(--text3);padding:8px 12px;background:var(--surface2);border-radius:var(--r-sm);display:flex;align-items:center;gap:6px;"><i class="fas fa-info-circle" style="color:var(--warning);"></i>Configure o combustível na aba <strong style="margin-left:2px;">Checklist</strong> para calcular o custo.</div>`}
+        <div id="_tp_fuel_result" style="display:none;margin-top:12px;"></div>
+      </div>`}
+
+      <!-- Botões de ação -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:20px;">
+        <button id="_tp_view_order" class="btn" style="background:linear-gradient(135deg,var(--ev-orange),#d97706);color:white;justify-content:center;gap:6px;">
+          <i class="fas fa-clipboard-list"></i> Ver Pedido
+        </button>
+        <button id="_tp_close2" class="btn" style="background:var(--surface2);color:var(--text2);border:1.5px solid var(--border);justify-content:center;">
+          Fechar
+        </button>
+      </div>
+    `;
+
+    overlay.appendChild(panel);
+    document.body.appendChild(overlay);
+
+    // Fechar
+    const closePanel = () => overlay.remove();
+    document.getElementById('_tp_close').addEventListener('click', closePanel);
+    document.getElementById('_tp_close2').addEventListener('click', closePanel);
+    overlay.addEventListener('click', e => { if (e.target === overlay) closePanel(); });
+
+    // Ver pedido
+    document.getElementById('_tp_view_order').addEventListener('click', () => {
+      closePanel();
+      setTimeout(() => openViewOrderModal(orderId), 200);
+    });
+
+    // Salvar km manual
+    const saveKmBtn = document.getElementById('_tp_km_save');
+    if (saveKmBtn) {
+      saveKmBtn.addEventListener('click', () => {
+        const input = document.getElementById('_tp_km_input');
+        const n = parseFloat(input.value);
+        if (isNaN(n) || n <= 0) { input.style.borderColor = 'var(--danger)'; return; }
+        const kmRecord = { total: n, ida: +(n*0.5).toFixed(2), volta: +(n*0.5).toFixed(2), duration: 0, date: new Date().toISOString(), manual: true };
+        order.kmRecord = kmRecord;
+        saveData();
+        // Calcular e mostrar custo
+        const litros2 = hasFuel ? n / fuelConfig.consumption : 0;
+        const custo2  = litros2 > 0 ? litros2 * fuelConfig.pricePerLiter : 0;
+        if (hasFuel) {
+          const resEl = document.getElementById('_tp_fuel_result');
+          if (resEl) {
+            resEl.style.display = 'block';
+            const lucroLiq = (order.totalValue||0) - custo2;
+            resEl.innerHTML = `
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(245,158,11,0.08);border-radius:var(--r-md);border:1.5px solid rgba(245,158,11,0.2);margin-bottom:10px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <i class="fas fa-gas-pump" style="color:var(--ev-orange);font-size:1.1rem;"></i>
+                  <div>
+                    <div style="font-size:0.8rem;font-weight:700;color:var(--text2);">${fuelConfig.type} · ${litros2.toFixed(2)} L</div>
+                    <div style="font-size:0.68rem;color:var(--text3);">R$ ${fuelConfig.pricePerLiter.toFixed(2)}/L · ${n.toFixed(1)} km</div>
+                  </div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-size:0.6rem;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:2px;">Combustível</div>
+                  <div style="font-size:1.2rem;font-weight:800;color:var(--ev-orange);">${formatCurrency(custo2)}</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(16,185,129,0.08);border-radius:var(--r-md);border:1.5px solid rgba(16,185,129,0.2);">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <i class="fas fa-hand-holding-usd" style="color:var(--success);font-size:1.1rem;"></i>
+                  <div>
+                    <div style="font-size:0.8rem;font-weight:700;color:var(--text2);">Lucro Líquido</div>
+                    <div style="font-size:0.68rem;color:var(--text3);">${formatCurrency(order.totalValue)} − ${formatCurrency(custo2)}</div>
+                  </div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-size:1.2rem;font-weight:800;color:var(--success);">${formatCurrency(lucroLiq)}</div>
+                </div>
+              </div>`;
+          }
+          // Registrar no fuelLog
+          fuelLog.push({ id: Date.now(), date: new Date().toISOString().split('T')[0], orderId, orderNumber: order.orderNumber, eventLocation: order.eventLocation||'', distanceKm: n, idaKm: kmRecord.ida, voltaKm: kmRecord.volta, durationSec: 0, fuelType: fuelConfig.type, pricePerLiter: fuelConfig.pricePerLiter, consumptionKmL: fuelConfig.consumption, liters: +litros2.toFixed(3), fuelCost: +custo2.toFixed(2) });
+          saveData();
+          showToast(`${n.toFixed(1)} km salvo · Combustível: ${formatCurrency(custo2)}`, 'success');
+        } else {
+          showToast(`Distância salva: ${n.toFixed(1)} km`, 'success');
+          closePanel();
+        }
+        saveKmBtn.disabled = true;
+        saveKmBtn.style.opacity = '0.5';
+        input.disabled = true;
+      });
+    }
   }
 
   // =====================================================
@@ -12968,6 +13609,10 @@ function showCommitmentsForDay(dateString) {
     updateDashboardUpcoming();
     document.getElementById('single-commitment-detail-modal').classList.remove('active');
     showToast(`Compromisso marcado como "${statusLabels[newStatus]}"`, 'success');
+    // Se marcou como realizado, mostrar painel de trajeto do pedido vinculado
+    if (newStatus === 'realizado' && c.linkedOrderId) {
+      setTimeout(() => showTravelSummaryPanel(c.linkedOrderId), 350);
+    }
   }
 
   function deleteCommitmentFromDetail(commitmentId) {
@@ -13160,20 +13805,20 @@ function showCommitmentsForDay(dateString) {
         if (irBtn) {
           irBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            // Busca o pedido atualizado no momento do clique (não usa cache do render)
             const _ord = eventOrders.find(o => o.id === _irOrderId);
             if (_ord && _ord.eventLocation) {
-              const enc = encodeURIComponent(_ord.eventLocation);
-              const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-              const mapsUrl = isIOS
-                ? `maps://?daddr=${enc}&dirflg=d`
-                : `https://www.google.com/maps/dir/?api=1&destination=${enc}&travelmode=driving`;
-              window.open(mapsUrl, '_blank');
+              // Verificar se já está rastreando — se sim, abrir painel
+              const badge = document.getElementById('km-tracking-badge');
+              if (badge) {
+                badge.remove();
+                KmTracker.open(_irOrderId, _ord.eventLocation);
+              } else {
+                // Iniciar rastreamento automático em segundo plano
+                KmTracker.startAutoTracking(_irOrderId);
+              }
             } else if (_ord) {
               showToast('Endereço do evento não cadastrado', 'warning');
-              return;
             }
-            openKmTracker(_irOrderId);
           });
         }
       }
@@ -13963,6 +14608,191 @@ function showCommitmentsForDay(dateString) {
       showToast(`Combustível salvo: ${fuelConfig.type} a R$${p.toFixed(2)}/L, ${c} km/L`, 'success');
       updatePreview();
     });
+
+    // Wire fuel report button
+    document.getElementById('fuel-report-btn')?.addEventListener('click', openFuelReportModal);
+  }
+
+  // ── Fuel Report Modal ───────────────────────────────
+  function openFuelReportModal() {
+    const modal = document.getElementById('fuel-report-modal');
+    if (!modal) return;
+    const today = new Date();
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+    document.getElementById('fuel-rpt-start').value = firstDay.toISOString().split('T')[0];
+    document.getElementById('fuel-rpt-end').value = today.toISOString().split('T')[0];
+    renderFuelReport();
+    modal.classList.add('active');
+
+    document.getElementById('fuel-rpt-filter-btn').onclick = renderFuelReport;
+    document.getElementById('fuel-rpt-pdf-btn').onclick = downloadFuelReportPDF;
+    document.getElementById('fuel-rpt-clear-btn').onclick = () => {
+      if (confirm('Limpar todo o histórico de trajetos?')) {
+        fuelLog = [];
+        saveData();
+        renderFuelReport();
+        showToast('Histórico de trajetos limpo!', 'success');
+      }
+    };
+  }
+
+  function getFuelReportFiltered() {
+    const start = document.getElementById('fuel-rpt-start').value;
+    const end = document.getElementById('fuel-rpt-end').value;
+    const dtStart = start ? new Date(start + 'T00:00:00') : null;
+    const dtEnd = end ? new Date(end + 'T23:59:59') : null;
+    return fuelLog.filter(e => {
+      const d = new Date(e.date + 'T00:00:00');
+      if (dtStart && d < dtStart) return false;
+      if (dtEnd && d > dtEnd) return false;
+      return true;
+    }).sort((a, b) => new Date(b.date) - new Date(a.date));
+  }
+
+  function renderFuelReport() {
+    const entries = getFuelReportFiltered();
+    const kpisEl = document.getElementById('fuel-rpt-kpis');
+    const listEl = document.getElementById('fuel-rpt-list');
+
+    const totalKm = entries.reduce((s, e) => s + (e.distanceKm || 0), 0);
+    const totalCost = entries.reduce((s, e) => s + (e.fuelCost || 0), 0);
+    const totalLitros = entries.reduce((s, e) => s + (e.liters || 0), 0);
+    const avgCostPerKm = totalKm > 0 ? totalCost / totalKm : 0;
+
+    kpisEl.innerHTML = `
+      <div style="background:linear-gradient(135deg,rgba(245,158,11,0.12),rgba(245,158,11,0.05));border:1.5px solid rgba(245,158,11,0.25);border-radius:var(--r-md);padding:12px;text-align:center;">
+        <div style="font-size:0.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;"><i class="fas fa-road" style="margin-right:3px;"></i>Total Percorrido</div>
+        <div style="font-size:1.4rem;font-weight:800;color:var(--ev-orange);">${totalKm.toFixed(1)} km</div>
+        <div style="font-size:0.7rem;color:var(--text3);margin-top:2px;">${entries.length} trajeto(s)</div>
+      </div>
+      <div style="background:linear-gradient(135deg,rgba(239,68,68,0.12),rgba(239,68,68,0.05));border:1.5px solid rgba(239,68,68,0.2);border-radius:var(--r-md);padding:12px;text-align:center;">
+        <div style="font-size:0.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;"><i class="fas fa-gas-pump" style="margin-right:3px;"></i>Custo Total</div>
+        <div style="font-size:1.1rem;font-weight:800;color:var(--danger);">${formatCurrency(totalCost)}</div>
+        <div style="font-size:0.7rem;color:var(--text3);margin-top:2px;">${totalLitros.toFixed(1)} L</div>
+      </div>
+      <div style="background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(59,130,246,0.05));border:1.5px solid rgba(59,130,246,0.15);border-radius:var(--r-md);padding:12px;text-align:center;">
+        <div style="font-size:0.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;"><i class="fas fa-tachometer-alt" style="margin-right:3px;"></i>Custo/km</div>
+        <div style="font-size:1.1rem;font-weight:800;color:var(--primary);">${formatCurrency(avgCostPerKm)}/km</div>
+        <div style="font-size:0.7rem;color:var(--text3);margin-top:2px;">média</div>
+      </div>
+      <div style="background:linear-gradient(135deg,rgba(16,185,129,0.1),rgba(16,185,129,0.05));border:1.5px solid rgba(16,185,129,0.15);border-radius:var(--r-md);padding:12px;text-align:center;">
+        <div style="font-size:0.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;"><i class="fas fa-droplet" style="margin-right:3px;"></i>Litros Usados</div>
+        <div style="font-size:1.1rem;font-weight:800;color:var(--success);">${totalLitros.toFixed(1)} L</div>
+        <div style="font-size:0.7rem;color:var(--text3);margin-top:2px;">${fuelConfig.type || 'Gasolina'}</div>
+      </div>`;
+
+    if (!entries.length) {
+      listEl.innerHTML = `<div class="empty-state" style="padding:20px 0;"><div class="empty-state-icon"><i class="fas fa-gas-pump"></i></div><h4>Nenhum trajeto no período</h4><p>Os trajetos concluídos aparecerão aqui</p></div>`;
+      return;
+    }
+
+    listEl.innerHTML = entries.map(e => {
+      const order = e.orderId ? eventOrders.find(o => o.id === e.orderId) : null;
+      const client = order ? clients.find(c => c.id === order.clientId) : null;
+      return `
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid var(--border-soft);">
+          <div style="width:38px;height:38px;border-radius:var(--r-sm);background:rgba(245,158,11,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fas fa-route" style="color:var(--ev-orange);font-size:0.85rem;"></i>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:0.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${client ? client.name : (e.eventLocation || 'Evento')}</div>
+            <div style="font-size:0.72rem;color:var(--text3);margin-top:1px;">${formatDate(e.date)} · ${e.distanceKm.toFixed(1)} km · ${e.liters.toFixed(2)} L</div>
+            ${e.orderNumber ? `<div style="font-size:0.68rem;color:var(--text3);">#${e.orderNumber}</div>` : ''}
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-weight:800;font-size:0.9rem;color:var(--danger);">${formatCurrency(e.fuelCost)}</div>
+            <div style="font-size:0.68rem;color:var(--text3);">${e.fuelType} R$${e.pricePerLiter.toFixed(2)}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function downloadFuelReportPDF() {
+    const entries = getFuelReportFiltered();
+    if (!entries.length) { showToast('Nenhum dado no período selecionado.', 'warning'); return; }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const mX = 14;
+
+    // Header
+    doc.setFillColor(245, 158, 11);
+    doc.rect(0, 0, pageW, 26, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.text(userInfo.name || 'DJ Manager', mX, 11);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.text('RELATÓRIO DE COMBUSTÍVEL & QUILOMETRAGEM', mX, 19);
+    const start = document.getElementById('fuel-rpt-start').value;
+    const end = document.getElementById('fuel-rpt-end').value;
+    const periodoStr = start && end ? `${formatDate(start)} a ${formatDate(end)}` : 'Todos os períodos';
+    doc.setFontSize(8);
+    doc.text(`Período: ${periodoStr}`, pageW - mX, 12, { align: 'right' });
+    doc.text(`Emitido: ${new Date().toLocaleDateString('pt-BR')}`, pageW - mX, 19, { align: 'right' });
+
+    const totalKm = entries.reduce((s, e) => s + (e.distanceKm || 0), 0);
+    const totalCost = entries.reduce((s, e) => s + (e.fuelCost || 0), 0);
+    const totalLitros = entries.reduce((s, e) => s + (e.liters || 0), 0);
+
+    // KPI strip
+    doc.setFillColor(255, 249, 235);
+    doc.roundedRect(mX, 30, pageW - mX * 2, 16, 2, 2, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(100, 80, 20);
+    doc.text(`Total: ${totalKm.toFixed(1)} km`, mX + 4, 40);
+    doc.text(`Custo: ${formatCurrency(totalCost)}`, pageW / 2, 40, { align: 'center' });
+    doc.text(`Litros: ${totalLitros.toFixed(1)} L`, pageW - mX - 4, 40, { align: 'right' });
+
+    const rows = entries.map(e => {
+      const order = e.orderId ? eventOrders.find(o => o.id === e.orderId) : null;
+      const client = order ? clients.find(c => c.id === order.clientId) : null;
+      return [
+        formatDate(e.date),
+        client ? client.name : (e.eventLocation || '—'),
+        e.orderNumber || '—',
+        e.distanceKm.toFixed(1) + ' km',
+        e.liters.toFixed(2) + ' L',
+        e.fuelType,
+        formatCurrency(e.fuelCost),
+      ];
+    });
+
+    doc.autoTable({
+      startY: 50,
+      head: [['Data', 'Cliente / Destino', 'Pedido', 'Distância', 'Litros', 'Combustível', 'Custo']],
+      body: rows,
+      margin: { left: mX, right: mX },
+      styles: { font: 'helvetica', fontSize: 7.5, cellPadding: 2.5 },
+      headStyles: { fillColor: [245, 158, 11], textColor: 255, fontStyle: 'bold', fontSize: 7.5 },
+      alternateRowStyles: { fillColor: [255, 251, 240] },
+      columnStyles: {
+        3: { halign: 'right' }, 4: { halign: 'right' },
+        6: { halign: 'right', textColor: [200, 60, 60], fontStyle: 'bold' }
+      },
+    });
+
+    const finalY = doc.lastAutoTable.finalY || 50;
+    doc.setFillColor(255, 249, 235);
+    doc.roundedRect(mX, finalY + 4, pageW - mX * 2, 14, 2, 2, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(100, 60, 0);
+    doc.text(`${entries.length} trajeto(s)`, mX + 4, finalY + 13);
+    doc.text(`Total: ${formatCurrency(totalCost)}`, pageW - mX - 4, finalY + 13, { align: 'right' });
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(150, 150, 150);
+    doc.text('Gerado pelo DJ Manager Pro', mX, pageH - 8);
+    doc.text(new Date().toLocaleString('pt-BR'), pageW - mX, pageH - 8, { align: 'right' });
+
+    const fname = `relatorio_combustivel_${start || 'all'}_${end || 'all'}`;
+    doc.save(fname + '.pdf');
+    showToast(`PDF gerado com ${entries.length} trajeto(s)!`, 'success');
   }
 
   init();
