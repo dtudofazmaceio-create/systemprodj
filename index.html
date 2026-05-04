@@ -16043,6 +16043,11 @@ function showCommitmentsForDay(dateString) {
     return p;
   }
 
+  // ── Utilitário: compara IDs com tolerância de tipo ──
+  function sameId(a, b) {
+    return String(a) === String(b);
+  }
+
   // ── Calcula alertas de pedidos ──
   function getOrderAlerts() {
     try {
@@ -16058,10 +16063,11 @@ function showCommitmentsForDay(dateString) {
         const dias = daysSince(dateRef);
         if (dias < ORDER_DAYS) continue;
         const totalPaid = receipts
-          .filter(r => String(r.eventOrderId) === String(order.id) || String(r.linkedOrderId) === String(order.id) || String(r.orderId) === String(order.id))
+          .filter(r => sameId(r.eventOrderId, order.id) || sameId(r.linkedOrderId, order.id) || sameId(r.orderId, order.id))
           .reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
         if (totalPaid > 0) continue;
-        const client = clients.find(c => c.id === order.clientId) || {};
+        // Busca cliente tolerando diferença de tipo (string vs number)
+        const client = clients.find(c => sameId(c.id, order.clientId)) || {};
         alerts.push({ type: 'order', item: order, client, dias });
       }
       return alerts.sort((a, b) => b.dias - a.dias);
@@ -16081,7 +16087,8 @@ function showCommitmentsForDay(dateString) {
         if (!dateRef) continue;
         const dias = daysSince(dateRef);
         if (dias < QUOTE_DAYS) continue;
-        const client = clients.find(c => c.id === quote.clientId) || {};
+        // Busca cliente tolerando diferença de tipo (string vs number)
+        const client = clients.find(c => sameId(c.id, quote.clientId)) || {};
         alerts.push({ type: 'quote', item: quote, client, dias });
       }
       return alerts.sort((a, b) => b.dias - a.dias);
@@ -16187,16 +16194,21 @@ function showCommitmentsForDay(dateString) {
       html += orders.map(({ item: order, client, dias }) => {
         const phone   = formatPhone(client.phone || '');
         const waMsg   = buildOrderWhatsApp(order, client);
-        const waUrl   = phone ? `https://wa.me/${phone}?text=${waMsg}` : `https://wa.me/?text=${waMsg}`;
+        // Monta URL com telefone; se não tiver telefone mostra apenas a mensagem (sem número)
+        const waUrl   = phone
+          ? `https://wa.me/${phone}?text=${waMsg}`
+          : `https://api.whatsapp.com/send?text=${waMsg}`;
         const total   = fmtCurrency(order.totalValue || 0);
         const dateRef = (order.createdAt || '').split('T')[0] || order.eventDate;
         const initStr = getInitials(client.name || '?');
+        const clientName = client.name || 'Cliente desconhecido';
+        const clientPhone = client.phone || '—';
         return `
-          <div class="alert-client-card" id="alert-card-order-${order.id}">
+          <div class="alert-client-card" id="alert-card-order-${order.id}" data-open-type="order" data-open-id="${order.id}" style="cursor:pointer;">
             <div class="alert-client-header">
               <div class="alert-client-avatar">${initStr}</div>
               <div class="alert-client-info">
-                <div class="alert-client-name">${client.name || 'Cliente desconhecido'}</div>
+                <div class="alert-client-name">${clientName}</div>
                 <div class="alert-client-meta">${order.eventType || 'Pedido'}${order.eventDate ? ' · ' + fmtDate(order.eventDate) : ''}</div>
               </div>
               <div class="alert-days-badge"><i class="fas fa-clock"></i> ${dias}d</div>
@@ -16209,10 +16221,10 @@ function showCommitmentsForDay(dateString) {
               <span class="detail-label">Sem pagamento há</span>
               <span class="detail-value danger">${dias} dia${dias !== 1 ? 's' : ''}</span>
               <span class="detail-label">Telefone</span>
-              <span class="detail-value">${client.phone || '—'}</span>
+              <span class="detail-value">${clientPhone}</span>
             </div>
-            <a class="alert-whatsapp-btn" href="${waUrl}" target="_blank" rel="noopener">
-              <i class="fab fa-whatsapp"></i> Contatar via WhatsApp
+            <a class="alert-whatsapp-btn" href="${waUrl}" target="_blank" rel="noopener" data-wa-btn>
+              <i class="fab fa-whatsapp"></i> Contatar via WhatsApp${!phone ? ' (sem telefone)' : ''}
             </a>
             <div class="alert-actions-row">
               <button class="alert-action-btn alert-action-cancel" data-action="cancel-order" data-id="${order.id}">
@@ -16232,16 +16244,20 @@ function showCommitmentsForDay(dateString) {
       html += quotes.map(({ item: quote, client, dias }) => {
         const phone   = formatPhone(client.phone || '');
         const waMsg   = buildQuoteWhatsApp(quote, client);
-        const waUrl   = phone ? `https://wa.me/${phone}?text=${waMsg}` : `https://wa.me/?text=${waMsg}`;
+        const waUrl   = phone
+          ? `https://wa.me/${phone}?text=${waMsg}`
+          : `https://api.whatsapp.com/send?text=${waMsg}`;
         const valTotal = (quote.services || []).reduce((s, sv) => s + (sv.value || 0), 0);
         const dateRef  = (quote.createdAt || '').split('T')[0] || quote.emissionDate;
         const initStr  = getInitials(client.name || '?');
+        const clientName = client.name || 'Cliente desconhecido';
+        const clientPhone = client.phone || '—';
         return `
-          <div class="alert-client-card" style="border-left-color:var(--primary);" id="alert-card-quote-${quote.id}">
+          <div class="alert-client-card" style="border-left-color:var(--primary);cursor:pointer;" id="alert-card-quote-${quote.id}" data-open-type="quote" data-open-id="${quote.id}">
             <div class="alert-client-header">
               <div class="alert-client-avatar" style="background:linear-gradient(135deg,var(--primary),var(--accent));">${initStr}</div>
               <div class="alert-client-info">
-                <div class="alert-client-name">${client.name || 'Cliente desconhecido'}</div>
+                <div class="alert-client-name">${clientName}</div>
                 <div class="alert-client-meta">${quote.eventType || 'Orçamento'}${quote.eventDate ? ' · ' + fmtDate(quote.eventDate) : ''}</div>
               </div>
               <div class="alert-days-badge" style="background:rgba(59,130,246,0.12);color:var(--primary);"><i class="fas fa-clock"></i> ${dias}d</div>
@@ -16254,10 +16270,10 @@ function showCommitmentsForDay(dateString) {
               <span class="detail-label">Aguardando há</span>
               <span class="detail-value" style="color:var(--primary);">${dias} dia${dias !== 1 ? 's' : ''}</span>
               <span class="detail-label">Telefone</span>
-              <span class="detail-value">${client.phone || '—'}</span>
+              <span class="detail-value">${clientPhone}</span>
             </div>
-            <a class="alert-whatsapp-btn" href="${waUrl}" target="_blank" rel="noopener">
-              <i class="fab fa-whatsapp"></i> Contatar via WhatsApp
+            <a class="alert-whatsapp-btn" href="${waUrl}" target="_blank" rel="noopener" data-wa-btn>
+              <i class="fab fa-whatsapp"></i> Contatar via WhatsApp${!phone ? ' (sem telefone)' : ''}
             </a>
             <div class="alert-actions-row">
               <button class="alert-action-btn alert-action-cancel" data-action="reject-quote" data-id="${quote.id}">
@@ -16275,17 +16291,51 @@ function showCommitmentsForDay(dateString) {
 
     // ── Wiring dos botões ──
     body.querySelectorAll('[data-action="cancel-order"]').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
         if (confirm('Confirmar cancelamento do pedido?')) cancelOrder(parseFloat(btn.dataset.id));
       });
     });
     body.querySelectorAll('[data-action="reject-quote"]').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
         if (confirm('Confirmar orçamento como não aceito?')) rejectQuoteAlert(parseFloat(btn.dataset.id));
       });
     });
     body.querySelectorAll('[data-action="snooze"]').forEach(btn => {
-      btn.addEventListener('click', () => snoozeAlert(parseFloat(btn.dataset.id), btn.dataset.type));
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        snoozeAlert(parseFloat(btn.dataset.id), btn.dataset.type);
+      });
+    });
+    // Impede que o clique no botão WhatsApp propague para o card
+    body.querySelectorAll('[data-wa-btn]').forEach(a => {
+      a.addEventListener('click', (e) => e.stopPropagation());
+    });
+
+    // ── Clique no card: abre o pedido ou orçamento correspondente ──
+    body.querySelectorAll('.alert-client-card[data-open-type]').forEach(card => {
+      card.addEventListener('click', () => {
+        const type = card.dataset.openType;
+        const id   = card.dataset.openId;
+        closeAlertsModal();
+        // Pequeno delay para o modal fechar antes de abrir o próximo
+        setTimeout(() => {
+          if (type === 'order') {
+            if (typeof window.openViewOrderModal === 'function') {
+              window.openViewOrderModal(parseFloat(id));
+            } else if (typeof window.openEventOrderModal === 'function') {
+              window.openEventOrderModal('edit', parseFloat(id));
+            }
+          } else if (type === 'quote') {
+            if (typeof window.openViewQuoteModal === 'function') {
+              window.openViewQuoteModal(parseFloat(id));
+            } else if (typeof window.openEventQuoteModal === 'function') {
+              window.openEventQuoteModal('edit', parseFloat(id));
+            }
+          }
+        }, 200);
+      });
     });
   }
 
