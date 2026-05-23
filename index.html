@@ -1510,10 +1510,14 @@
     border-radius: var(--r-sm);
     padding: 8px 10px;
     transition: var(--t-fast);
+    overflow: hidden;
+    box-sizing: border-box;
+    width: 100%;
   }
   .order-service-item:hover { border-color: var(--primary); }
   .order-service-item .order-service-desc {
-    flex: 2;
+    flex: 2 1 0;
+    min-width: 0;
     padding: 8px 10px;
     background: var(--input-bg);
     border: 1.5px solid var(--input-border);
@@ -1523,9 +1527,12 @@
     font-size: 0.9rem;
     outline: none;
     transition: var(--t-fast);
+    width: 100%;
   }
   .order-service-item .order-service-value {
-    flex: 1;
+    flex: 0 0 100px;
+    min-width: 80px;
+    max-width: 120px;
     padding: 8px 10px;
     background: var(--input-bg);
     border: 1.5px solid var(--input-border);
@@ -2055,8 +2062,8 @@
   /* ==========================================
      ORDER SERVICE ITEMS
   ========================================== */
-  .order-service-item { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-  .order-service-item input { padding: 9px 12px; font-size: 0.88rem; }
+  .order-service-item { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; overflow: hidden; width: 100%; }
+  .order-service-item input { padding: 9px 12px; font-size: 0.88rem; min-width: 0; }
 
   /* ==========================================
      BALANCE DETAIL MODAL
