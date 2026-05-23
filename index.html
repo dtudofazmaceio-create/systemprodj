@@ -1530,10 +1530,10 @@
     width: 100%;
   }
   .order-service-item .order-service-value {
-    flex: 0 0 100px;
-    min-width: 80px;
-    max-width: 120px;
-    padding: 8px 10px;
+    flex: 0 0 80px;
+    min-width: 0;
+    max-width: 80px;
+    padding: 8px 6px;
     background: var(--input-bg);
     border: 1.5px solid var(--input-border);
     border-radius: var(--r-sm);
@@ -7234,8 +7234,8 @@ if (typeof activeModalCallback === 'function') {
     newItem.className = 'order-service-item';
     newItem.innerHTML = `
       <input type="text" placeholder="Descrição do serviço" class="order-service-desc" value="${desc}">
-      <input type="number" placeholder="R$ 0,00" step="0.01" min="0" class="order-service-value" value="${value}">
-      <button type="button" class="btn btn-xs btn-danger" data-action="remove-service" style="flex-shrink:0;padding:6px 10px;"><i class="fas fa-trash"></i></button>
+      <input type="number" placeholder="0,00" step="0.01" min="0" class="order-service-value" value="${value}">
+      <button type="button" class="btn btn-xs btn-danger" data-action="remove-service" style="flex-shrink:0;padding:6px 8px;min-width:32px;"><i class="fas fa-trash"></i></button>
     `;
     container.appendChild(newItem);
   }
