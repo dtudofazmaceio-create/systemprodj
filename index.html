@@ -1510,10 +1510,14 @@
     border-radius: var(--r-sm);
     padding: 8px 10px;
     transition: var(--t-fast);
+    overflow: hidden;
+    box-sizing: border-box;
+    width: 100%;
   }
   .order-service-item:hover { border-color: var(--primary); }
   .order-service-item .order-service-desc {
-    flex: 2;
+    flex: 2 1 0;
+    min-width: 0;
     padding: 8px 10px;
     background: var(--input-bg);
     border: 1.5px solid var(--input-border);
@@ -1523,10 +1527,13 @@
     font-size: 0.9rem;
     outline: none;
     transition: var(--t-fast);
+    width: 100%;
   }
   .order-service-item .order-service-value {
-    flex: 1;
-    padding: 8px 10px;
+    flex: 0 0 80px;
+    min-width: 0;
+    max-width: 80px;
+    padding: 8px 6px;
     background: var(--input-bg);
     border: 1.5px solid var(--input-border);
     border-radius: var(--r-sm);
@@ -1677,6 +1684,7 @@
     justify-content: center;
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
+    padding: 0;
   }
   .modal.active { display: flex; animation: fadeIn 0.2s ease; }
   .modal-content {
@@ -1685,13 +1693,15 @@
     max-width: 600px;
     border-radius: var(--r-xl) var(--r-xl) 0 0;
     padding: 0 var(--space-lg) calc(var(--space-lg) + env(safe-area-inset-bottom, 0px));
-    max-height: 92vh;
+    max-height: min(92vh, 92dvh);
     overflow-y: auto;
+    overflow-x: hidden;
     animation: sheetUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
     position: relative;
     -webkit-overflow-scrolling: touch;
     border-top: 1px solid var(--border-soft);
     box-shadow: 0 -10px 50px rgba(0,0,0,0.2);
+    overscroll-behavior: contain;
   }
   .modal-handle {
     width: 40px; height: 4px;
@@ -1705,10 +1715,10 @@
   }
   .close-button {
     position: sticky;
-    top: 0;
+    top: 8px;
     float: right;
-    margin-top: -4px;
-    margin-right: -8px;
+    margin-top: 4px;
+    margin-right: -4px;
     width: 36px; height: 36px;
     border-radius: 50%;
     background: var(--surface2);
@@ -1716,7 +1726,7 @@
     font-size: 1.1rem; color: var(--text3);
     display: flex; align-items: center; justify-content: center;
     transition: var(--t-fast);
-    z-index: 1;
+    z-index: 10;
   }
   .close-button:hover { color: var(--danger); background: var(--danger-bg); }
   .modal h2 {
@@ -2052,8 +2062,8 @@
   /* ==========================================
      ORDER SERVICE ITEMS
   ========================================== */
-  .order-service-item { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-  .order-service-item input { padding: 9px 12px; font-size: 0.88rem; }
+  .order-service-item { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; overflow: hidden; width: 100%; }
+  .order-service-item input { padding: 9px 12px; font-size: 0.88rem; min-width: 0; }
 
   /* ==========================================
      BALANCE DETAIL MODAL
@@ -4996,36 +5006,33 @@ fa-download"></i> Baixar Pedido</button>
         <span id="km-status-text">Pronto para iniciar o trajeto</span>
       </div>
 
-      <!-- Fase buttons (Ida / Chegou / Volta) -->
+      <!-- Fase buttons (Cheguei / Voltar) -->
       <div id="km-phase-btns" style="display:none;flex-direction:column;gap:8px;margin-bottom:12px;">
-        <!-- Cheguei -->
-        <button id="km-btn-chegou" class="btn" style="width:100%;background:linear-gradient(135deg,rgba(16,185,129,0.15),rgba(16,185,129,0.08));color:var(--success);border:1.5px solid var(--success);font-size:0.9rem;padding:13px 12px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;gap:10px;font-weight:700;transition:all 0.2s;">
-          <div style="width:36px;height:36px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <i class="fas fa-map-pin" style="color:#fff;font-size:0.9rem;"></i>
-          </div>
-          <div style="text-align:left;">
-            <div style="font-size:0.88rem;font-weight:800;">✅ Cheguei no Local!</div>
-            <div style="font-size:0.68rem;font-weight:500;opacity:0.8;" id="km-chegou-dist-hint">Registra distância percorrida na ida</div>
-          </div>
+        <!-- Botao Cheguei -->
+        <button id="km-btn-chegou" class="btn" style="width:100%;background:linear-gradient(135deg,rgba(16,185,129,0.18),rgba(16,185,129,0.08));color:var(--success);border:2px solid var(--success);font-size:0.9rem;padding:13px 16px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700;letter-spacing:0.01em;">
+          <i class="fas fa-map-pin" style="font-size:1rem;"></i> Cheguei no Local do Evento
         </button>
-        <!-- Voltar ao ponto de origem -->
-        <button id="km-btn-voltando" class="btn" style="width:100%;background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(59,130,246,0.08));color:var(--primary);border:1.5px solid var(--primary);font-size:0.9rem;padding:13px 12px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;gap:10px;font-weight:700;transition:all 0.2s;">
-          <div style="width:36px;height:36px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <i class="fas fa-home" style="color:#fff;font-size:0.9rem;"></i>
+        <!-- Info ida (aparece apos Cheguei) -->
+        <div id="km-chegou-info" style="display:none;padding:12px 14px;background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.25);border-radius:var(--r-md);">
+          <div style="font-size:0.68rem;font-weight:700;color:var(--success);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;"><i class="fas fa-check-circle" style="margin-right:4px;"></i>Distancia da Ida Registrada</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div style="text-align:center;background:var(--surface);border-radius:var(--r-sm);padding:8px 4px;">
+              <div id="km-ida-dist-display" style="font-size:1.25rem;font-weight:800;color:var(--success);">-</div>
+              <div style="font-size:0.62rem;color:var(--text3);font-weight:600;margin-top:2px;">KM Ida</div>
+            </div>
+            <div style="text-align:center;background:var(--surface);border-radius:var(--r-sm);padding:8px 4px;">
+              <div id="km-ida-fuel-display" style="font-size:1.1rem;font-weight:800;color:var(--ev-orange);">-</div>
+              <div style="font-size:0.62rem;color:var(--text3);font-weight:600;margin-top:2px;">Custo Ida</div>
+            </div>
           </div>
-          <div style="text-align:left;">
-            <div style="font-size:0.88rem;font-weight:800;">🏠 Voltar ao Ponto de Origem</div>
-            <div style="font-size:0.68rem;font-weight:500;opacity:0.8;">Abre o GPS com rota de volta automática</div>
-          </div>
+        </div>
+        <!-- Botao Voltar ao Ponto de Origem -->
+        <button id="km-btn-voltando" class="btn" style="width:100%;background:linear-gradient(135deg,rgba(59,130,246,0.18),rgba(59,130,246,0.08));color:var(--primary);border:2px solid var(--primary);font-size:0.9rem;padding:13px 16px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700;letter-spacing:0.01em;">
+          <i class="fas fa-route" style="font-size:1rem;"></i> Voltar ao Ponto de Origem
         </button>
-        <!-- Prévia de combustível durante trajeto -->
-        <div id="km-fuel-live-preview" style="display:none;padding:10px 14px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.25);border-radius:var(--r-md);display:flex;align-items:center;gap:10px;">
-          <i class="fas fa-gas-pump" style="color:var(--warning);font-size:1rem;flex-shrink:0;"></i>
-          <div style="flex:1;">
-            <div style="font-size:0.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;">Combustível (parcial)</div>
-            <div style="font-size:1rem;font-weight:800;color:var(--warning);" id="km-fuel-live-val">—</div>
-            <div style="font-size:0.68rem;color:var(--text3);" id="km-fuel-live-detail">—</div>
-          </div>
+        <!-- Info volta (aparece apos Voltando) -->
+        <div id="km-voltando-info" style="display:none;padding:12px 14px;background:rgba(59,130,246,0.07);border:1px solid rgba(59,130,246,0.25);border-radius:var(--r-md);">
+          <div style="font-size:0.68rem;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.05em;"><i class="fas fa-route" style="margin-right:4px;"></i>Rota de Retorno Calculada automaticamente</div>
         </div>
       </div>
 
@@ -7247,8 +7254,8 @@ if (typeof activeModalCallback === 'function') {
     newItem.className = 'order-service-item';
     newItem.innerHTML = `
       <input type="text" placeholder="Descrição do serviço" class="order-service-desc" value="${desc}">
-      <input type="number" placeholder="R$ 0,00" step="0.01" min="0" class="order-service-value" value="${value}">
-      <button type="button" class="btn btn-xs btn-danger" data-action="remove-service" style="flex-shrink:0;padding:6px 10px;"><i class="fas fa-trash"></i></button>
+      <input type="number" placeholder="0,00" step="0.01" min="0" class="order-service-value" value="${value}">
+      <button type="button" class="btn btn-xs btn-danger" data-action="remove-service" style="flex-shrink:0;padding:6px 8px;min-width:32px;"><i class="fas fa-trash"></i></button>
     `;
     container.appendChild(newItem);
   }
@@ -8061,7 +8068,7 @@ function openCommitmentModal(mode, id = null, date = null) {
           <i class="fas fa-envelope" style="font-size:1.2rem;color:var(--primary);"></i>E-mail
         </a>` : ''}
         ${client.address ? `
-        <a href="https://maps.google.com/?q=${encodeURIComponent(client.address)}" target="_blank" rel="noopener" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;background:var(--surface2);border-radius:var(--r-md);border:1px solid var(--border-soft);text-decoration:none;color:var(--text2);font-size:0.72rem;font-weight:600;" ontouchstart="">
+        <a href="#" data-maps-addr="${client.address.replace(/"/g,'&quot;')}" onclick="event.preventDefault();window._openMapsChoice&&window._openMapsChoice(this.dataset.mapsAddr);" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;background:var(--surface2);border-radius:var(--r-md);border:1px solid var(--border-soft);text-decoration:none;color:var(--text2);font-size:0.72rem;font-weight:600;" ontouchstart="">
           <i class="fas fa-map-marker-alt" style="font-size:1.2rem;color:var(--danger);"></i>Mapa
         </a>` : ''}
       </div>
@@ -8661,71 +8668,26 @@ function openCommitmentModal(mode, id = null, date = null) {
       const concluirBtn = document.getElementById('km-concluir-btn');
       const iniciarBtn = document.getElementById('km-open-maps-btn');
       if (['going','arrived','returning'].includes(_state.phase)) {
-        if (phaseDiv) phaseDiv.style.display = 'flex';
+        if (phaseDiv) { phaseDiv.style.display = 'flex'; phaseDiv.style.flexDirection = 'column'; }
         if (concluirBtn) concluirBtn.style.display = 'flex';
         if (iniciarBtn) iniciarBtn.style.display = 'none';
         // Update phase button labels/styles
         const chegouBtn = document.getElementById('km-btn-chegou');
         const voltandoBtn = document.getElementById('km-btn-voltando');
         if (chegouBtn) {
-          chegouBtn.style.opacity = _state.phase === 'arrived' ? '0.45' : '1';
-          chegouBtn.disabled = _state.phase === 'arrived';
+          const chDis = ['arrived','returning','done'].includes(_state.phase);
+          chegouBtn.style.opacity = chDis ? '0.42' : '1';
+          chegouBtn.disabled = chDis;
         }
         if (voltandoBtn) {
-          voltandoBtn.style.opacity = _state.phase === 'returning' ? '0.45' : '1';
-          voltandoBtn.disabled = _state.phase === 'returning';
+          const vtDis = ['returning','done'].includes(_state.phase);
+          voltandoBtn.style.opacity = vtDis ? '0.42' : '1';
+          voltandoBtn.disabled = vtDis;
         }
-        // Live fuel preview (update every GPS tick)
-        _updateLiveFuelPreview();
       } else {
         if (phaseDiv) phaseDiv.style.display = 'none';
         if (concluirBtn) concluirBtn.style.display = 'none';
         if (iniciarBtn) iniciarBtn.style.display = _state.phase === 'done' ? 'none' : 'flex';
-      }
-    }
-
-    function _openReturnMaps() {
-      // If we have a current GPS position, route from there to home
-      // If no GPS pos, route from event location to home
-      // "Home" is the origin — we use the device's current GPS or ask Maps to detect
-      const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-      let mapsUrl;
-      if (_state.lastPos) {
-        const { lat, lng } = _state.lastPos;
-        if (isIOS) {
-          // iOS Maps: current location to home (no explicit origin → current pos)
-          mapsUrl = `maps://?saddr=${lat},${lng}&daddr=&dirflg=d`;
-        } else {
-          // Google Maps: from current location, destination = origin (blank = my location)
-          // Use "My+Location" as destination since we want to go back
-          mapsUrl = `https://www.google.com/maps/dir/${lat},${lng}/My+Location/?travelmode=driving`;
-        }
-      } else {
-        // Fallback: just open Maps navigation to home
-        if (isIOS) {
-          mapsUrl = `maps://?daddr=&dirflg=d`;
-        } else {
-          mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=My+Location&travelmode=driving`;
-        }
-      }
-      window.open(mapsUrl, '_blank');
-      showToast('🗺️ Rota de volta calculada automaticamente!', 'success');
-    }
-
-    function _updateLiveFuelPreview() {
-      const previewEl = document.getElementById('km-fuel-live-preview');
-      const valEl = document.getElementById('km-fuel-live-val');
-      const detailEl = document.getElementById('km-fuel-live-detail');
-      if (!previewEl || !valEl || !detailEl) return;
-      if (fuelConfig.pricePerLiter > 0 && fuelConfig.consumption > 0 && _state.totalDist > 0) {
-        const km = _state.totalDist;
-        const litros = km / fuelConfig.consumption;
-        const custo = litros * fuelConfig.pricePerLiter;
-        previewEl.style.display = 'flex';
-        valEl.textContent = formatCurrency(custo);
-        detailEl.textContent = `${km.toFixed(2)} km · ${litros.toFixed(2)} L · ${fuelConfig.type} R$${fuelConfig.pricePerLiter.toFixed(2)}/L`;
-      } else {
-        previewEl.style.display = 'none';
       }
     }
 
@@ -8870,6 +8832,11 @@ function openCommitmentModal(mode, id = null, date = null) {
       _state.totalDist = 0; _state.idaDist = 0; _state.voltaDist = 0;
       _state.lastPos = null; _state.startTime = null; _state.gpsOk = false; _state.posCount = 0;
       clearInterval(_state.timerInterval);
+      // Reset phase info boxes
+      const _chegInfo = document.getElementById('km-chegou-info');
+      const _voltInfo = document.getElementById('km-voltando-info');
+      if (_chegInfo) _chegInfo.style.display = 'none';
+      if (_voltInfo) _voltInfo.style.display = 'none';
 
       if (order && order.kmRecord) {
         const r = order.kmRecord;
@@ -8954,16 +8921,89 @@ function openCommitmentModal(mode, id = null, date = null) {
     function _openMapsAndStartTracking() {
       // Abrir mapa + iniciar GPS
       if (_state.location) {
-        const enc = encodeURIComponent(_state.location);
-        const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-        const mapsUrl = isIOS
-          ? `maps://?daddr=${enc}&dirflg=d`
-          : `https://www.google.com/maps/dir/?api=1&destination=${enc}&travelmode=driving`;
-        window.open(mapsUrl, '_blank');
+        _showMapsChoice(_state.location);
       }
       const started = _startGPS();
       if (started) showToast('Rastreamento GPS iniciado! 🚗', 'success');
     }
+
+    function _showMapsChoice(location) {
+      const enc = encodeURIComponent(location);
+      const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${enc}&travelmode=driving`;
+      const appleUrl  = `maps://?daddr=${enc}&dirflg=d`;
+      const isIOS     = /iPhone|iPad|iPod/.test(navigator.userAgent);
+
+      // Remove any previous choice sheet
+      const prev = document.getElementById('maps-choice-sheet');
+      if (prev) prev.remove();
+
+      const sheet = document.createElement('div');
+      sheet.id = 'maps-choice-sheet';
+      sheet.style.cssText = `
+        position:fixed;inset:0;z-index:9999;
+        background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+        display:flex;align-items:flex-end;justify-content:center;
+        animation:fadeIn 0.2s ease;
+      `;
+      sheet.innerHTML = `
+        <div style="
+          background:var(--surface);width:100%;max-width:420px;
+          border-radius:20px 20px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom,0px));
+          box-shadow:0 -8px 40px rgba(0,0,0,0.25);
+          animation:sheetUp 0.3s cubic-bezier(0.4,0,0.2,1) both;
+        ">
+          <div style="width:36px;height:4px;background:var(--border-soft);border-radius:99px;margin:0 auto 16px;"></div>
+          <div style="font-size:0.75rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:14px;text-align:center;">
+            <i class="fas fa-map-marker-alt" style="color:var(--primary);margin-right:6px;"></i>Abrir com…
+          </div>
+          <a href="${googleUrl}" target="_blank" rel="noopener" id="maps-choice-google"
+            style="display:flex;align-items:center;gap:14px;padding:14px 16px;
+              background:var(--surface2);border-radius:14px;margin-bottom:10px;
+              text-decoration:none;border:1.5px solid var(--border);cursor:pointer;transition:background 0.15s;">
+            <span style="width:40px;height:40px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+              <svg width="22" height="22" viewBox="0 0 48 48"><path fill="#4285F4" d="M43.6 20.5H42V20H24v8h11.3C33.9 32.3 29.4 35 24 35c-6.1 0-11-4.9-11-11s4.9-11 11-11c2.8 0 5.3 1 7.2 2.7l5.7-5.7C33.8 7.2 29.1 5 24 5 13.5 5 5 13.5 5 24s8.5 19 19 19 19-8.5 19-19c0-1.2-.1-2.4-.4-3.5z"/><path fill="#34A853" d="M6.3 14.7l6.6 4.8C14.5 16 19 13 24 13c2.8 0 5.3 1 7.2 2.7l5.7-5.7C33.8 7.2 29.1 5 24 5c-7.7 0-14.3 4.3-17.7 9.7z"/><path fill="#FBBC05" d="M24 43c5.1 0 9.8-2 13.3-5.2l-6.2-5.2C29.3 34.3 26.8 35 24 35c-5.4 0-9.9-2.7-11.3-6.5l-6.6 4.8C9.7 38.7 16.3 43 24 43z"/><path fill="#EA4335" d="M43.6 20.5H42V20H24v8h11.3c-0.8 2.2-2.2 4-4.1 5.3l.1-.1 6.2 5.2C37.2 40.3 43 35.5 43 24c0-1.2-.1-2.4-.4-3.5z"/></svg>
+            </span>
+            <div>
+              <div style="font-size:0.95rem;font-weight:700;color:var(--text);">Google Maps</div>
+              <div style="font-size:0.78rem;color:var(--text3);">Abrir rota no Google Maps</div>
+            </div>
+            <i class="fas fa-chevron-right" style="color:var(--text3);margin-left:auto;font-size:0.85rem;"></i>
+          </a>
+          ${isIOS ? `
+          <a href="${appleUrl}" id="maps-choice-apple"
+            style="display:flex;align-items:center;gap:14px;padding:14px 16px;
+              background:var(--surface2);border-radius:14px;margin-bottom:10px;
+              text-decoration:none;border:1.5px solid var(--border);cursor:pointer;transition:background 0.15s;">
+            <span style="width:40px;height:40px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+              <i class="fas fa-map" style="font-size:1.3rem;color:#3b82f6;"></i>
+            </span>
+            <div>
+              <div style="font-size:0.95rem;font-weight:700;color:var(--text);">Apple Maps</div>
+              <div style="font-size:0.78rem;color:var(--text3);">Abrir rota no Maps nativo</div>
+            </div>
+            <i class="fas fa-chevron-right" style="color:var(--text3);margin-left:auto;font-size:0.85rem;"></i>
+          </a>` : ''}
+          <button id="maps-choice-cancel"
+            style="width:100%;padding:13px;background:var(--surface3);border:none;
+              border-radius:14px;font-family:var(--font-body);font-size:0.95rem;
+              font-weight:600;color:var(--text2);cursor:pointer;">
+            Cancelar
+          </button>
+        </div>
+      `;
+
+      document.body.appendChild(sheet);
+
+      const close = () => { sheet.style.opacity='0'; setTimeout(() => sheet.remove(), 200); };
+      sheet.addEventListener('click', e => { if (e.target === sheet) close(); });
+      sheet.querySelector('#maps-choice-cancel').addEventListener('click', close);
+      [sheet.querySelector('#maps-choice-google'), sheet.querySelector('#maps-choice-apple')].forEach(el => {
+        if (el) el.addEventListener('click', close);
+      });
+    }
+
+    // Expose globally for use outside the KM tracker scope
+    window._openMapsChoice = _showMapsChoice;
 
     function startAutoTracking(orderId) {
       const order = eventOrders.find(o => o.id === orderId);
@@ -8983,19 +9023,18 @@ function openCommitmentModal(mode, id = null, date = null) {
       _state.lastPos = null; _state.startTime = null; _state.gpsOk = false; _state.posCount = 0;
       clearInterval(_state.timerInterval);
 
-      // Open maps immediately
-      const enc = encodeURIComponent(order.eventLocation);
-      const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-      const mapsUrl = isIOS
-        ? `maps://?daddr=${enc}&dirflg=d`
-        : `https://www.google.com/maps/dir/?api=1&destination=${enc}&travelmode=driving`;
-      window.open(mapsUrl, '_blank');
+      // Open maps with choice dialog
+      _showMapsChoice(order.eventLocation);
 
       // Set up panel state
       document.getElementById('km-tracker-order-num').textContent = `Pedido #${order.orderNumber}`;
       document.getElementById('km-tracker-dest').textContent = order.eventLocation;
       const mapsLink = document.getElementById('km-maps-link');
-      if (mapsLink) mapsLink.href = mapsUrl;
+      if (mapsLink) {
+        const _encL = encodeURIComponent(order.eventLocation);
+        mapsLink.href = `https://www.google.com/maps/dir/?api=1&destination=${_encL}&travelmode=driving`;
+        mapsLink.onclick = function(e) { e.preventDefault(); _showMapsChoice(order.eventLocation); };
+      }
       const summaryCard = document.getElementById('km-summary-card');
       const statsGrid = document.getElementById('km-stats-grid');
       if (summaryCard) summaryCard.style.display = 'none';
@@ -9105,26 +9144,73 @@ function openCommitmentModal(mode, id = null, date = null) {
         document.getElementById('km-btn-chegou')?.addEventListener('click', () => {
           if (_state.phase === 'going') {
             _state.phase = 'arrived';
-            _setGpsBanner('📍 No local do evento — rastreamento pausado', 'ok');
-            // Show distance traveled so far
-            const idaKm = _state.idaDist.toFixed(2);
-            const hintEl = document.getElementById('km-chegou-dist-hint');
-            if (hintEl) hintEl.textContent = `✓ Ida: ${idaKm} km percorridos`;
-            // Show live fuel preview
-            _updateLiveFuelPreview();
+            _setGpsBanner('\xf0\x9f\x93\x8d No local do evento \xe2\x80\x94 rastreamento pausado', 'ok');
+
+            // Show ida distance + fuel cost preview
+            const idaInfoEl = document.getElementById('km-chegou-info');
+            const idaDistEl = document.getElementById('km-ida-dist-display');
+            const idaFuelEl = document.getElementById('km-ida-fuel-display');
+            if (idaInfoEl && idaDistEl) {
+              idaInfoEl.style.display = 'block';
+              idaDistEl.textContent = _state.idaDist >= 1
+                ? _state.idaDist.toFixed(2) + ' km'
+                : (_state.idaDist * 1000).toFixed(0) + ' m';
+              if (idaFuelEl && fuelConfig.consumption > 0 && fuelConfig.pricePerLiter > 0) {
+                const litrosIda = _state.idaDist / fuelConfig.consumption;
+                const custoIda  = litrosIda * fuelConfig.pricePerLiter;
+                idaFuelEl.textContent = 'R$ ' + custoIda.toFixed(2);
+              } else {
+                idaFuelEl.textContent = '\xe2\x80\x94';
+              }
+            }
+
             _updateUI();
-            showToast(`✅ Chegou ao local! Ida: ${idaKm} km`, 'success');
+            showToast('Chegada registrada! \xf0\x9f\x93\x8d Pronto para registrar a volta.', 'success');
           }
         });
 
         document.getElementById('km-btn-voltando')?.addEventListener('click', () => {
           if (_state.phase === 'going' || _state.phase === 'arrived') {
             _state.phase = 'returning';
-            _setGpsBanner('🔴 Rastreando — Voltando para casa', 'tracking');
+            _setGpsBanner('\xf0\x9f\x94\xb4 Rastreando \xe2\x80\x94 Voltando ao ponto de origem', 'tracking');
+
+            // Show voltando info
+            const voltInfoEl = document.getElementById('km-voltando-info');
+            if (voltInfoEl) voltInfoEl.style.display = 'block';
+
+            // Auto-open Maps with reverse route (from event back to origin)
+            if (_state.location) {
+              // Build reverse route URL: from event location back home
+              const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+              const enc = encodeURIComponent(_state.location);
+              // Get user home address if set
+              const homeAddr = (typeof userInfo !== 'undefined' && userInfo.address) ? userInfo.address : '';
+              let mapsUrl;
+              if (homeAddr) {
+                const encHome = encodeURIComponent(homeAddr);
+                mapsUrl = isIOS
+                  ? 'maps://?saddr=' + enc + '&daddr=' + encHome + '&dirflg=d'
+                  : 'https://www.google.com/maps/dir/?api=1&origin=' + enc + '&destination=' + encHome + '&travelmode=driving';
+              } else {
+                // No home address: just open navigation from current location (Maps default)
+                mapsUrl = isIOS
+                  ? 'maps://?saddr=&daddr=&dirflg=d'
+                  : 'https://www.google.com/maps/dir/?api=1&destination=&travelmode=driving';
+                // Better: use current position if available
+                if (_state.lastPos) {
+                  const { lat, lng } = _state.lastPos;
+                  mapsUrl = isIOS
+                    ? 'maps://?saddr=' + enc + '&daddr=' + lat + ',' + lng + '&dirflg=d'
+                    : 'https://www.google.com/maps/dir/?api=1&origin=' + enc + '&destination=Minha+localiza%C3%A7%C3%A3o&travelmode=driving';
+                }
+              }
+              // Show a small toast then open maps
+              showToast('\xf0\x9f\x97\xba Abrindo rota de retorno no Maps...', 'info');
+              setTimeout(() => window.open(mapsUrl, '_blank'), 800);
+            }
+
             _updateUI();
-            // Open Google Maps with route back to origin (current location → last known origin)
-            _openReturnMaps();
-            showToast('🏠 Calculando rota de volta...', 'info');
+            showToast('Rastreando retorno! \xf0\x9f\x94\x84 GPS ativado.', 'success');
           }
         });
 
@@ -9768,7 +9854,7 @@ function updateClientsList() {
     const currentMonth = calendarCurrentDate.getMonth();
 
     const filteredCommitments = commitments.filter(c => {
-        const commitmentDate = new Date(c.date);
+        const commitmentDate = new Date(c.date.includes('T') ? c.date : c.date + 'T00:00:00');
         return commitmentDate.getFullYear() === currentYear && commitmentDate.getMonth() === currentMonth;
     });
     if (filteredCommitments.length === 0) {
@@ -9781,14 +9867,14 @@ function updateClientsList() {
     const statusBgs     = { agendado: 'var(--warning-bg)', confirmado: 'var(--success-bg)', realizado: 'rgba(139,92,246,0.12)', cancelado: 'var(--danger-bg)' };
     const statusLabels  = { agendado: '⏳ Agendado', confirmado: '✅ Confirmado', realizado: '🎉 Realizado', cancelado: '❌ Cancelado' };
     const _today = new Date(); _today.setHours(0,0,0,0);
-    const _todayStr = `${_today.getFullYear()}-${String(_today.getMonth()+1).padStart(2,'0')}-${String(_today.getDate()).padStart(2,'0')}`;
 
     filteredCommitments.sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(commitment => {
       const client = commitment.clientId ? clients.find(c => c.id === commitment.clientId) : null;
-      const date = new Date(commitment.date + (commitment.date.includes('T') ? '' : 'T00:00:00'));
+      const date = new Date(commitment.date.includes('T') ? commitment.date : commitment.date + 'T00:00:00');
       const timeStr = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-      const dateOnly = new Date(date); dateOnly.setHours(0,0,0,0);
-      const diffDays = Math.round((dateOnly - _today) / 86400000);
+      // Usar apenas parte da data para evitar off-by-one com eventos que tem horario
+      const dateDateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const diffDays = Math.round((dateDateOnly - _today) / 86400000);
       const isToday = diffDays === 0;
       const isPast  = diffDays < 0;
 
@@ -13780,7 +13866,8 @@ function showCommitmentsForDay(dateString) {
     el.innerHTML = '';
     upcoming.forEach(c => {
       const d = new Date(c.date + (c.date.includes('T') ? '' : 'T00:00:00'));
-      const dDateOnly = new Date(d); dDateOnly.setHours(0,0,0,0);
+      // Para calcular diffDays, usar apenas a parte da data (sem hora) para evitar off-by-one em UTC-3
+      const dDateOnly = new Date(d.getFullYear(), d.getMonth(), d.getDate());
       const diffDays = Math.round((dDateOnly - _now) / 86400000);
       const timeStr = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
       const isToday = diffDays === 0;
