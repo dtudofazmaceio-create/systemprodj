@@ -6127,6 +6127,8 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
     document.getElementById('add-new-package-btn')?.addEventListener('click', () => openPackageModal('new'));
     document.getElementById('package-form')?.addEventListener('submit', handlePackageSubmit);
     document.getElementById('add-package-service-btn')?.addEventListener('click', () => addPackageServiceItem());
+    document.getElementById('add-package-checklist-btn')?.addEventListener('click', () => addPackageChecklistItem());
+    document.getElementById('package-new-checklist-item')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addPackageChecklistItem(); } });
     document.getElementById('order-load-package')?.addEventListener('change', (e) => loadPackageToForm('order', e.target.value));
     document.getElementById('quote-load-package')?.addEventListener('change', (e) => loadPackageToForm('quote', e.target.value));
     // Clause editor listeners
@@ -7110,6 +7112,18 @@ if (typeof activeModalCallback === 'function') {
         };
         eventOrders.push(newOrder);
 
+        // Apply pending package default checklist to this new order's event checklist
+        if (window._pendingPackageChecklist && (window._pendingPackageChecklist.items || []).length > 0) {
+          const eventKey = 'o_' + newOrder.id;
+          if (!eventChecklists[eventKey]) eventChecklists[eventKey] = [];
+          window._pendingPackageChecklist.items.forEach(name => {
+            if (!eventChecklists[eventKey].find(i => i.name.toLowerCase() === name.toLowerCase())) {
+              eventChecklists[eventKey].push({ name, checked: false });
+            }
+          });
+          window._pendingPackageChecklist = null;
+        }
+
         const client = clients.find(c => c.id === newOrder.clientId);
         const newCommitment = {
             id: Date.now() + 1,
@@ -7640,6 +7654,10 @@ function openCommitmentModal(mode, id = null, date = null) {
 
   const servicesContainer = document.getElementById('order-services-container');
   servicesContainer.innerHTML = '';
+  // Clean up pending package checklist state
+  window._pendingPackageChecklist = null;
+  const existingBanner = document.getElementById('pkg-checklist-preview-banner');
+  if (existingBanner) existingBanner.remove();
   populatePackageSelects();
 
   if (mode === 'edit' && id) {
@@ -12338,6 +12356,7 @@ function showCommitmentsForDay(dateString) {
     modal.querySelector('#package-modal-title').textContent = 'Novo Pacote';
     const container = document.getElementById('package-services-container');
     container.innerHTML = '';
+    document.getElementById('package-checklist-container').innerHTML = '';
 
     if (mode === 'edit' && id) {
       const pkg = packages.find(p => p.id === id);
@@ -12347,6 +12366,7 @@ function showCommitmentsForDay(dateString) {
         document.getElementById('package-name').value = pkg.name;
         document.getElementById('package-description').value = pkg.description || '';
         (pkg.services || []).forEach(s => addPackageServiceItem(s.description, s.value));
+        (pkg.defaultChecklist || []).forEach(item => addPackageChecklistItemRow(item));
       }
     } else {
       addPackageServiceItem();
@@ -12367,6 +12387,33 @@ function showCommitmentsForDay(dateString) {
     container.appendChild(item);
   }
 
+  function addPackageChecklistItem() {
+    const input = document.getElementById('package-new-checklist-item');
+    const name = (input?.value || '').trim();
+    if (!name) return;
+    // Check duplicate
+    const existing = Array.from(document.querySelectorAll('#package-checklist-container .pkg-checklist-name')).map(el => el.value.toLowerCase());
+    if (existing.includes(name.toLowerCase())) { showToast('warning', 'Equipamento já está na lista.'); return; }
+    addPackageChecklistItemRow(name);
+    input.value = '';
+    input.focus();
+  }
+
+  function addPackageChecklistItemRow(name) {
+    const container = document.getElementById('package-checklist-container');
+    const row = document.createElement('div');
+    row.className = 'pkg-checklist-row';
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--surface3);border-radius:var(--r-sm);margin-bottom:6px;border:1px solid var(--border-soft);';
+    row.innerHTML = `
+      <i class="fas fa-grip-vertical" style="color:var(--text3);font-size:0.8rem;flex-shrink:0;"></i>
+      <i class="fas fa-cube" style="color:var(--warning);font-size:0.82rem;flex-shrink:0;"></i>
+      <input type="text" class="pkg-checklist-name" value="${name.replace(/"/g,'&quot;')}" style="flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--font-body);font-size:0.88rem;">
+      <button type="button" class="btn btn-xs btn-danger pkg-checklist-remove" style="padding:3px 7px;flex-shrink:0;" title="Remover"><i class="fas fa-times"></i></button>
+    `;
+    row.querySelector('.pkg-checklist-remove').addEventListener('click', () => row.remove());
+    container.appendChild(row);
+  }
+
   function handlePackageSubmit(e) {
     e.preventDefault();
     const id = document.getElementById('edit-package-id').value;
@@ -12377,11 +12424,18 @@ function showCommitmentsForDay(dateString) {
       const val = parseFloat(item.querySelector('.order-service-value').value) || 0;
       if (desc) { services.push({ description: desc, value: val }); totalValue += val; }
     });
+    // Collect default checklist items
+    const defaultChecklist = [];
+    document.querySelectorAll('#package-checklist-container .pkg-checklist-name').forEach(input => {
+      const name = input.value.trim();
+      if (name && !defaultChecklist.includes(name)) defaultChecklist.push(name);
+    });
     const data = {
       name: document.getElementById('package-name').value,
       description: document.getElementById('package-description').value,
       services: services,
       totalValue: totalValue,
+      defaultChecklist: defaultChecklist,
     };
     if (id) {
       const idx = packages.findIndex(p => p.id === parseFloat(id));
@@ -12432,6 +12486,10 @@ function showCommitmentsForDay(dateString) {
         ${servCount > 0 ? `<div style="background:var(--surface2);border-radius:var(--r-sm);padding:8px 10px;">
           ${(pkg.services||[]).map(s=>`<div style="display:flex;justify-content:space-between;font-size:0.77rem;padding:2px 0;border-bottom:1px solid var(--border-soft);"><span style="color:var(--text2);">• ${s.description}</span><span style="font-weight:600;color:var(--text);">${formatCurrency(s.value)}</span></div>`).join('')}
         </div>` : ''}
+        ${(pkg.defaultChecklist||[]).length > 0 ? `<div style="margin-top:8px;background:rgba(245,158,11,0.07);border-radius:var(--r-sm);padding:8px 10px;border:1px solid rgba(245,158,11,0.2);">
+          <div style="font-size:0.68rem;font-weight:700;color:var(--warning);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;display:flex;align-items:center;gap:5px;"><i class="fas fa-clipboard-list"></i> Checklist Padrão (${pkg.defaultChecklist.length} item${pkg.defaultChecklist.length!==1?'s':''})</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;">${pkg.defaultChecklist.map(item=>`<span style="background:rgba(245,158,11,0.15);color:var(--warning);padding:2px 7px;border-radius:var(--r-full);font-size:0.73rem;font-weight:600;">${item}</span>`).join('')}</div>
+        </div>` : ''}
       `;
       card.addEventListener('mouseenter', () => { card.style.boxShadow='var(--card-shadow-hover)'; });
       card.addEventListener('mouseleave', () => { card.style.boxShadow='var(--card-shadow)'; });
@@ -12459,8 +12517,38 @@ function showCommitmentsForDay(dateString) {
     if (!container) return;
     container.innerHTML = '';
     (pkg.services || []).forEach(s => addServiceItem(type, s.description, s.value));
+
+    // If the package has a default checklist, store it for use when the order is saved
+    // and show a preview banner
+    if ((pkg.defaultChecklist || []).length > 0) {
+      // Store pending checklist on window to be applied after order save
+      window._pendingPackageChecklist = { packageId: pkg.id, items: pkg.defaultChecklist };
+      // Show info banner inside the services section
+      const existingBanner = document.getElementById('pkg-checklist-preview-banner');
+      if (existingBanner) existingBanner.remove();
+      const banner = document.createElement('div');
+      banner.id = 'pkg-checklist-preview-banner';
+      banner.style.cssText = 'background:rgba(245,158,11,0.1);border:1.5px solid rgba(245,158,11,0.35);border-radius:var(--r-sm);padding:10px 12px;margin-top:10px;font-size:0.82rem;color:var(--text2);';
+      banner.innerHTML = `<div style="display:flex;align-items:flex-start;gap:8px;">
+        <i class="fas fa-clipboard-check" style="color:var(--warning);margin-top:2px;flex-shrink:0;"></i>
+        <div>
+          <strong style="color:var(--warning);">Checklist padrão incluído:</strong>
+          <div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:5px;">
+            ${pkg.defaultChecklist.map(item => `<span style="background:rgba(245,158,11,0.15);color:var(--warning);padding:2px 8px;border-radius:var(--r-full);font-size:0.78rem;font-weight:600;">${item}</span>`).join('')}
+          </div>
+          <div style="margin-top:6px;font-size:0.75rem;color:var(--text3);">Estes equipamentos serão adicionados automaticamente ao checklist do evento ao salvar o pedido.</div>
+        </div>
+      </div>`;
+      container.after(banner);
+    } else {
+      window._pendingPackageChecklist = null;
+      const existingBanner = document.getElementById('pkg-checklist-preview-banner');
+      if (existingBanner) existingBanner.remove();
+    }
+
     // Reset selector
     const selId = type === 'order' ? 'order-load-package' : 'quote-load-package';
+    // Keep the value visible but reset after short delay
     setTimeout(() => { const sel = document.getElementById(selId); if(sel) sel.value = ''; }, 100);
   }
 
@@ -15777,6 +15865,18 @@ function showCommitmentsForDay(dateString) {
           <label>Serviços Inclusos</label>
           <div id="package-services-container"></div>
           <button type="button" class="btn btn-xs" id="add-package-service-btn" style="margin-top:5px;"><i class="fas fa-plus"></i> Adicionar Serviço</button>
+        </div>
+        <div class="form-group" style="margin-top:4px;">
+          <label style="display:flex;align-items:center;gap:8px;">
+            <i class="fas fa-clipboard-list" style="color:var(--warning);"></i>
+            Checklist Padrão de Equipamentos
+            <span style="font-size:0.72rem;color:var(--text3);font-weight:400;">(pré-carregado ao usar este pacote)</span>
+          </label>
+          <div id="package-checklist-container" style="margin-bottom:8px;"></div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" id="package-new-checklist-item" placeholder="Nome do equipamento..." style="flex:1;padding:9px 12px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.88rem;outline:none;">
+            <button type="button" class="btn btn-xs" id="add-package-checklist-btn" style="background:var(--warning);color:white;white-space:nowrap;flex-shrink:0;"><i class="fas fa-plus"></i> Adicionar</button>
+          </div>
         </div>
         <div class="btn-container">
           <button type="button" class="btn btn-danger" data-action="close-modal">Cancelar</button>
