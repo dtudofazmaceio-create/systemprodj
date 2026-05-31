@@ -3734,21 +3734,6 @@
       <div class="dashboard-hero">
         <div class="hero-greeting" id="hero-greeting">Bom dia 👋</div>
         <div class="hero-name" id="hero-username">FinancePro</div>
-        <!-- 3 métricas financeiras rápidas -->
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.18);">
-          <div style="background:rgba(255,255,255,0.12);border-radius:var(--r-sm);padding:10px 8px;min-width:0;">
-            <div style="font-size:0.58rem;opacity:0.75;text-transform:uppercase;letter-spacing:0.04em;font-weight:700;line-height:1.2;">Receita<br>Mês</div>
-            <div style="font-size:0.9rem;font-weight:800;margin-top:4px;font-family:var(--font-display);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="hero-receitas-month">R$ 0</div>
-          </div>
-          <div style="background:rgba(255,255,255,0.12);border-radius:var(--r-sm);padding:10px 8px;min-width:0;">
-            <div style="font-size:0.58rem;opacity:0.75;text-transform:uppercase;letter-spacing:0.04em;font-weight:700;line-height:1.2;">A<br>Receber</div>
-            <div style="font-size:0.9rem;font-weight:800;margin-top:4px;font-family:var(--font-display);color:#fde047;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="hero-ar-events">R$ 0</div>
-          </div>
-          <div style="background:rgba(255,255,255,0.12);border-radius:var(--r-sm);padding:10px 8px;min-width:0;">
-            <div style="font-size:0.58rem;opacity:0.75;text-transform:uppercase;letter-spacing:0.04em;font-weight:700;line-height:1.2;">Saldo<br>Contas</div>
-            <div style="font-size:0.9rem;font-weight:800;margin-top:4px;font-family:var(--font-display);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="hero-saldo-contas">R$ 0</div>
-          </div>
-        </div>
         <div id="hero-today-event-section" style="margin-top:12px;">
           <div style="font-size:0.72rem;opacity:0.75;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;font-weight:700;">📅 Eventos de Hoje</div>
           <div id="hero-today-events-list"></div>
@@ -3794,11 +3779,27 @@
       <!-- Notifications -->
       <div class="notifications-container" id="notifications-container"></div>
 
-      <!-- Saldo a Receber de Eventos -->
-      <div id="dash-ar-events-card" style="display:none;background:linear-gradient(135deg,#065f46,#059669);border-radius:var(--r-md);padding:14px 16px;color:white;box-shadow:0 4px 16px rgba(5,150,105,0.25);">
-        <div style="font-size:0.7rem;opacity:0.8;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;margin-bottom:4px;"><i class="fas fa-hand-holding-usd" style="margin-right:5px;"></i>Saldo a Receber — Pedidos em Aberto</div>
-        <div style="font-size:1.6rem;font-weight:800;font-family:var(--font-display);" id="dash-ar-value">R$ 0,00</div>
-        <div style="font-size:0.72rem;opacity:0.75;margin-top:4px;" id="dash-ar-sub">de <span id="dash-ar-count">0</span> pedido(s) com saldo em aberto · <span style="cursor:pointer;text-decoration:underline;" data-tab-target="pedidos">Ver pedidos →</span></div>
+      <!-- Resumo Financeiro (card verde) -->
+      <div id="dash-ar-events-card" style="background:linear-gradient(135deg,#065f46,#059669);border-radius:var(--r-md);padding:16px;color:white;box-shadow:0 4px 16px rgba(5,150,105,0.25);">
+        <div style="font-size:0.7rem;opacity:0.85;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;margin-bottom:12px;"><i class="fas fa-wallet" style="margin-right:6px;"></i>Resumo Financeiro</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;" id="dash-fin-metrics-grid">
+          <div style="background:rgba(255,255,255,0.14);border-radius:var(--r-sm);padding:10px 8px;min-width:0;">
+            <div style="font-size:0.58rem;opacity:0.85;text-transform:uppercase;letter-spacing:0.04em;font-weight:700;line-height:1.2;">Receita<br>Mês</div>
+            <div style="font-size:0.95rem;font-weight:800;margin-top:4px;font-family:var(--font-display);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="hero-receitas-month">R$ 0</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.14);border-radius:var(--r-sm);padding:10px 8px;min-width:0;">
+            <div style="font-size:0.58rem;opacity:0.85;text-transform:uppercase;letter-spacing:0.04em;font-weight:700;line-height:1.2;">A<br>Receber</div>
+            <div style="font-size:0.95rem;font-weight:800;margin-top:4px;font-family:var(--font-display);color:#fde047;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="hero-ar-events">R$ 0</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.14);border-radius:var(--r-sm);padding:10px 8px;min-width:0;">
+            <div style="font-size:0.58rem;opacity:0.85;text-transform:uppercase;letter-spacing:0.04em;font-weight:700;line-height:1.2;">Saldo<br>Contas</div>
+            <div style="font-size:0.95rem;font-weight:800;margin-top:4px;font-family:var(--font-display);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="hero-saldo-contas">R$ 0</div>
+          </div>
+        </div>
+        <!-- Linha de pedidos em aberto (aparece quando há saldo a receber) -->
+        <div id="dash-ar-subline" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.18);font-size:0.72rem;opacity:0.88;">
+          <i class="fas fa-hand-holding-usd" style="margin-right:5px;"></i><strong id="dash-ar-value">R$ 0,00</strong> a receber de <span id="dash-ar-count">0</span> pedido(s) em aberto · <span style="cursor:pointer;text-decoration:underline;" data-tab-target="pedidos">Ver pedidos →</span>
+        </div>
       </div>
 
       <!-- Ações Rápidas -->
@@ -5866,7 +5867,13 @@ document.addEventListener('DOMContentLoaded', () => {
   let goals = parseLocalStorage('goals', []);
   let creditcards = parseLocalStorage('creditcards', []);
   let userInfo = parseLocalStorage('userInfo', { name: 'Sua Empresa de Eventos', cpf: 'Seu CPF/CNPJ' });
-  let categories = parseLocalStorage('categories', ['Recebimento de Evento', 'Aluguel de Equipamento', 'Cachê', 'Transporte', 'Alimentação', 'Marketing', 'Impostos', 'Manutenção', 'Outras Receitas', 'Outras Despesas', 'Ajuste']);
+  let categories = parseLocalStorage('categories', ['Recebimento de Evento', 'Aluguel de Equipamento', 'Cachê', 'Transporte', 'Alimentação', 'Marketing', 'Impostos', 'Manutenção', 'Custos Operacionais', 'Outras Receitas', 'Outras Despesas', 'Ajuste']);
+  // Garante que a categoria de custos operacionais exista para usuários antigos
+  if (!categories.includes('Custos Operacionais')) {
+    const idx = categories.indexOf('Outras Receitas');
+    if (idx >= 0) categories.splice(idx, 0, 'Custos Operacionais');
+    else categories.push('Custos Operacionais');
+  }
   let receipts = parseLocalStorage('receipts', []);
   let clients = parseLocalStorage('clients', []);
   let commitments = parseLocalStorage('commitments', []);
@@ -5919,6 +5926,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     setupNavigation();
     setupEventListeners();
+    backfillOperationalCosts();
     updateUI();
     updateDashboardHero();
     updateDashboardRecent();
@@ -11963,6 +11971,94 @@ function showCommitmentsForDay(dateString) {
   }
 
   // =====================================================
+  // CUSTO OPERACIONAL — registra o combustível como despesa
+  // ao finalizar o pedido, exibindo em "Despesas" como custo operacional.
+  // Possui proteção contra duplicação (1 despesa por pedido).
+  // =====================================================
+  function registerOperationalCostExpense(order, fuelCost, distanceKm, options) {
+    if (!order || !fuelCost || fuelCost <= 0) return false;
+    options = options || {};
+
+    const defaultAccount = accounts.length > 0 ? accounts[0].id : null;
+    const today = new Date().toISOString().split('T')[0];
+    const txDate = options.dateOverride || today;
+    const kmTxt = (distanceKm && distanceKm > 0) ? ` (${distanceKm.toFixed(1)} km)` : '';
+    const description = `Combustível — Pedido Nº ${order.orderNumber}${kmTxt}`;
+
+    // Já existe uma despesa de combustível vinculada a este pedido?
+    const existing = transactions.find(t => t.linkedFuelOrderId === order.id);
+
+    if (existing) {
+      // Atualiza valor/descrição caso a distância tenha sido recalculada
+      existing.amount = +fuelCost.toFixed(2);
+      existing.description = description;
+      existing.category = 'Custos Operacionais';
+      existing.type = 'despesa';
+      existing.date = existing.date || txDate;
+      if (defaultAccount && !existing.toAccount) existing.toAccount = defaultAccount;
+      if (!options.silent) saveData();
+      return false;
+    }
+
+    transactions.push({
+      id: Date.now() + Math.floor(Math.random() * 1000),
+      type: 'despesa',
+      amount: +fuelCost.toFixed(2),
+      date: txDate,
+      description: description,
+      category: 'Custos Operacionais',
+      status: 'confirmada',
+      toAccount: defaultAccount,
+      fromAccount: defaultAccount,
+      linkedFuelOrderId: order.id,
+      createdAt: new Date().toISOString(),
+    });
+    if (!options.silent) {
+      saveData();
+      showToast(`Custo operacional de ${formatCurrency(fuelCost)} lançado em Despesas`, 'info');
+    }
+    return true;
+  }
+
+  // =====================================================
+  // BACKFILL — lança em Despesas o combustível de pedidos
+  // já finalizados anteriormente (executa 1x, sem duplicar).
+  // =====================================================
+  function backfillOperationalCosts() {
+    let created = 0;
+    eventOrders.forEach(order => {
+      if (!order || order.status !== 'finalizado') return;
+      // Pula se já existe despesa vinculada
+      if (transactions.some(t => t.linkedFuelOrderId === order.id)) return;
+
+      // 1) Prioriza o registro histórico do fuelLog (preço da época)
+      const logEntry = fuelLog.find(f => f.orderId === order.id && f.fuelCost > 0);
+      let cost = 0, dist = 0;
+      if (logEntry) {
+        cost = logEntry.fuelCost;
+        dist = logEntry.distanceKm || 0;
+      } else if (order.kmRecord && order.kmRecord.total > 0 &&
+                 fuelConfig.consumption > 0 && fuelConfig.pricePerLiter > 0) {
+        // 2) Calcula a partir do trajeto + configuração atual de combustível
+        dist = order.kmRecord.total;
+        const litros = dist / fuelConfig.consumption;
+        cost = litros * fuelConfig.pricePerLiter;
+      }
+      if (cost > 0) {
+        const ok = registerOperationalCostExpense(order, cost, dist, {
+          silent: true,
+          dateOverride: order.eventDate || (logEntry && logEntry.date) || undefined,
+        });
+        if (ok) created++;
+      }
+    });
+    if (created > 0) {
+      saveData();
+      showToast(`${created} custo(s) de combustível de pedidos anteriores lançado(s) em Despesas`, 'info');
+    }
+  }
+
+  // =====================================================
   // PAINEL DE TRAJETO/COMBUSTÍVEL — aparece ao marcar realizado
   // =====================================================
   function showTravelSummaryPanel(orderId) {
@@ -11995,6 +12091,11 @@ function showCommitmentsForDay(dateString) {
     // Calcular lucro líquido se houver custo de combustível
     const totalPaid = receipts.filter(r => r.orderId === orderId && r.status === 'pago').reduce((s,r) => s+r.amount, 0);
     const lucroLiquido = custo > 0 ? (order.totalValue || 0) - custo : null;
+
+    // Contabiliza o combustível como custo operacional (despesa) ao finalizar o pedido
+    if (custo > 0 && km && km.total > 0 && order.status === 'finalizado') {
+      registerOperationalCostExpense(order, custo, km.total);
+    }
 
     panel.innerHTML = `
       <div style="width:40px;height:4px;background:var(--border-soft);border-radius:999px;margin:14px auto 0;"></div>
@@ -12159,6 +12260,10 @@ function showCommitmentsForDay(dateString) {
           }
           // Registrar no fuelLog
           fuelLog.push({ id: Date.now(), date: new Date().toISOString().split('T')[0], orderId, orderNumber: order.orderNumber, eventLocation: order.eventLocation||'', distanceKm: n, idaKm: kmRecord.ida, voltaKm: kmRecord.volta, durationSec: 0, fuelType: fuelConfig.type, pricePerLiter: fuelConfig.pricePerLiter, consumptionKmL: fuelConfig.consumption, liters: +litros2.toFixed(3), fuelCost: +custo2.toFixed(2) });
+          // Contabiliza como custo operacional (despesa) ao finalizar o pedido
+          if (custo2 > 0 && order.status === 'finalizado') {
+            registerOperationalCostExpense(order, custo2, n);
+          }
           saveData();
           showToast(`${n.toFixed(1)} km salvo · Combustível: ${formatCurrency(custo2)}`, 'success');
         } else {
@@ -13590,15 +13695,17 @@ function showCommitmentsForDay(dateString) {
     if (el('hero-ar-events'))       el('hero-ar-events').textContent       = formatCurrency(totalAR);
     if (el('hero-saldo-contas'))    el('hero-saldo-contas').textContent    = formatCurrency(totalBalance);
 
-    // Saldo a receber card
+    // Card verde de resumo financeiro (sempre visível)
     const arCard = el('dash-ar-events-card');
     if (arCard) {
+      arCard.style.display = 'block';
+      const subline = el('dash-ar-subline');
       if (totalAR > 0) {
-        arCard.style.display = 'block';
+        if (subline) subline.style.display = 'block';
         if (el('dash-ar-value'))  el('dash-ar-value').textContent = formatCurrency(totalAR);
         if (el('dash-ar-count'))  el('dash-ar-count').textContent = countAR;
       } else {
-        arCard.style.display = 'none';
+        if (subline) subline.style.display = 'none';
       }
     }
 
