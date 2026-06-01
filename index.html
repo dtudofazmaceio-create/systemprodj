@@ -3686,6 +3686,129 @@
     color: var(--text);
   }
 
+  /* ==========================================
+     CALCULADORA DE COMBUSTÍVEL
+  ========================================== */
+  .fuel-calc-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 1300;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex; align-items: flex-end; justify-content: center;
+  }
+  .fuel-calc-overlay.open { opacity: 1; pointer-events: all; }
+  .fuel-calc-panel {
+    background: var(--surface);
+    border-radius: 24px 24px 0 0;
+    width: 100%; max-width: 600px;
+    padding: 0 0 calc(24px + env(safe-area-inset-bottom,0px));
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.32,0.72,0,1);
+    box-shadow: 0 -16px 60px rgba(0,0,0,0.3);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .fuel-calc-overlay.open .fuel-calc-panel { transform: translateY(0); }
+  .fuel-calc-header {
+    padding: 16px 20px 14px;
+    border-bottom: 1px solid var(--border-soft);
+    position: sticky; top: 0;
+    background: var(--surface);
+    border-radius: 24px 24px 0 0;
+    z-index: 1;
+  }
+  .fuel-calc-handle {
+    width: 40px; height: 4px;
+    background: var(--border);
+    border-radius: 4px;
+    margin: 0 auto 14px;
+  }
+  .fuel-calc-title {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .fuel-calc-title-left {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .fuel-calc-title-icon {
+    width: 38px; height: 38px;
+    border-radius: var(--r-md);
+    background: linear-gradient(135deg,#f59e0b,#d97706);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; color: white; flex-shrink: 0;
+  }
+  .fuel-calc-body { padding: 20px; }
+
+  .fuel-input-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin-bottom: 16px;
+  }
+  .fuel-input-full { grid-column: 1 / -1; }
+
+  .fuel-result-box {
+    background: linear-gradient(135deg,rgba(245,158,11,0.12),rgba(245,158,11,0.06));
+    border: 1.5px solid rgba(245,158,11,0.3);
+    border-radius: var(--r-lg);
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .fuel-result-box.visible { display: block; }
+  .fuel-result-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(245,158,11,0.15);
+    font-size: 0.88rem;
+  }
+  .fuel-result-row:last-child { border-bottom: none; }
+  .fuel-result-label { color: var(--text2); font-weight: 500; display: flex; align-items: center; gap: 7px; }
+  .fuel-result-value { font-weight: 800; color: var(--text); }
+  .fuel-result-total {
+    background: linear-gradient(135deg,#f59e0b,#d97706);
+    border-radius: var(--r-md);
+    padding: 14px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 14px;
+  }
+  .fuel-result-total .label { color: rgba(255,255,255,0.85); font-size: 0.82rem; font-weight: 600; }
+  .fuel-result-total .amount { color: white; font-size: 1.35rem; font-weight: 800; font-family: var(--font-display); }
+
+  /* ==========================================
+     RELATÓRIO OPERACIONAL
+  ========================================== */
+  .op-kpi-grid {
+    display: grid; grid-template-columns: repeat(2,1fr);
+    gap: 10px; margin-bottom: 4px;
+  }
+  @media (min-width: 540px) { .op-kpi-grid { grid-template-columns: repeat(4,1fr); } }
+  .op-kpi-card {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    padding: 14px 12px;
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--card-shadow);
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .op-kpi-label { font-size: 0.65rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; }
+  .op-kpi-value { font-size: 1.1rem; font-weight: 800; font-family: var(--font-display); }
+  .op-cost-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-soft);
+    font-size: 0.88rem;
+  }
+  .op-cost-row:last-child { border-bottom: none; }
+  .op-cost-left { display: flex; align-items: center; gap: 10px; }
+  .op-cost-icon {
+    width: 34px; height: 34px;
+    border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem; flex-shrink: 0;
+  }
+  .op-cost-name { font-weight: 600; color: var(--text); }
+  .op-cost-sub { font-size: 0.72rem; color: var(--text3); margin-top: 1px; }
+  .op-cost-amount { font-weight: 800; font-family: var(--font-display); }
 </style>
 
 </head>
@@ -3829,6 +3952,7 @@
           <div class="feature-item" data-tab-target="pacotes"><i class="fas fa-box-open"></i><span>Pacotes</span></div>
           <div class="feature-item" data-tab-target="analise"><i class="fas fa-chart-pie"></i><span>Análise</span></div>
           <div class="feature-item" data-tab-target="checklist"><i class="fas fa-clipboard-list"></i><span>Checklist</span></div>
+          <div class="feature-item" data-tab-target="combustivel"><i class="fas fa-gas-pump"></i><span>Combustível</span></div>
           <div class="feature-item" data-tab-target="backup"><i class="fas fa-database"></i><span>Backup</span></div>
         </div>
       </div>
@@ -4216,7 +4340,304 @@
         </p>
       </div>
 
+      <!-- ── Relatório de Custos Operacionais ── -->
+      <div class="card" id="op-costs-report-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+          <h2 style="margin-bottom:0;"><i class="fas fa-gas-pump" style="color:var(--warning);"></i> Custos Operacionais</h2>
+          <button class="btn" id="op-open-fuel-calc-btn" style="background:linear-gradient(135deg,#f59e0b,#d97706);font-size:0.82rem;padding:8px 14px;gap:6px;color:white;border:none;">
+            <i class="fas fa-calculator"></i> Calcular Viagem
+          </button>
+        </div>
+
+        <!-- Filtro de período -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="op-date-start" style="font-size:0.76rem;">Data início</label>
+            <input type="date" id="op-date-start" style="font-size:0.85rem;width:100%;padding:8px 10px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);outline:none;">
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="op-date-end" style="font-size:0.76rem;">Data fim</label>
+            <input type="date" id="op-date-end" style="font-size:0.85rem;width:100%;padding:8px 10px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);outline:none;">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+          <button class="maint-pill active" data-op-period="month" id="op-pill-month">Este Mês</button>
+          <button class="maint-pill" data-op-period="3months" id="op-pill-3months">3 Meses</button>
+          <button class="maint-pill" data-op-period="year" id="op-pill-year">Este Ano</button>
+          <button class="maint-pill" data-op-period="custom" id="op-pill-custom">Personalizado</button>
+        </div>
+
+        <!-- KPIs -->
+        <div class="op-kpi-grid" id="op-kpi-grid">
+          <div class="op-kpi-card">
+            <div class="op-kpi-label"><i class="fas fa-gas-pump" style="color:var(--warning);margin-right:4px;"></i> Combustível</div>
+            <div class="op-kpi-value" id="op-kpi-fuel" style="color:var(--warning);">R$ 0,00</div>
+            <div style="font-size:0.7rem;color:var(--text3);" id="op-kpi-fuel-km">0 km</div>
+          </div>
+          <div class="op-kpi-card">
+            <div class="op-kpi-label"><i class="fas fa-tools" style="color:var(--danger);margin-right:4px;"></i> Manutenção</div>
+            <div class="op-kpi-value" id="op-kpi-maintenance" style="color:var(--danger);">R$ 0,00</div>
+            <div style="font-size:0.7rem;color:var(--text3);" id="op-kpi-maintenance-count">0 registros</div>
+          </div>
+          <div class="op-kpi-card">
+            <div class="op-kpi-label"><i class="fas fa-receipt" style="color:var(--accent);margin-right:4px;"></i> Outras Despesas</div>
+            <div class="op-kpi-value" id="op-kpi-other" style="color:var(--accent);">R$ 0,00</div>
+            <div style="font-size:0.7rem;color:var(--text3);">transações de despesa</div>
+          </div>
+          <div class="op-kpi-card" style="background:linear-gradient(135deg,rgba(239,68,68,0.07),rgba(239,68,68,0.03));border-color:rgba(239,68,68,0.2);">
+            <div class="op-kpi-label"><i class="fas fa-minus-circle" style="color:var(--danger);margin-right:4px;"></i> Total Custos</div>
+            <div class="op-kpi-value" id="op-kpi-total" style="color:var(--danger);">R$ 0,00</div>
+            <div style="font-size:0.7rem;color:var(--text3);">no período</div>
+          </div>
+        </div>
+
+        <!-- Detalhamento -->
+        <div style="margin-top:16px;">
+          <div style="font-size:0.72rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;display:flex;align-items:center;gap:6px;"><i class="fas fa-list"></i> Detalhamento</div>
+          <div id="op-cost-detail-list">
+            <div class="empty-state" style="padding:20px 0;">
+              <div class="empty-state-icon"><i class="fas fa-chart-pie"></i></div>
+              <h4>Sem dados para o período</h4>
+              <p>Selecione um período com registros de km ou transações</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Receita vs Custo -->
+        <div id="op-margin-box" style="display:none;margin-top:16px;background:var(--surface2);border-radius:var(--r-md);padding:14px 16px;border:1px solid var(--border-soft);">
+          <div style="font-size:0.72rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;"><i class="fas fa-balance-scale" style="margin-right:5px;"></i>Receita vs. Custos</div>
+          <div class="op-cost-row">
+            <div class="op-cost-left"><i class="fas fa-arrow-down" style="color:var(--success);"></i><span class="op-cost-name">Receita no período</span></div>
+            <span class="op-cost-amount" id="op-margin-receita" style="color:var(--success);">R$ 0,00</span>
+          </div>
+          <div class="op-cost-row">
+            <div class="op-cost-left"><i class="fas fa-arrow-up" style="color:var(--danger);"></i><span class="op-cost-name">Custos totais</span></div>
+            <span class="op-cost-amount" id="op-margin-custo" style="color:var(--danger);">R$ 0,00</span>
+          </div>
+          <div class="op-cost-row" style="border-top:2px solid var(--border-soft);margin-top:4px;padding-top:12px;">
+            <div class="op-cost-left" style="font-weight:800;font-size:0.92rem;color:var(--text);">Resultado líquido</div>
+            <span class="op-cost-amount" id="op-margin-result" style="font-size:1.1rem;">R$ 0,00</span>
+          </div>
+        </div>
+      </div>
+
     </div>
+
+    <!-- =====================================================
+         ABA COMBUSTÍVEL & VIAGENS
+    ===================================================== -->
+    <div class="tab-content" id="combustivel-content">
+
+      <!-- Hero banner -->
+      <div style="background:linear-gradient(135deg,#d97706 0%,#f59e0b 60%,#fbbf24 100%);border-radius:var(--r-lg);padding:20px;color:white;box-shadow:0 6px 24px rgba(245,158,11,0.35);display:flex;align-items:center;gap:14px;">
+        <div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;"><i class="fas fa-gas-pump"></i></div>
+        <div>
+          <div style="font-size:1.05rem;font-weight:800;font-family:var(--font-display);">Combustível &amp; Viagens</div>
+          <div style="font-size:0.8rem;opacity:0.85;margin-top:2px;">Calcule gastos por deslocamento e acompanhe custos de transporte</div>
+        </div>
+      </div>
+
+      <!-- ── CALCULADORA ── -->
+      <div class="card" id="fuel-tab-calc-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+          <div style="width:38px;height:38px;border-radius:var(--r-md);background:rgba(245,158,11,0.15);display:flex;align-items:center;justify-content:center;color:#f59e0b;font-size:1rem;flex-shrink:0;"><i class="fas fa-calculator"></i></div>
+          <div>
+            <div style="font-size:1rem;font-weight:800;color:var(--text);">Calculadora de Viagem</div>
+            <div style="font-size:0.72rem;color:var(--text3);">Estime o custo de combustível para um deslocamento</div>
+          </div>
+        </div>
+
+        <!-- Tipo de combustível -->
+        <div style="margin-bottom:14px;">
+          <div style="font-size:0.7rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Tipo de Combustível</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;" id="tab-fuel-type-pills">
+            <button class="maint-pill active" data-tab-fuel-type="gasolina"><i class="fas fa-tint"></i> Gasolina</button>
+            <button class="maint-pill" data-tab-fuel-type="etanol"><i class="fas fa-leaf"></i> Etanol</button>
+            <button class="maint-pill" data-tab-fuel-type="diesel"><i class="fas fa-truck"></i> Diesel</button>
+            <button class="maint-pill" data-tab-fuel-type="gnv"><i class="fas fa-wind"></i> GNV</button>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label style="font-size:0.76rem;"><i class="fas fa-road" style="color:var(--primary);margin-right:4px;"></i>Distância (km)</label>
+            <input type="number" id="tab-fc-distance" placeholder="Ex: 120" min="0" step="0.1"
+              style="width:100%;padding:10px 12px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.9rem;outline:none;">
+          </div>
+          <div class="form-group" style="margin-bottom:0;display:flex;flex-direction:column;justify-content:flex-end;">
+            <label style="font-size:0.76rem;display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <input type="checkbox" id="tab-fc-roundtrip" style="width:16px;height:16px;accent-color:var(--primary);cursor:pointer;"> Ida e volta
+            </label>
+            <div style="font-size:0.8rem;color:var(--text3);padding:10px 12px;background:var(--surface2);border-radius:var(--r-sm);border:1.5px solid var(--border-soft);">
+              Total: <span id="tab-fc-dist-preview" style="font-weight:700;color:var(--text);">—</span>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label style="font-size:0.76rem;"><i class="fas fa-tachometer-alt" style="color:var(--accent);margin-right:4px;"></i>Consumo (km/L)</label>
+            <input type="number" id="tab-fc-consumption" placeholder="Ex: 12" min="1" step="0.1"
+              style="width:100%;padding:10px 12px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.9rem;outline:none;">
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label style="font-size:0.76rem;"><i class="fas fa-tag" style="color:var(--warning);margin-right:4px;"></i>Preço por Litro (R$)</label>
+            <input type="number" id="tab-fc-price" placeholder="Ex: 5.89" min="0" step="0.01"
+              style="width:100%;padding:10px 12px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.9rem;outline:none;">
+          </div>
+          <div class="form-group" style="margin-bottom:0;grid-column:1/-1;">
+            <label style="font-size:0.76rem;"><i class="fas fa-music" style="color:var(--primary);margin-right:4px;"></i>Evento / Destino <span style="color:var(--text3);font-weight:400;">opcional</span></label>
+            <input type="text" id="tab-fc-event-name" placeholder="Ex: Casamento João & Maria — Fortaleza"
+              style="width:100%;padding:10px 12px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.9rem;outline:none;">
+          </div>
+          <div class="form-group" style="margin-bottom:0;grid-column:1/-1;">
+            <label style="font-size:0.76rem;"><i class="fas fa-road" style="color:var(--danger);margin-right:4px;"></i>Pedágio / outras taxas (R$) <span style="color:var(--text3);font-weight:400;">opcional</span></label>
+            <input type="number" id="tab-fc-toll" placeholder="0.00" min="0" step="0.01"
+              style="width:100%;padding:10px 12px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.9rem;outline:none;">
+          </div>
+        </div>
+
+        <button id="tab-fc-calc-btn" class="btn" style="width:100%;background:linear-gradient(135deg,#f59e0b,#d97706);color:white;font-size:0.95rem;padding:13px;margin-bottom:0;border:none;border-radius:var(--r-md);cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <i class="fas fa-calculator"></i> Calcular Custo da Viagem
+        </button>
+      </div>
+
+      <!-- ── RESULTADO ── -->
+      <div id="tab-fc-result-card" class="card" style="display:none;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+          <div style="width:38px;height:38px;border-radius:var(--r-md);background:rgba(245,158,11,0.15);display:flex;align-items:center;justify-content:center;color:#f59e0b;font-size:1rem;flex-shrink:0;"><i class="fas fa-receipt"></i></div>
+          <div style="font-size:1rem;font-weight:800;color:var(--text);">Resultado da Viagem</div>
+        </div>
+
+        <!-- Destino chip -->
+        <div id="tab-fc-dest-chip" style="display:none;align-items:center;gap:10px;padding:10px 14px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:var(--r-md);margin-bottom:14px;">
+          <i class="fas fa-map-marker-alt" style="color:#f59e0b;flex-shrink:0;"></i>
+          <span id="tab-fc-dest-name" style="font-size:0.88rem;font-weight:600;color:var(--text);"></span>
+        </div>
+
+        <!-- Estatísticas em grid -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;" id="tab-fc-stats-grid">
+          <div style="background:var(--surface2);border-radius:var(--r-md);padding:14px;border:1px solid var(--border-soft);text-align:center;">
+            <div style="font-size:0.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;"><i class="fas fa-road" style="margin-right:3px;"></i>Distância</div>
+            <div style="font-size:1.3rem;font-weight:800;color:var(--primary);font-family:var(--font-display);" id="tab-fc-res-dist">—</div>
+            <div style="font-size:0.7rem;color:var(--text3);margin-top:2px;" id="tab-fc-res-dist-label">km total</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:var(--r-md);padding:14px;border:1px solid var(--border-soft);text-align:center;">
+            <div style="font-size:0.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;"><i class="fas fa-tint" style="margin-right:3px;"></i>Combustível</div>
+            <div style="font-size:1.3rem;font-weight:800;color:#f59e0b;font-family:var(--font-display);" id="tab-fc-res-liters">—</div>
+            <div style="font-size:0.7rem;color:var(--text3);margin-top:2px;">litros necessários</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:var(--r-md);padding:14px;border:1px solid var(--border-soft);text-align:center;">
+            <div style="font-size:0.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;"><i class="fas fa-gas-pump" style="margin-right:3px;"></i>Custo Comb.</div>
+            <div style="font-size:1.1rem;font-weight:800;color:#f59e0b;font-family:var(--font-display);" id="tab-fc-res-fuel">—</div>
+            <div style="font-size:0.7rem;color:var(--text3);margin-top:2px;" id="tab-fc-res-fuel-type">gasolina</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:var(--r-md);padding:14px;border:1px solid var(--border-soft);text-align:center;" id="tab-fc-toll-stat">
+            <div style="font-size:0.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;"><i class="fas fa-road" style="margin-right:3px;"></i>Pedágio</div>
+            <div style="font-size:1.1rem;font-weight:800;color:var(--danger);font-family:var(--font-display);" id="tab-fc-res-toll">—</div>
+            <div style="font-size:0.7rem;color:var(--text3);margin-top:2px;">taxas extras</div>
+          </div>
+        </div>
+
+        <!-- Total destaque -->
+        <div style="background:linear-gradient(135deg,#d97706,#f59e0b);border-radius:var(--r-lg);padding:18px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;box-shadow:0 4px 18px rgba(245,158,11,0.35);">
+          <div>
+            <div style="font-size:0.72rem;color:rgba(255,255,255,0.8);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;"><i class="fas fa-wallet" style="margin-right:5px;"></i>Custo Total da Viagem</div>
+            <div style="font-size:0.78rem;color:rgba(255,255,255,0.7);" id="tab-fc-total-detail">combustível + pedágio</div>
+          </div>
+          <div style="font-size:1.8rem;font-weight:800;color:white;font-family:var(--font-display);" id="tab-fc-res-total">R$ —</div>
+        </div>
+
+        <!-- Ações -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <button id="tab-fc-save-btn" class="btn" style="background:var(--success);color:white;font-size:0.85rem;padding:12px;border:none;border-radius:var(--r-md);cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px;">
+            <i class="fas fa-save"></i> Salvar Despesa
+          </button>
+          <button id="tab-fc-share-btn" class="btn" style="background:var(--surface2);color:var(--text);font-size:0.85rem;padding:12px;border:1.5px solid var(--border);border-radius:var(--r-md);cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px;">
+            <i class="fas fa-copy"></i> Copiar Resumo
+          </button>
+        </div>
+      </div>
+
+      <!-- ── CONFIGURAÇÃO DO VEÍCULO ── -->
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+          <div style="width:38px;height:38px;border-radius:var(--r-md);background:rgba(59,130,246,0.12);display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:1rem;flex-shrink:0;"><i class="fas fa-car"></i></div>
+          <div>
+            <div style="font-size:0.95rem;font-weight:800;color:var(--text);">Configuração do Veículo</div>
+            <div style="font-size:0.72rem;color:var(--text3);">Valores padrão usados nos cálculos</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label style="font-size:0.76rem;"><i class="fas fa-tachometer-alt" style="color:var(--accent);margin-right:4px;"></i>Consumo padrão (km/L)</label>
+            <input type="number" id="tab-fc-cfg-consumption" placeholder="Ex: 12" min="1" step="0.1"
+              style="width:100%;padding:10px 12px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.9rem;outline:none;">
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label style="font-size:0.76rem;"><i class="fas fa-tag" style="color:var(--warning);margin-right:4px;"></i>Preço por litro (R$)</label>
+            <input type="number" id="tab-fc-cfg-price" placeholder="Ex: 5.89" min="0" step="0.01"
+              style="width:100%;padding:10px 12px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.9rem;outline:none;">
+          </div>
+          <div class="form-group" style="margin-bottom:0;grid-column:1/-1;">
+            <label style="font-size:0.76rem;"><i class="fas fa-gas-pump" style="color:var(--warning);margin-right:4px;"></i>Combustível padrão</label>
+            <select id="tab-fc-cfg-type" style="width:100%;padding:10px 12px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.9rem;outline:none;">
+              <option value="Gasolina">Gasolina</option>
+              <option value="Etanol">Etanol</option>
+              <option value="Diesel">Diesel</option>
+              <option value="GNV">GNV</option>
+            </select>
+          </div>
+        </div>
+        <button id="tab-fc-cfg-save-btn" class="btn" style="width:100%;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;font-size:0.88rem;padding:12px;border:none;border-radius:var(--r-md);cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px;">
+          <i class="fas fa-save"></i> Salvar Configuração
+        </button>
+      </div>
+
+      <!-- ── HISTÓRICO DE DESPESAS DE COMBUSTÍVEL ── -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:38px;height:38px;border-radius:var(--r-md);background:rgba(245,158,11,0.12);display:flex;align-items:center;justify-content:center;color:#f59e0b;font-size:1rem;flex-shrink:0;"><i class="fas fa-history"></i></div>
+            <div>
+              <div style="font-size:0.95rem;font-weight:800;color:var(--text);">Histórico de Deslocamentos</div>
+              <div style="font-size:0.72rem;color:var(--text3);">Despesas de combustível registradas</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <select id="tab-fc-hist-period" style="padding:8px 12px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.82rem;outline:none;cursor:pointer;">
+              <option value="month">Este mês</option>
+              <option value="3months">3 meses</option>
+              <option value="year">Este ano</option>
+              <option value="all">Todos</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- KPIs resumo -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">
+          <div style="background:var(--surface2);border-radius:var(--r-md);padding:10px;text-align:center;border:1px solid var(--border-soft);">
+            <div style="font-size:0.58rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Total Gasto</div>
+            <div style="font-size:1rem;font-weight:800;color:#f59e0b;font-family:var(--font-display);" id="tab-hist-total">R$ 0</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:var(--r-md);padding:10px;text-align:center;border:1px solid var(--border-soft);">
+            <div style="font-size:0.58rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">KM Registrados</div>
+            <div style="font-size:1rem;font-weight:800;color:var(--primary);font-family:var(--font-display);" id="tab-hist-km">0 km</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:var(--r-md);padding:10px;text-align:center;border:1px solid var(--border-soft);">
+            <div style="font-size:0.58rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Viagens</div>
+            <div style="font-size:1rem;font-weight:800;color:var(--accent);font-family:var(--font-display);" id="tab-hist-count">0</div>
+          </div>
+        </div>
+
+        <div id="tab-fc-hist-list">
+          <div class="empty-state" style="padding:20px 0;">
+            <div class="empty-state-icon"><i class="fas fa-route"></i></div>
+            <h4>Nenhum deslocamento registrado</h4>
+            <p>Calcule e salve uma viagem para vê-la aqui</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <!-- ── fim aba combustivel ── -->
 
     <div class="tab-content" id="usuario-content">
       <!-- Profile header visual -->
@@ -4800,6 +5221,7 @@ fa-download"></i> Baixar Pedido</button>
     <button class="fab-menu-item" id="fab-new-commitment"><span class="fab-icon" style="background:rgba(155,93,229,0.15);color:var(--ev-purple)"><i class="fas fa-calendar-plus"></i></span>Novo Compromisso</button>
     <button class="fab-menu-item" id="fab-new-shopping"><span class="fab-icon" style="background:rgba(245,158,11,0.15);color:var(--warning)"><i class="fas fa-shopping-cart"></i></span>Nova Lista de Compras</button>
     <button class="fab-menu-item" id="fab-new-maintenance"><span class="fab-icon" style="background:rgba(239,71,111,0.15);color:var(--danger)"><i class="fas fa-tools"></i></span>Nota de Manutenção</button>
+    <button class="fab-menu-item" id="fab-fuel-calc"><span class="fab-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b"><i class="fas fa-gas-pump"></i></span>Calcular Combustível</button>
 
   </div>
 
@@ -4831,6 +5253,7 @@ fa-download"></i> Baixar Pedido</button>
 
       <div class="side-menu-item" data-tab-target="pacotes"><i class="fas fa-box-open" style="color:var(--ev-teal);background:rgba(6,214,160,0.12)"></i><span>Pacotes</span></div>
       <div class="side-menu-item" data-tab-target="manutencao"><i class="fas fa-tools" style="color:var(--danger);background:rgba(239,71,111,0.12)"></i><span>Manutenção</span></div>
+      <div class="side-menu-item" data-tab-target="combustivel"><i class="fas fa-gas-pump" style="color:#f59e0b;background:rgba(245,158,11,0.12)"></i><span>Combustível</span></div>
       <div class="side-menu-item" data-tab-target="relatorios"><i class="fas fa-chart-bar" style="color:var(--ev-purple);background:rgba(155,93,229,0.12)"></i><span>Relatórios</span></div>
       <div class="side-menu-item" data-tab-target="backup"><i class="fas fa-database" style="color:var(--text3);background:var(--surface2)"></i><span>Backup</span></div>
       <div class="side-menu-item" data-tab-target="usuario"><i class="fas fa-user-circle" style="color:var(--primary);background:var(--primary-glow)"></i><span>Perfil</span></div>
@@ -5905,7 +6328,8 @@ document.addEventListener('DOMContentLoaded', () => {
     usuario: 'Perfil', backup: 'Backup',
     recibos: 'Recibos', clientes: 'Clientes', Agenda: 'Agenda',
     documentos: 'Gerar Documentos', analise: 'Análise de Negócio', pedidos: 'Pedidos e Orçamentos',
-    pacotes: 'Pacotes de Serviços', checklist: 'Checklist de Equipamentos', manutencao: 'Notas de Manutenção'
+    pacotes: 'Pacotes de Serviços', checklist: 'Checklist de Equipamentos', manutencao: 'Notas de Manutenção',
+    combustivel: 'Combustível & Viagens'
   };
   let activeFilters = {
     search: '',
@@ -5960,7 +6384,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('event-order-template').style.display = 'none';
     }
 
-    if (tabId === 'relatorios') updateAllCharts();
+    if (tabId === 'relatorios') { updateAllCharts(); setTimeout(() => { if (typeof window.renderOpCosts === 'function') window.renderOpCosts(); }, 200); }
+    if (tabId === 'combustivel') { setTimeout(() => { if (typeof window.initCombustivelTabView === 'function') window.initCombustivelTabView(); }, 100); }
     if (tabId === 'analise') {
       updateAnaliseDashboard();
       updateRevenueProjection();
@@ -16784,5 +17209,748 @@ function showCommitmentsForDay(dateString) {
 })();
 </script>
 
+<!-- =====================================================
+     CALCULADORA DE COMBUSTÍVEL
+===================================================== -->
+<div class="fuel-calc-overlay" id="fuel-calc-overlay">
+  <div class="fuel-calc-panel" id="fuel-calc-panel">
+    <div class="fuel-calc-header">
+      <div class="fuel-calc-handle"></div>
+      <div class="fuel-calc-title">
+        <div class="fuel-calc-title-left">
+          <div class="fuel-calc-title-icon"><i class="fas fa-gas-pump"></i></div>
+          <div>
+            <div style="font-size:1rem;font-weight:800;color:var(--text);">Calculadora de Combustível</div>
+            <div style="font-size:0.72rem;color:var(--text3);margin-top:1px;">Calcule o gasto estimado da viagem</div>
+          </div>
+        </div>
+        <button id="fuel-calc-close-btn" style="width:34px;height:34px;border-radius:50%;background:var(--surface2);border:none;cursor:pointer;font-size:1rem;color:var(--text3);display:flex;align-items:center;justify-content:center;">&times;</button>
+      </div>
+    </div>
+    <div class="fuel-calc-body">
+
+      <!-- Tipo de combustível -->
+      <div style="margin-bottom:14px;">
+        <div style="font-size:0.7rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Tipo de Combustível</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="maint-pill active" data-fuel-type="gasolina" id="fcpill-gasolina"><i class="fas fa-tint"></i> Gasolina</button>
+          <button class="maint-pill" data-fuel-type="etanol" id="fcpill-etanol"><i class="fas fa-leaf"></i> Etanol</button>
+          <button class="maint-pill" data-fuel-type="diesel" id="fcpill-diesel"><i class="fas fa-truck"></i> Diesel</button>
+          <button class="maint-pill" data-fuel-type="gnv" id="fcpill-gnv"><i class="fas fa-wind"></i> GNV</button>
+        </div>
+      </div>
+
+      <div class="fuel-input-grid">
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="fc-distance" style="font-size:0.76rem;"><i class="fas fa-road" style="color:var(--primary);margin-right:4px;"></i>Distância (km)</label>
+          <input type="number" id="fc-distance" placeholder="Ex: 120" min="0" step="0.1"
+            style="width:100%;padding:10px 12px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.9rem;outline:none;">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="fc-roundtrip" style="font-size:0.76rem;display:flex;align-items:center;gap:6px;">
+            <input type="checkbox" id="fc-roundtrip" style="width:16px;height:16px;accent-color:var(--primary);cursor:pointer;"> Ida e volta
+          </label>
+          <div style="height:42px;display:flex;align-items:center;padding-left:4px;">
+            <span style="font-size:0.8rem;color:var(--text3);">Multiplicar por 2</span>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="fc-consumption" style="font-size:0.76rem;"><i class="fas fa-tachometer-alt" style="color:var(--accent);margin-right:4px;"></i>Consumo (km/L)</label>
+          <input type="number" id="fc-consumption" placeholder="Ex: 12" min="1" step="0.1"
+            style="width:100%;padding:10px 12px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.9rem;outline:none;">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="fc-price" style="font-size:0.76rem;"><i class="fas fa-tag" style="color:var(--warning);margin-right:4px;"></i>Preço por Litro (R$)</label>
+          <input type="number" id="fc-price" placeholder="Ex: 5.89" min="0" step="0.01"
+            style="width:100%;padding:10px 12px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.9rem;outline:none;">
+        </div>
+        <div class="form-group fuel-input-full" style="margin-bottom:0;">
+          <label for="fc-event-name" style="font-size:0.76rem;"><i class="fas fa-music" style="color:var(--primary);margin-right:4px;"></i>Evento (opcional)</label>
+          <input type="text" id="fc-event-name" placeholder="Ex: Casamento João & Maria"
+            style="width:100%;padding:10px 12px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.9rem;outline:none;">
+        </div>
+        <div class="form-group fuel-input-full" style="margin-bottom:0;">
+          <label for="fc-toll" style="font-size:0.76rem;"><i class="fas fa-road" style="color:var(--danger);margin-right:4px;"></i>Pedágio / Outras taxas (R$) <span style="color:var(--text3);font-weight:400;">opcional</span></label>
+          <input type="number" id="fc-toll" placeholder="0.00" min="0" step="0.01"
+            style="width:100%;padding:10px 12px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font-body);font-size:0.9rem;outline:none;">
+        </div>
+      </div>
+
+      <!-- Botão calcular -->
+      <button id="fc-calc-btn" class="btn" style="width:100%;background:linear-gradient(135deg,#f59e0b,#d97706);color:white;font-size:0.95rem;padding:13px;margin-bottom:16px;border:none;border-radius:var(--r-md);cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <i class="fas fa-calculator"></i> Calcular
+      </button>
+
+      <!-- Resultado -->
+      <div class="fuel-result-box" id="fc-result-box">
+        <div style="font-size:0.7rem;font-weight:800;color:var(--warning);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;"><i class="fas fa-chart-bar" style="margin-right:5px;"></i>Resultado da Viagem</div>
+        <div class="fuel-result-row">
+          <span class="fuel-result-label"><i class="fas fa-road" style="color:var(--primary);font-size:0.9rem;"></i>Distância total</span>
+          <span class="fuel-result-value" id="fc-res-distance">— km</span>
+        </div>
+        <div class="fuel-result-row">
+          <span class="fuel-result-label"><i class="fas fa-tint" style="color:var(--warning);font-size:0.9rem;"></i>Litros necessários</span>
+          <span class="fuel-result-value" id="fc-res-liters">— L</span>
+        </div>
+        <div class="fuel-result-row">
+          <span class="fuel-result-label"><i class="fas fa-gas-pump" style="color:var(--warning);font-size:0.9rem;"></i>Custo combustível</span>
+          <span class="fuel-result-value" id="fc-res-fuel-cost">R$ —</span>
+        </div>
+        <div class="fuel-result-row" id="fc-res-toll-row" style="display:none;">
+          <span class="fuel-result-label"><i class="fas fa-road" style="color:var(--danger);font-size:0.9rem;"></i>Pedágio / taxas</span>
+          <span class="fuel-result-value" id="fc-res-toll">R$ —</span>
+        </div>
+        <div class="fuel-result-total">
+          <span class="label"><i class="fas fa-wallet" style="margin-right:6px;"></i>Custo Total da Viagem</span>
+          <span class="amount" id="fc-res-total">R$ —</span>
+        </div>
+      </div>
+
+      <!-- Botão salvar como despesa -->
+      <button id="fc-save-expense-btn" class="btn" style="width:100%;display:none;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-size:0.88rem;padding:11px;border-radius:var(--r-md);cursor:pointer;font-weight:700;align-items:center;justify-content:center;gap:8px;margin-bottom:8px;">
+        <i class="fas fa-save" style="color:var(--success);"></i> Salvar como Despesa de Combustível
+      </button>
+
+      <!-- Config rápida de consumo -->
+      <div style="background:var(--surface2);border-radius:var(--r-md);padding:12px 14px;border:1px solid var(--border-soft);margin-top:4px;">
+        <div style="font-size:0.7rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;"><i class="fas fa-sliders-h" style="margin-right:5px;"></i>Configuração Padrão</div>
+        <div style="font-size:0.82rem;color:var(--text2);">Os valores de consumo e preço do sistema de configuração de combustível são usados como padrão. Você pode editá-los na aba <strong>Manutenção → Configuração de Combustível</strong>.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// =====================================================
+// CALCULADORA DE COMBUSTÍVEL — lógica
+// =====================================================
+(function() {
+  'use strict';
+
+  function openFuelCalc() {
+    const overlay = document.getElementById('fuel-calc-overlay');
+    if (!overlay) return;
+    // Pré-preencher com fuelConfig salvo
+    try {
+      const fc = JSON.parse(localStorage.getItem('djmpro_data') || '{}').fuelConfig || {};
+      const cons = document.getElementById('fc-consumption');
+      const price = document.getElementById('fc-price');
+      if (cons && !cons.value && fc.consumption) cons.value = fc.consumption;
+      if (price && !price.value && fc.pricePerLiter) price.value = fc.pricePerLiter;
+      // Set fuel type pill
+      if (fc.type) {
+        const typeMap = { 'Gasolina':'gasolina','Etanol':'etanol','Diesel':'diesel','GNV':'gnv' };
+        const key = typeMap[fc.type] || 'gasolina';
+        document.querySelectorAll('[data-fuel-type]').forEach(b => b.classList.remove('active'));
+        const pill = document.querySelector(`[data-fuel-type="${key}"]`);
+        if (pill) pill.classList.add('active');
+      }
+    } catch(e) {}
+    overlay.classList.add('open');
+  }
+
+  function closeFuelCalc() {
+    document.getElementById('fuel-calc-overlay')?.classList.remove('open');
+  }
+
+  function calcFuel() {
+    const dist = parseFloat(document.getElementById('fc-distance')?.value) || 0;
+    const roundtrip = document.getElementById('fc-roundtrip')?.checked;
+    const cons = parseFloat(document.getElementById('fc-consumption')?.value) || 0;
+    const price = parseFloat(document.getElementById('fc-price')?.value) || 0;
+    const toll = parseFloat(document.getElementById('fc-toll')?.value) || 0;
+
+    if (!dist || !cons || !price) {
+      if (typeof showToast === 'function') showToast('Preencha distância, consumo e preço do litro.', 'warning');
+      return;
+    }
+
+    const totalDist = roundtrip ? dist * 2 : dist;
+    const liters = totalDist / cons;
+    const fuelCost = liters * price;
+    const total = fuelCost + toll;
+
+    const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+    document.getElementById('fc-res-distance').textContent = `${totalDist.toFixed(1)} km`;
+    document.getElementById('fc-res-liters').textContent = `${liters.toFixed(2)} L`;
+    document.getElementById('fc-res-fuel-cost').textContent = fmt(fuelCost);
+    document.getElementById('fc-res-total').textContent = fmt(total);
+
+    const tollRow = document.getElementById('fc-res-toll-row');
+    if (toll > 0) {
+      tollRow.style.display = 'flex';
+      document.getElementById('fc-res-toll').textContent = fmt(toll);
+    } else {
+      tollRow.style.display = 'none';
+    }
+
+    const box = document.getElementById('fc-result-box');
+    box.classList.add('visible');
+
+    const saveBtn = document.getElementById('fc-save-expense-btn');
+    saveBtn.style.display = 'flex';
+    // Store for save
+    saveBtn.dataset.amount = total;
+    saveBtn.dataset.fuel = fuelCost;
+    saveBtn.dataset.toll = toll;
+    saveBtn.dataset.desc = `Combustível${document.getElementById('fc-event-name').value ? ' — ' + document.getElementById('fc-event-name').value : ''} (${totalDist.toFixed(0)}km, ${liters.toFixed(2)}L)`;
+  }
+
+  function saveFuelExpense(btn) {
+    const amount = parseFloat(btn.dataset.amount) || 0;
+    const desc = btn.dataset.desc || 'Combustível';
+    if (!amount) return;
+
+    // Add transaction via existing system
+    try {
+      const rawData = JSON.parse(localStorage.getItem('djmpro_data') || '{}');
+      const txs = rawData.transactions || [];
+      const today = new Date().toISOString().split('T')[0];
+      const accounts = rawData.accounts || [];
+      const firstAccId = accounts.length > 0 ? accounts[0].id : null;
+      txs.push({
+        id: Date.now(),
+        type: 'despesa',
+        amount: amount,
+        date: today,
+        description: desc,
+        category: 'Combustível',
+        account: firstAccId,
+        status: 'confirmada',
+        createdAt: new Date().toISOString()
+      });
+      rawData.transactions = txs;
+      localStorage.setItem('djmpro_data', JSON.stringify(rawData));
+      if (typeof updateUI === 'function') updateUI();
+      if (typeof showToast === 'function') showToast('Despesa de combustível registrada! ⛽', 'success');
+      closeFuelCalc();
+    } catch(e) {
+      if (typeof showToast === 'function') showToast('Erro ao salvar despesa.', 'error');
+    }
+  }
+
+  // ── Relatório Operacional ──
+  function renderOpCosts() {
+    const rawData = (() => { try { return JSON.parse(localStorage.getItem('djmpro_data') || '{}'); } catch(e) { return {}; } })();
+    const transactions = rawData.transactions || [];
+    const maintenanceNotes = rawData.maintenanceNotes || [];
+    const eventOrders = rawData.eventOrders || [];
+    const fuelConfig = rawData.fuelConfig || { pricePerLiter: 0, consumption: 10 };
+
+    const startInput = document.getElementById('op-date-start')?.value;
+    const endInput = document.getElementById('op-date-end')?.value;
+    const startDate = startInput ? new Date(startInput + 'T00:00:00') : null;
+    const endDate = endInput ? new Date(endInput + 'T23:59:59') : null;
+
+    const inRange = (dateStr) => {
+      if (!dateStr) return false;
+      const d = new Date(dateStr.includes('T') ? dateStr : dateStr + 'T00:00:00');
+      if (startDate && d < startDate) return false;
+      if (endDate && d > endDate) return false;
+      return true;
+    };
+
+    // Combustível: calcular de kms registrados nos eventOrders
+    let totalKm = 0;
+    let fuelCostTotal = 0;
+    const fuelEvents = [];
+    eventOrders.forEach(o => {
+      const kmRec = o.kmRecord;
+      if (!kmRec) return;
+      // Use event date for range filter
+      const dateRef = o.eventDate || o.createdAt || '';
+      if (!inRange(dateRef)) return;
+      const km = kmRec.total || 0;
+      totalKm += km;
+      const liters = km / (fuelConfig.consumption || 10);
+      const cost = liters * (fuelConfig.pricePerLiter || 0);
+      fuelCostTotal += cost;
+      fuelEvents.push({ order: o, km, cost });
+    });
+
+    // Manutenção: somar custos do campo (se tiver valor)
+    let maintTotal = 0;
+    let maintCount = 0;
+    maintenanceNotes.forEach(n => {
+      if (!inRange(n.date || n.createdAt || '')) return;
+      const cost = parseFloat(n.cost || n.value || 0) || 0;
+      maintTotal += cost;
+      maintCount++;
+    });
+
+    // Transações de despesa no período
+    let otherExpenses = 0;
+    const fuelTxs = [];
+    const otherTxs = [];
+    transactions.forEach(t => {
+      if (t.type !== 'despesa') return;
+      if (!inRange(t.date)) return;
+      if ((t.category || '').toLowerCase().includes('combustível') || (t.category || '').toLowerCase().includes('combustivel') || (t.description || '').toLowerCase().includes('combustível') || (t.description || '').toLowerCase().includes('combustivel')) {
+        fuelTxs.push(t);
+        fuelCostTotal += t.amount;
+      } else {
+        otherExpenses += t.amount;
+        otherTxs.push(t);
+      }
+    });
+
+    // Receita no período
+    let receita = 0;
+    transactions.forEach(t => {
+      if (t.type !== 'receita') return;
+      if (t.status !== 'confirmada') return;
+      if (!inRange(t.date)) return;
+      receita += t.amount;
+    });
+
+    const total = fuelCostTotal + maintTotal + otherExpenses;
+
+    // Update KPIs
+    const fmt = v => v.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+    document.getElementById('op-kpi-fuel').textContent = fmt(fuelCostTotal);
+    document.getElementById('op-kpi-fuel-km').textContent = totalKm > 0 ? `${totalKm.toFixed(1)} km registrados` : fuelTxs.length > 0 ? `${fuelTxs.length} transações` : '0 km';
+    document.getElementById('op-kpi-maintenance').textContent = fmt(maintTotal);
+    document.getElementById('op-kpi-maintenance-count').textContent = `${maintCount} registro${maintCount !== 1 ? 's' : ''}`;
+    document.getElementById('op-kpi-other').textContent = fmt(otherExpenses);
+    document.getElementById('op-kpi-total').textContent = fmt(total);
+
+    // Detail list
+    const detailEl = document.getElementById('op-cost-detail-list');
+    const items = [];
+
+    if (fuelCostTotal > 0) {
+      let fuelSub = '';
+      if (totalKm > 0 && fuelConfig.pricePerLiter > 0) {
+        fuelSub = `${totalKm.toFixed(1)} km · ${(totalKm / (fuelConfig.consumption||10)).toFixed(2)} L`;
+      } else if (fuelTxs.length > 0) {
+        fuelSub = `${fuelTxs.length} transação(ões) registradas`;
+      }
+      items.push({ icon: 'fa-gas-pump', iconBg: 'rgba(245,158,11,0.15)', iconColor: '#f59e0b', name: 'Combustível', sub: fuelSub, amount: fuelCostTotal });
+    }
+    if (maintTotal > 0) {
+      items.push({ icon: 'fa-tools', iconBg: 'var(--danger-bg)', iconColor: 'var(--danger)', name: 'Manutenção', sub: `${maintCount} registro${maintCount !== 1 ? 's' : ''} no período`, amount: maintTotal });
+    }
+    // Group other expenses by category
+    const catMap = {};
+    otherTxs.forEach(t => {
+      const cat = t.category || 'Outros';
+      catMap[cat] = (catMap[cat] || 0) + t.amount;
+    });
+    const iconMap = { 'Alimentação':'fa-utensils', 'Transporte':'fa-car', 'Marketing':'fa-bullhorn', 'Equipamento':'fa-plug', 'Software':'fa-laptop', 'Internet':'fa-wifi' };
+    Object.entries(catMap).sort((a,b) => b[1]-a[1]).slice(0, 8).forEach(([cat, amt]) => {
+      items.push({ icon: iconMap[cat] || 'fa-receipt', iconBg: 'rgba(139,92,246,0.12)', iconColor: 'var(--accent)', name: cat, sub: `despesas confirmadas`, amount: amt });
+    });
+
+    if (items.length === 0) {
+      detailEl.innerHTML = `<div class="empty-state" style="padding:20px 0;"><div class="empty-state-icon"><i class="fas fa-chart-pie"></i></div><h4>Sem dados no período</h4><p>Selecione um período com eventos ou transações</p></div>`;
+    } else {
+      detailEl.innerHTML = items.map(it => `
+        <div class="op-cost-row">
+          <div class="op-cost-left">
+            <div class="op-cost-icon" style="background:${it.iconBg};color:${it.iconColor};"><i class="fas ${it.icon}"></i></div>
+            <div><div class="op-cost-name">${it.name}</div><div class="op-cost-sub">${it.sub}</div></div>
+          </div>
+          <div class="op-cost-amount" style="color:var(--danger);">${fmt(it.amount)}</div>
+        </div>`).join('');
+    }
+
+    // Margin box
+    const marginBox = document.getElementById('op-margin-box');
+    if (receita > 0 || total > 0) {
+      marginBox.style.display = 'block';
+      document.getElementById('op-margin-receita').textContent = fmt(receita);
+      document.getElementById('op-margin-custo').textContent = fmt(total);
+      const result = receita - total;
+      const resEl = document.getElementById('op-margin-result');
+      resEl.textContent = fmt(result);
+      resEl.style.color = result >= 0 ? 'var(--success)' : 'var(--danger)';
+    } else {
+      marginBox.style.display = 'none';
+    }
+  }
+
+  function setOpPeriod(period) {
+    const now = new Date();
+    let start, end;
+    end = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    if (period === 'month') {
+      start = new Date(now.getFullYear(), now.getMonth(), 1);
+    } else if (period === '3months') {
+      start = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+    } else if (period === 'year') {
+      start = new Date(now.getFullYear(), 0, 1);
+    } else {
+      return; // custom — let user choose
+    }
+    const fmt = d => d.toISOString().split('T')[0];
+    const startEl = document.getElementById('op-date-start');
+    const endEl = document.getElementById('op-date-end');
+    if (startEl) startEl.value = fmt(start);
+    if (endEl) endEl.value = fmt(end);
+    renderOpCosts();
+  }
+
+  function init() {
+    // Fuel calc open/close
+    document.getElementById('fuel-calc-close-btn')?.addEventListener('click', closeFuelCalc);
+    document.getElementById('fuel-calc-overlay')?.addEventListener('click', e => {
+      if (e.target === document.getElementById('fuel-calc-overlay')) closeFuelCalc();
+    });
+    document.getElementById('fc-calc-btn')?.addEventListener('click', calcFuel);
+    document.getElementById('fc-save-expense-btn')?.addEventListener('click', function() { saveFuelExpense(this); });
+
+    // Open from reports tab button
+    document.getElementById('op-open-fuel-calc-btn')?.addEventListener('click', openFuelCalc);
+
+    // Fuel type pills
+    document.querySelectorAll('[data-fuel-type]').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('[data-fuel-type]').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+      });
+    });
+
+    // Op cost period pills
+    document.querySelectorAll('[data-op-period]').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('[data-op-period]').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        const period = pill.dataset.opPeriod;
+        if (period !== 'custom') {
+          setOpPeriod(period);
+        }
+      });
+    });
+
+    // Op date inputs
+    document.getElementById('op-date-start')?.addEventListener('change', () => {
+      document.querySelectorAll('[data-op-period]').forEach(p => p.classList.remove('active'));
+      document.getElementById('op-pill-custom')?.classList.add('active');
+      renderOpCosts();
+    });
+    document.getElementById('op-date-end')?.addEventListener('change', () => {
+      document.querySelectorAll('[data-op-period]').forEach(p => p.classList.remove('active'));
+      document.getElementById('op-pill-custom')?.classList.add('active');
+      renderOpCosts();
+    });
+
+    // Expose for tab change
+    window.renderOpCosts = renderOpCosts;
+    window.openFuelCalc = openFuelCalc;
+
+    // Default: current month
+    setOpPeriod('month');
+  }
+
+  document.readyState === 'loading'
+    ? document.addEventListener('DOMContentLoaded', init)
+    : setTimeout(init, 600);
+})();
+</script>
+
+<script>
+// =====================================================
+// ABA COMBUSTÍVEL — lógica completa
+// =====================================================
+(function() {
+  'use strict';
+
+  const FMT = v => (typeof v === 'number' ? v : 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const STORE_KEY = 'djmpro_data';
+  const getData = () => { try { return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch(e) { return {}; } };
+  const setData = d => localStorage.setItem(STORE_KEY, JSON.stringify(d));
+
+  // ── helpers ──
+  function getFuelConfig() {
+    const d = getData();
+    return d.fuelConfig || { type: 'Gasolina', pricePerLiter: 0, consumption: 10 };
+  }
+  function saveFuelConfig(cfg) {
+    const d = getData();
+    d.fuelConfig = { ...getFuelConfig(), ...cfg };
+    setData(d);
+    if (typeof updateUI === 'function') updateUI();
+  }
+
+  // ── Prefill calc fields with saved config ──
+  function prefillCalcFields() {
+    const cfg = getFuelConfig();
+    const cons = document.getElementById('tab-fc-consumption');
+    const price = document.getElementById('tab-fc-price');
+    if (cons && !cons.value) cons.value = cfg.consumption || '';
+    if (price && !price.value) price.value = cfg.pricePerLiter || '';
+
+    // Set active fuel pill
+    const typeMap = { 'Gasolina':'gasolina','Etanol':'etanol','Diesel':'diesel','GNV':'gnv' };
+    const key = typeMap[cfg.type] || 'gasolina';
+    document.querySelectorAll('[data-tab-fuel-type]').forEach(b => b.classList.remove('active'));
+    const pill = document.querySelector(`[data-tab-fuel-type="${key}"]`);
+    if (pill) pill.classList.add('active');
+  }
+
+  function loadConfigPanel() {
+    const cfg = getFuelConfig();
+    const consEl = document.getElementById('tab-fc-cfg-consumption');
+    const priceEl = document.getElementById('tab-fc-cfg-price');
+    const typeEl = document.getElementById('tab-fc-cfg-type');
+    if (consEl) consEl.value = cfg.consumption || '';
+    if (priceEl) priceEl.value = cfg.pricePerLiter || '';
+    if (typeEl) typeEl.value = cfg.type || 'Gasolina';
+  }
+
+  // ── Live distance preview ──
+  function updateDistPreview() {
+    const dist = parseFloat(document.getElementById('tab-fc-distance')?.value) || 0;
+    const rt = document.getElementById('tab-fc-roundtrip')?.checked;
+    const total = rt ? dist * 2 : dist;
+    const el = document.getElementById('tab-fc-dist-preview');
+    if (el) el.textContent = dist > 0 ? `${total.toFixed(1)} km` : '—';
+  }
+
+  // ── Main calculation ──
+  function calcTabFuel() {
+    const dist = parseFloat(document.getElementById('tab-fc-distance')?.value) || 0;
+    const roundtrip = document.getElementById('tab-fc-roundtrip')?.checked;
+    const cons = parseFloat(document.getElementById('tab-fc-consumption')?.value) || 0;
+    const price = parseFloat(document.getElementById('tab-fc-price')?.value) || 0;
+    const toll = parseFloat(document.getElementById('tab-fc-toll')?.value) || 0;
+    const eventName = (document.getElementById('tab-fc-event-name')?.value || '').trim();
+    const fuelType = document.querySelector('[data-tab-fuel-type].active')?.dataset.tabFuelType || 'gasolina';
+
+    if (!dist || dist <= 0) { if (typeof showToast === 'function') showToast('Informe a distância em km.', 'warning'); return; }
+    if (!cons || cons <= 0) { if (typeof showToast === 'function') showToast('Informe o consumo do veículo (km/L).', 'warning'); return; }
+    if (!price || price <= 0) { if (typeof showToast === 'function') showToast('Informe o preço por litro.', 'warning'); return; }
+
+    const totalDist = roundtrip ? dist * 2 : dist;
+    const liters = totalDist / cons;
+    const fuelCost = liters * price;
+    const total = fuelCost + toll;
+
+    // Populate result card
+    const card = document.getElementById('tab-fc-result-card');
+    card.style.display = 'block';
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    const destChip = document.getElementById('tab-fc-dest-chip');
+    if (eventName) {
+      destChip.style.display = 'flex';
+      document.getElementById('tab-fc-dest-name').textContent = eventName;
+    } else {
+      destChip.style.display = 'none';
+    }
+
+    document.getElementById('tab-fc-res-dist').textContent = `${totalDist.toFixed(1)}`;
+    document.getElementById('tab-fc-res-dist-label').textContent = roundtrip ? 'km (ida e volta)' : 'km';
+    document.getElementById('tab-fc-res-liters').textContent = `${liters.toFixed(2)} L`;
+    document.getElementById('tab-fc-res-fuel').textContent = FMT(fuelCost);
+    document.getElementById('tab-fc-res-fuel-type').textContent = fuelType;
+    document.getElementById('tab-fc-res-toll').textContent = toll > 0 ? FMT(toll) : 'R$ 0,00';
+    document.getElementById('tab-fc-res-total').textContent = FMT(total);
+    const detailEl = document.getElementById('tab-fc-total-detail');
+    if (detailEl) detailEl.textContent = toll > 0 ? `combustível (${FMT(fuelCost)}) + pedágio (${FMT(toll)})` : `${liters.toFixed(2)} L × R$ ${price.toFixed(2)}`;
+
+    // Store calc result for save action
+    const saveBtn = document.getElementById('tab-fc-save-btn');
+    saveBtn.dataset.amount = total;
+    saveBtn.dataset.fuel = fuelCost;
+    saveBtn.dataset.toll = toll;
+    saveBtn.dataset.km = totalDist;
+    saveBtn.dataset.liters = liters.toFixed(2);
+    saveBtn.dataset.desc = `Combustível${eventName ? ' — ' + eventName : ''} (${totalDist.toFixed(0)} km, ${liters.toFixed(2)} L)`;
+    saveBtn.dataset.date = new Date().toISOString().split('T')[0];
+
+    if (typeof showToast === 'function') showToast('Cálculo concluído! ⛽', 'success');
+  }
+
+  // ── Save as expense ──
+  function saveFuelExpense(btn) {
+    const amount = parseFloat(btn.dataset.amount) || 0;
+    if (!amount) { if (typeof showToast === 'function') showToast('Nada para salvar.', 'warning'); return; }
+    const desc = btn.dataset.desc || 'Combustível';
+    const today = btn.dataset.date || new Date().toISOString().split('T')[0];
+
+    const d = getData();
+    const txs = d.transactions || [];
+    const accounts = d.accounts || [];
+    txs.push({
+      id: Date.now(),
+      type: 'despesa',
+      amount,
+      date: today,
+      description: desc,
+      category: 'Combustível',
+      account: accounts.length > 0 ? accounts[0].id : null,
+      status: 'confirmada',
+      createdAt: new Date().toISOString(),
+      _fuelKm: parseFloat(btn.dataset.km) || 0,
+      _fuelLiters: parseFloat(btn.dataset.liters) || 0,
+    });
+    d.transactions = txs;
+    setData(d);
+    if (typeof updateUI === 'function') updateUI();
+    renderFuelHistory();
+    if (typeof renderOpCosts === 'function') renderOpCosts();
+    if (typeof showToast === 'function') showToast('Despesa de combustível salva! ✅', 'success');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-check"></i> Salvo!';
+    btn.style.background = 'var(--success)';
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-save"></i> Salvar Despesa';
+      btn.style.background = 'var(--success)';
+    }, 3000);
+  }
+
+  // ── Copy summary ──
+  function copyFuelSummary() {
+    const total = document.getElementById('tab-fc-res-total')?.textContent || '';
+    const dist = document.getElementById('tab-fc-res-dist')?.textContent || '';
+    const liters = document.getElementById('tab-fc-res-liters')?.textContent || '';
+    const dest = document.getElementById('tab-fc-dest-name')?.textContent || 'Viagem';
+    const toll = document.getElementById('tab-fc-res-toll')?.textContent || '';
+    const text = `⛽ Custo de Combustível — ${dest}\n📍 Distância: ${dist} km\n🛢 Litros: ${liters}\n🛣 Pedágio: ${toll}\n💰 Total: ${total}`;
+    navigator.clipboard?.writeText(text).then(() => {
+      if (typeof showToast === 'function') showToast('Resumo copiado! 📋', 'success');
+    }).catch(() => {
+      if (typeof showToast === 'function') showToast('Não foi possível copiar.', 'warning');
+    });
+  }
+
+  // ── History ──
+  function renderFuelHistory() {
+    const period = document.getElementById('tab-fc-hist-period')?.value || 'month';
+    const d = getData();
+    const txs = d.transactions || [];
+    const eventOrders = d.eventOrders || [];
+    const fuelConfig = d.fuelConfig || { consumption: 10, pricePerLiter: 0 };
+
+    const now = new Date();
+    let startDate = null;
+    if (period === 'month') startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    else if (period === '3months') startDate = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+    else if (period === 'year') startDate = new Date(now.getFullYear(), 0, 1);
+
+    const inRange = dateStr => {
+      if (!startDate || !dateStr) return true;
+      const dt = new Date(dateStr.includes('T') ? dateStr : dateStr + 'T00:00:00');
+      return dt >= startDate;
+    };
+
+    // Fuel transactions
+    const fuelTxs = txs.filter(t =>
+      t.type === 'despesa' &&
+      inRange(t.date) &&
+      ((t.category || '').toLowerCase().includes('combustível') ||
+       (t.category || '').toLowerCase().includes('combustivel') ||
+       (t.description || '').toLowerCase().includes('combustível') ||
+       (t.description || '').toLowerCase().includes('combustivel'))
+    ).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    // KM from eventOrders
+    let kmTotal = 0;
+    eventOrders.forEach(o => {
+      if (!o.kmRecord) return;
+      if (!inRange(o.eventDate || o.createdAt || '')) return;
+      kmTotal += o.kmRecord.total || 0;
+    });
+    // Also from transaction metadata
+    fuelTxs.forEach(t => { if (t._fuelKm) kmTotal += 0; }); // already counted in eventOrders
+
+    const totalGasto = fuelTxs.reduce((s, t) => s + (t.amount || 0), 0);
+
+    // Update summary KPIs
+    document.getElementById('tab-hist-total').textContent = FMT(totalGasto);
+    document.getElementById('tab-hist-km').textContent = kmTotal > 0 ? `${kmTotal.toFixed(1)} km` : `${fuelTxs.reduce((s,t)=>s+(t._fuelKm||0),0).toFixed(0)} km`;
+    document.getElementById('tab-hist-count').textContent = fuelTxs.length;
+
+    const list = document.getElementById('tab-fc-hist-list');
+    if (!list) return;
+
+    if (fuelTxs.length === 0) {
+      list.innerHTML = `<div class="empty-state" style="padding:20px 0;"><div class="empty-state-icon"><i class="fas fa-route"></i></div><h4>Nenhum deslocamento no período</h4><p>Calcule e salve uma viagem para vê-la aqui</p></div>`;
+      return;
+    }
+
+    list.innerHTML = fuelTxs.map(t => {
+      const dateStr = t.date ? new Date(t.date + 'T00:00:00').toLocaleDateString('pt-BR') : '—';
+      const km = t._fuelKm ? `${t._fuelKm.toFixed(1)} km · ` : '';
+      const liters = t._fuelLiters ? `${t._fuelLiters} L · ` : '';
+      return `<div style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border-soft);">
+        <div style="width:38px;height:38px;border-radius:var(--r-sm);background:rgba(245,158,11,0.12);color:#f59e0b;display:flex;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0;"><i class="fas fa-gas-pump"></i></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:0.88rem;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.description || 'Combustível'}</div>
+          <div style="font-size:0.72rem;color:var(--text3);margin-top:2px;">${km}${liters}${dateStr}</div>
+        </div>
+        <div style="font-size:0.92rem;font-weight:800;color:var(--danger);flex-shrink:0;">${FMT(t.amount)}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Tab init ──
+  function initCombustivelTab() {
+    // Fuel type pills
+    document.querySelectorAll('[data-tab-fuel-type]').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('[data-tab-fuel-type]').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+      });
+    });
+
+    // Distance preview
+    document.getElementById('tab-fc-distance')?.addEventListener('input', updateDistPreview);
+    document.getElementById('tab-fc-roundtrip')?.addEventListener('change', updateDistPreview);
+
+    // Calc button
+    document.getElementById('tab-fc-calc-btn')?.addEventListener('click', calcTabFuel);
+
+    // Save expense
+    document.getElementById('tab-fc-save-btn')?.addEventListener('click', function() { saveFuelExpense(this); });
+
+    // Copy summary
+    document.getElementById('tab-fc-share-btn')?.addEventListener('click', copyFuelSummary);
+
+    // Config save
+    document.getElementById('tab-fc-cfg-save-btn')?.addEventListener('click', () => {
+      const cons = parseFloat(document.getElementById('tab-fc-cfg-consumption')?.value) || 0;
+      const price = parseFloat(document.getElementById('tab-fc-cfg-price')?.value) || 0;
+      const type = document.getElementById('tab-fc-cfg-type')?.value || 'Gasolina';
+      if (!cons || !price) { if (typeof showToast === 'function') showToast('Preencha consumo e preço.', 'warning'); return; }
+      saveFuelConfig({ consumption: cons, pricePerLiter: price, type });
+      // Update calc fields
+      const consEl = document.getElementById('tab-fc-consumption');
+      const priceEl = document.getElementById('tab-fc-price');
+      if (consEl) consEl.value = cons;
+      if (priceEl) priceEl.value = price;
+      if (typeof showToast === 'function') showToast('Configuração salva! ✅', 'success');
+    });
+
+    // History period filter
+    document.getElementById('tab-fc-hist-period')?.addEventListener('change', renderFuelHistory);
+
+    // FAB button
+    document.getElementById('fab-fuel-calc')?.addEventListener('click', () => {
+      if (typeof toggleFab === 'function') toggleFab(false);
+      if (typeof showTab === 'function') showTab('combustivel');
+    });
+
+    // Expose for showTab hook
+    window.initCombustivelTabView = () => {
+      prefillCalcFields();
+      loadConfigPanel();
+      renderFuelHistory();
+    };
+
+    // Also wire the floating overlay calc to navigate here
+    window.openFuelCalc = () => {
+      if (typeof showTab === 'function') showTab('combustivel');
+    };
+  }
+
+  document.readyState === 'loading'
+    ? document.addEventListener('DOMContentLoaded', initCombustivelTab)
+    : setTimeout(initCombustivelTab, 700);
+})();
+</script>
 </body>
 </html>
