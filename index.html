@@ -5,7 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#1e293b">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" id="app-web-title" content="DJ Manager">
+<!-- Ícone do app na tela inicial (iPhone/Android). O href é preenchido dinamicamente com a logo importada. -->
+<link rel="apple-touch-icon" id="app-apple-touch-icon" href="">
+<link rel="apple-touch-icon" sizes="180x180" id="app-apple-touch-icon-180" href="">
+<link rel="icon" type="image/png" id="app-favicon" href="">
 <title>DJ Manager Pro - Sistema Financeiro</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -7270,6 +7276,7 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
     const msgEl = document.getElementById('user-info-message');
     const saveAndNotify = (message) => {
         saveData();
+        if (typeof window.updateHomeScreenIcon === 'function') window.updateHomeScreenIcon();
         msgEl.innerHTML = `<div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--success-bg);border-radius:var(--r-sm);color:var(--success);font-size:0.88rem;"><i class="fas fa-check-circle"></i>${message}</div>`;
         setTimeout(() => { msgEl.innerHTML = ''; }, 3000);
         updateUserInfoForm();
@@ -17950,6 +17957,113 @@ function showCommitmentsForDay(dateString) {
   document.readyState === 'loading'
     ? document.addEventListener('DOMContentLoaded', initCombustivelTab)
     : setTimeout(initCombustivelTab, 700);
+})();
+</script>
+
+<!-- ============================================================
+     ÍCONE DA TELA INICIAL (Add to Home Screen)
+     Gera o apple-touch-icon a partir da LOGO importada (userLogo),
+     substituindo o ícone padrão com a letra "D".
+============================================================ -->
+<script>
+(function () {
+  var ICON_SIZE = 180; // tamanho recomendado pelo iOS
+
+  // Lê a logo salva no localStorage (mesma chave usada pelo app)
+  function getStoredLogo() {
+    try {
+      var raw = localStorage.getItem('userLogo');
+      if (!raw) return null;
+      var val = JSON.parse(raw);
+      return (typeof val === 'string' && val.indexOf('data:image') === 0) ? val : null;
+    } catch (e) { return null; }
+  }
+
+  // Aplica um data URL aos links de ícone do <head>
+  function applyIcon(dataUrl) {
+    ['app-apple-touch-icon', 'app-apple-touch-icon-180', 'app-favicon'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.setAttribute('href', dataUrl);
+    });
+  }
+
+  // Desenha um quadrado de fundo + logo centralizada (object-fit: contain)
+  function drawLogoIcon(img) {
+    var canvas = document.createElement('canvas');
+    canvas.width = ICON_SIZE;
+    canvas.height = ICON_SIZE;
+    var ctx = canvas.getContext('2d');
+
+    // Fundo branco (o iOS arredonda os cantos automaticamente — preenchemos o quadrado todo)
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, ICON_SIZE, ICON_SIZE);
+
+    // Margem interna para a logo respirar
+    var pad = ICON_SIZE * 0.16;
+    var maxW = ICON_SIZE - pad * 2;
+    var maxH = ICON_SIZE - pad * 2;
+    var ratio = Math.min(maxW / img.width, maxH / img.height);
+    var w = img.width * ratio;
+    var h = img.height * ratio;
+    var x = (ICON_SIZE - w) / 2;
+    var y = (ICON_SIZE - h) / 2;
+
+    try { ctx.drawImage(img, x, y, w, h); } catch (e) {}
+    return canvas.toDataURL('image/png');
+  }
+
+  // Ícone padrão (quando ainda NÃO há logo importada): gradiente + nota musical
+  function buildDefaultIcon() {
+    var canvas = document.createElement('canvas');
+    canvas.width = ICON_SIZE;
+    canvas.height = ICON_SIZE;
+    var ctx = canvas.getContext('2d');
+
+    var grad = ctx.createLinearGradient(0, 0, ICON_SIZE, ICON_SIZE);
+    grad.addColorStop(0, '#1d4ed8');
+    grad.addColorStop(1, '#3b82f6');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, ICON_SIZE, ICON_SIZE);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = 'bold ' + (ICON_SIZE * 0.55) + 'px Arial, sans-serif';
+    ctx.fillText('\u266B', ICON_SIZE / 2, ICON_SIZE / 2 + ICON_SIZE * 0.04); // ♫
+    return canvas.toDataURL('image/png');
+  }
+
+  // Atualiza o ícone: usa a logo se existir, senão o ícone padrão
+  function updateHomeScreenIcon() {
+    var logo = getStoredLogo();
+    if (logo) {
+      var img = new Image();
+      img.onload = function () { applyIcon(drawLogoIcon(img)); };
+      img.onerror = function () { applyIcon(buildDefaultIcon()); };
+      img.src = logo;
+    } else {
+      applyIcon(buildDefaultIcon());
+    }
+
+    // Também ajusta o nome exibido sob o ícone para o nome da empresa, se houver
+    try {
+      var info = JSON.parse(localStorage.getItem('userInfo') || 'null');
+      var titleMeta = document.getElementById('app-web-title');
+      if (titleMeta && info && info.name) {
+        titleMeta.setAttribute('content', info.name);
+      }
+    } catch (e) {}
+  }
+
+  // Expõe globalmente para ser chamado após salvar a logo
+  window.updateHomeScreenIcon = updateHomeScreenIcon;
+
+  // Executa ao carregar a página
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', updateHomeScreenIcon);
+  } else {
+    updateHomeScreenIcon();
+  }
 })();
 </script>
 </body>
