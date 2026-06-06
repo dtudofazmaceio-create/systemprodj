@@ -3824,7 +3824,22 @@
   <header class="top-bar">
     <button class="icon-button" id="back-button" style="display: none;"><i class="fas fa-arrow-left"></i></button>
     <div class="top-bar-brand" id="top-bar-brand-logo" style="display:flex;">
-      <i class="fas fa-music" style="color:var(--primary);font-size:1.1rem;"></i>
+      <svg class="alek-logo" viewBox="0 0 360 110" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ALEK" style="height:1.05em;width:auto;color:var(--primary);flex-shrink:0;">
+        <g fill="currentColor">
+          <g transform="translate(6,5)">
+            <path fill-rule="evenodd" d="M40,0 L82,100 L62,100 L40,48 L18,100 L-2,100 Z"/>
+            <path d="M40,0 L52,28 L28,28 Z"/>
+            <path d="M40,58 L54,100 L26,100 Z"/>
+          </g>
+          <g transform="translate(96,5)"><path d="M0,0 L20,0 L20,80 L62,80 L62,100 L0,100 Z"/></g>
+          <g transform="translate(172,5)"><path d="M0,0 L60,0 L60,20 L20,20 L20,40 L50,40 L50,58 L20,58 L20,80 L60,80 L60,100 L0,100 Z"/></g>
+          <g transform="translate(246,5)">
+            <path d="M0,0 L20,0 L20,100 L0,100 Z"/>
+            <path d="M64,0 L44,0 L18,44 L18,60 Z"/>
+            <path d="M64,100 L44,100 L18,56 L18,40 Z"/>
+          </g>
+        </g>
+      </svg>
       DJ <span class="brand-dot">Manager</span>
     </div>
     <h1 class="page-title" id="page-title" style="display:none;">Início</h1>
@@ -17988,27 +18003,63 @@ function showCommitmentsForDay(dateString) {
   }
 
   // Desenha um quadrado de fundo + logo centralizada (object-fit: contain)
+  // Analisa os cantos da logo para descobrir a cor de fundo e se ela é opaca
+  function analyzeLogo(img) {
+    var result = { bg: '#ffffff', opaque: false };
+    try {
+      var s = 40; // amostra reduzida para leitura rápida
+      var c = document.createElement('canvas');
+      c.width = s; c.height = s;
+      var cx = c.getContext('2d');
+      cx.drawImage(img, 0, 0, s, s);
+      var d = cx.getImageData(0, 0, s, s).data;
+
+      // Pixels dos 4 cantos
+      var pts = [[0,0],[s-1,0],[0,s-1],[s-1,s-1]];
+      var r = 0, g = 0, b = 0, aMin = 255, n = pts.length;
+      pts.forEach(function (p) {
+        var i = (p[1] * s + p[0]) * 4;
+        r += d[i]; g += d[i+1]; b += d[i+2];
+        if (d[i+3] < aMin) aMin = d[i+3];
+      });
+      r = Math.round(r/n); g = Math.round(g/n); b = Math.round(b/n);
+      result.bg = 'rgb(' + r + ',' + g + ',' + b + ')';
+      result.opaque = aMin > 200; // cantos opacos => a logo tem fundo próprio
+    } catch (e) {}
+    return result;
+  }
+
   function drawLogoIcon(img) {
     var canvas = document.createElement('canvas');
     canvas.width = ICON_SIZE;
     canvas.height = ICON_SIZE;
     var ctx = canvas.getContext('2d');
 
-    // Fundo branco (o iOS arredonda os cantos automaticamente — preenchemos o quadrado todo)
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, ICON_SIZE, ICON_SIZE);
+    var info = analyzeLogo(img);
+    var aspect = img.width / img.height;
+    var nearSquare = aspect > 0.82 && aspect < 1.22;
 
-    // Margem interna para a logo respirar
-    var pad = ICON_SIZE * 0.16;
-    var maxW = ICON_SIZE - pad * 2;
-    var maxH = ICON_SIZE - pad * 2;
-    var ratio = Math.min(maxW / img.width, maxH / img.height);
-    var w = img.width * ratio;
-    var h = img.height * ratio;
-    var x = (ICON_SIZE - w) / 2;
-    var y = (ICON_SIZE - h) / 2;
+    if (info.opaque && nearSquare) {
+      // Logo já é quadrada e tem fundo próprio (ex.: arte com fundo escuro):
+      // preenche o ícone inteiro (cover), como um app nativo, sem margem.
+      ctx.fillStyle = info.bg;
+      ctx.fillRect(0, 0, ICON_SIZE, ICON_SIZE);
+      var scale = Math.max(ICON_SIZE / img.width, ICON_SIZE / img.height);
+      var cw = img.width * scale, ch = img.height * scale;
+      try { ctx.drawImage(img, (ICON_SIZE - cw)/2, (ICON_SIZE - ch)/2, cw, ch); } catch (e) {}
+    } else {
+      // Logo retangular ou com fundo transparente:
+      // usa a cor de fundo detectada (ou branco) e centraliza com margem (contain).
+      ctx.fillStyle = info.opaque ? info.bg : '#ffffff';
+      ctx.fillRect(0, 0, ICON_SIZE, ICON_SIZE);
+      var pad = ICON_SIZE * 0.14;
+      var maxW = ICON_SIZE - pad * 2;
+      var maxH = ICON_SIZE - pad * 2;
+      var ratio = Math.min(maxW / img.width, maxH / img.height);
+      var w = img.width * ratio, h = img.height * ratio;
+      try { ctx.drawImage(img, (ICON_SIZE - w)/2, (ICON_SIZE - h)/2, w, h); } catch (e) {}
+    }
 
-    try { ctx.drawImage(img, x, y, w, h); } catch (e) {}
     return canvas.toDataURL('image/png');
   }
 
@@ -18033,8 +18084,7 @@ function showCommitmentsForDay(dateString) {
     return canvas.toDataURL('image/png');
   }
 
-  // Atualiza o ícone: usa a logo da empresa se existir.
-  // Só cai no ícone padrão se ainda não houver logo importada.
+  // Atualiza o ícone: usa a logo se existir, senão o ícone padrão
   function updateHomeScreenIcon() {
     var logo = getStoredLogo();
     if (logo) {
@@ -18045,6 +18095,15 @@ function showCommitmentsForDay(dateString) {
     } else {
       applyIcon(buildDefaultIcon());
     }
+
+    // Também ajusta o nome exibido sob o ícone para o nome da empresa, se houver
+    try {
+      var info = JSON.parse(localStorage.getItem('userInfo') || 'null');
+      var titleMeta = document.getElementById('app-web-title');
+      if (titleMeta && info && info.name) {
+        titleMeta.setAttribute('content', info.name);
+      }
+    } catch (e) {}
   }
 
   // Expõe globalmente para ser chamado após salvar a logo
