@@ -18033,7 +18033,8 @@ function showCommitmentsForDay(dateString) {
     return canvas.toDataURL('image/png');
   }
 
-  // Atualiza o ícone: usa a logo se existir, senão o ícone padrão
+  // Atualiza o ícone: usa a logo da empresa se existir.
+  // Só cai no ícone padrão se ainda não houver logo importada.
   function updateHomeScreenIcon() {
     var logo = getStoredLogo();
     if (logo) {
@@ -18044,15 +18045,6 @@ function showCommitmentsForDay(dateString) {
     } else {
       applyIcon(buildDefaultIcon());
     }
-
-    // Também ajusta o nome exibido sob o ícone para o nome da empresa, se houver
-    try {
-      var info = JSON.parse(localStorage.getItem('userInfo') || 'null');
-      var titleMeta = document.getElementById('app-web-title');
-      if (titleMeta && info && info.name) {
-        titleMeta.setAttribute('content', info.name);
-      }
-    } catch (e) {}
   }
 
   // Expõe globalmente para ser chamado após salvar a logo
