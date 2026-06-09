@@ -7291,7 +7291,7 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
     const msgEl = document.getElementById('user-info-message');
     const saveAndNotify = (message) => {
         saveData();
-        if (typeof window.updateHomeScreenIcon === 'function') window.updateHomeScreenIcon(userLogo);
+        if (typeof window.updateHomeScreenIcon === 'function') window.updateHomeScreenIcon();
         msgEl.innerHTML = `<div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--success-bg);border-radius:var(--r-sm);color:var(--success);font-size:0.88rem;"><i class="fas fa-check-circle"></i>${message}</div>`;
         setTimeout(() => { msgEl.innerHTML = ''; }, 3000);
         updateUserInfoForm();
@@ -11990,7 +11990,6 @@ function updateCommitmentOrderSelector(clientId) {
           updateUI();
           updateMaintenanceTab();
           initFuelConfigPanel();
-          if (typeof window.updateHomeScreenIcon === 'function') window.updateHomeScreenIcon(userLogo);
           showToast('Backup restaurado com sucesso! ✅', 'success');
           showTab('dashboard');
         } catch (err) {
@@ -18037,29 +18036,16 @@ function showCommitmentsForDay(dateString) {
     var ctx = canvas.getContext('2d');
 
     var info = analyzeLogo(img);
-    var aspect = img.width / img.height;
-    var nearSquare = aspect > 0.7 && aspect < 1.43; // tolerância maior
 
-    // Fundo: usa a cor detectada nos cantos da logo (quando ela tem fundo próprio)
-    // ou branco como segurança. Para logos com fundo transparente, esse fundo
-    // só aparece se sobrar algum cantinho — o objetivo é não deixar moldura.
-    ctx.fillStyle = info.opaque ? info.bg : '#ffffff';
+    // Sempre preenche o ícone inteiro (cover), sem margem/padding.
+    // Detecta a cor de fundo pelos cantos; se transparente usa preto.
+    ctx.fillStyle = info.opaque ? info.bg : '#000000';
     ctx.fillRect(0, 0, ICON_SIZE, ICON_SIZE);
 
-    if (nearSquare) {
-      // Logo quadrada (ou quase): "cover" — preenche TODO o botão, encostando
-      // nas 4 bordas, igual a um app nativo. Sem margem.
-      var scale = Math.max(ICON_SIZE / img.width, ICON_SIZE / img.height);
-      var cw = img.width * scale, ch = img.height * scale;
-      try { ctx.drawImage(img, (ICON_SIZE - cw)/2, (ICON_SIZE - ch)/2, cw, ch); } catch (e) {}
-    } else {
-      // Logo bem retangular (ex.: texto largo): "contain" SEM margem, para a logo
-      // ficar o maior possível e encostar nas bordas do lado mais comprido,
-      // sem cortar a marca. O fundo preenche o restante de forma uniforme.
-      var ratio = Math.min(ICON_SIZE / img.width, ICON_SIZE / img.height);
-      var w = img.width * ratio, h = img.height * ratio;
-      try { ctx.drawImage(img, (ICON_SIZE - w)/2, (ICON_SIZE - h)/2, w, h); } catch (e) {}
-    }
+    // Escala "cover": a imagem ocupa todo o quadrado sem bordas brancas.
+    var scale = Math.max(ICON_SIZE / img.width, ICON_SIZE / img.height);
+    var cw = img.width * scale, ch = img.height * scale;
+    try { ctx.drawImage(img, (ICON_SIZE - cw) / 2, (ICON_SIZE - ch) / 2, cw, ch); } catch (e) {}
 
     return canvas.toDataURL('image/png');
   }
@@ -18085,13 +18071,9 @@ function showCommitmentsForDay(dateString) {
     return canvas.toDataURL('image/png');
   }
 
-  // Atualiza o ícone: usa a logo se existir, senão o ícone padrão.
-  // Aceita opcionalmente a logo (data URL) recém-salva, para refletir
-  // a alteração imediatamente, sem depender da releitura do localStorage.
-  function updateHomeScreenIcon(freshLogo) {
-    var logo = (typeof freshLogo === 'string' && freshLogo.indexOf('data:image') === 0)
-      ? freshLogo
-      : getStoredLogo();
+  // Atualiza o ícone: usa a logo se existir, senão o ícone padrão
+  function updateHomeScreenIcon() {
+    var logo = getStoredLogo();
     if (logo) {
       var img = new Image();
       img.onload = function () { applyIcon(drawLogoIcon(img)); };
