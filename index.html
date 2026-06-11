@@ -4292,9 +4292,14 @@
       <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
           <h2 style="margin-bottom:0;"><i class="fas fa-calendar-check"></i> Eventos por Tipo</h2>
-          <button class="btn" id="rpt-download-pdf-btn" style="background:linear-gradient(135deg,#ef4444,#dc2626);font-size:0.82rem;padding:8px 14px;gap:6px;">
-            <i class="fas fa-file-pdf"></i> Baixar Relatório PDF
-          </button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn" id="rpt-agendados-pdf-btn" style="background:linear-gradient(135deg,#6c63ff,#4f46e5);font-size:0.82rem;padding:8px 14px;gap:6px;color:white;border:none;">
+              <i class="fas fa-calendar-alt"></i> Eventos Agendados
+            </button>
+            <button class="btn" id="rpt-download-pdf-btn" style="background:linear-gradient(135deg,#ef4444,#dc2626);font-size:0.82rem;padding:8px 14px;gap:6px;">
+              <i class="fas fa-file-pdf"></i> PDF Eventos
+            </button>
+          </div>
         </div>
 
         <!-- Filtros -->
@@ -4365,12 +4370,12 @@
       <div class="card" id="op-costs-report-card">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
           <h2 style="margin-bottom:0;"><i class="fas fa-gas-pump" style="color:var(--warning);"></i> Custos Operacionais</h2>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn" id="op-open-fuel-calc-btn" style="background:linear-gradient(135deg,#f59e0b,#d97706);font-size:0.82rem;padding:8px 14px;gap:6px;color:white;border:none;">
-              <i class="fas fa-calculator"></i> Calcular
+          <div style="display:flex; gap:8px;">
+            <button class="btn" id="op-download-pdf-btn" style="background:linear-gradient(135deg,#ef4444,#dc2626);font-size:0.82rem;padding:8px 14px;gap:6px;color:white;border:none;">
+              <i class="fas fa-file-pdf"></i> PDF
             </button>
-            <button class="btn" id="op-costs-pdf-btn" style="background:linear-gradient(135deg,#ef4444,#dc2626);font-size:0.82rem;padding:8px 14px;gap:6px;color:white;border:none;">
-              <i class="fas fa-file-pdf"></i> Baixar PDF
+            <button class="btn" id="op-open-fuel-calc-btn" style="background:linear-gradient(135deg,#f59e0b,#d97706);font-size:0.82rem;padding:8px 14px;gap:6px;color:white;border:none;">
+              <i class="fas fa-calculator"></i> Calcular Viagem
             </button>
           </div>
         </div>
@@ -4799,7 +4804,6 @@
         <div style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap;">
           <button class="btn" id="add-commitment-btn-aba"><i class="fas fa-plus"></i> Novo Compromisso</button>
           <button class="btn" id="relatorio-eventos-btn" style="background:linear-gradient(135deg,#06d6a0,#059c75);"><i class="fas fa-file-pdf"></i> Relatório PDF</button>
-          <button class="btn" id="relatorio-pendentes-btn" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:white;"><i class="fas fa-clock"></i> Agendados &amp; Pendentes PDF</button>
         </div>
         <div id="commitments-list" class="transactions-list-container"><div class="empty-state" data-empty-state><div class="empty-state-icon"><i class="fas fa-calendar-alt"></i></div><h4>Nenhum compromisso este mês</h4><p>Adicione compromissos para organizar sua agenda</p></div></div>
       </div>
@@ -6411,7 +6415,25 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('event-order-template').style.display = 'none';
     }
 
-    if (tabId === 'relatorios') { updateAllCharts(); setTimeout(() => { if (typeof window.renderOpCosts === 'function') window.renderOpCosts(); }, 200); }
+    if (tabId === 'relatorios') { 
+      updateAllCharts(); 
+      setTimeout(() => { 
+        if (typeof window.renderOpCosts === 'function') {
+          // Inicializar datas se estiverem vazias
+          const startEl = document.getElementById('op-date-start');
+          const endEl = document.getElementById('op-date-end');
+          if (startEl && !startEl.value) {
+            const now = new Date();
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+            startEl.value = firstDay.toISOString().split('T')[0];
+          }
+          if (endEl && !endEl.value) {
+            endEl.value = new Date().toISOString().split('T')[0];
+          }
+          window.renderOpCosts(); 
+        }
+      }, 200); 
+    }
     if (tabId === 'combustivel') { setTimeout(() => { if (typeof window.initCombustivelTabView === 'function') window.initCombustivelTabView(); }, 100); }
     if (tabId === 'analise') {
       updateAnaliseDashboard();
@@ -7459,12 +7481,50 @@ if (typeof activeModalCallback === 'function') {
       const index = commitments.findIndex(c => c.id === parseFloat(id));
       if (index > -1) {
         commitments[index] = { ...commitments[index], ...data };
-        // Sincroniza o endereço de volta ao pedido vinculado, garantindo sempre o dado mais recente
+        // ── EDIÇÃO GLOBAL ──
+        // Quando o compromisso está vinculado a um pedido, qualquer alteração feita
+        // aqui na Agenda é propagada para o pedido (e, por consequência, para recibos,
+        // relatórios, dashboard, KM/combustível e financeiro que leem do pedido).
         const linkedId = commitments[index].linkedOrderId;
         if (linkedId) {
           const orderIndex = eventOrders.findIndex(o => o.id === linkedId);
-          if (orderIndex > -1 && data.location) {
-            eventOrders[orderIndex] = { ...eventOrders[orderIndex], eventLocation: data.location };
+          if (orderIndex > -1) {
+            const order = eventOrders[orderIndex];
+
+            // Separa data e hora do campo datetime-local (YYYY-MM-DDTHH:MM)
+            let evDate = order.eventDate;
+            let evTime = order.eventTime;
+            if (data.date) {
+              const parts = data.date.split('T');
+              if (parts[0]) evDate = parts[0];
+              if (parts[1]) evTime = parts[1].slice(0, 5);
+            }
+
+            const updatedOrder = {
+              ...order,
+              clientId: (data.clientId != null) ? data.clientId : order.clientId,
+              eventDate: evDate,
+              eventTime: evTime,
+              eventLocation: data.location || order.eventLocation,
+            };
+            if (data.locationLink) updatedOrder.eventLocationLink = data.locationLink;
+
+            // Sincroniza KM (gera/atualiza o kmRecord usado nos custos de combustível)
+            if (data.kmInicial != null && data.kmFinal != null && data.kmFinal >= data.kmInicial) {
+              const totalKm = data.kmFinal - data.kmInicial;
+              updatedOrder.kmRecord = {
+                ...(order.kmRecord || {}),
+                total: totalKm,
+                ida: totalKm * 0.5,
+                volta: totalKm * 0.5,
+                kmInicial: data.kmInicial,
+                kmFinal: data.kmFinal,
+                manual: true,
+                date: new Date().toISOString()
+              };
+            }
+
+            eventOrders[orderIndex] = updatedOrder;
           }
         }
       }
@@ -7476,6 +7536,7 @@ if (typeof activeModalCallback === 'function') {
     renderCalendar(calendarCurrentDate);
     document.getElementById('commitment-modal').classList.remove('active');
     showTab('Agenda');
+    showToast(id ? 'Compromisso atualizado em todo o sistema!' : 'Compromisso criado com sucesso!', 'success');
   }
   
   function handleDJContractSubmit(e) {
@@ -11779,15 +11840,293 @@ function updateCommitmentOrderSelector(clientId) {
         pdfBtn.dataset.attached = 'true';
         pdfBtn.addEventListener('click', gerarRelatorioCompletoEventosPDF);
       }
+
+      // Botão "Eventos Agendados" → abre modal com filtros de data/status
+      const agBtn = document.getElementById('rpt-agendados-pdf-btn');
+      if (agBtn && !agBtn.dataset.attached) {
+        agBtn.dataset.attached = 'true';
+        agBtn.addEventListener('click', () => openRelatorioEventosModal());
+      }
     }
 
     updateKPIs();
     renderReport();
+
+    const opPdfBtn = document.getElementById('op-download-pdf-btn');
+    if (opPdfBtn && !opPdfBtn.dataset.attached) {
+      opPdfBtn.dataset.attached = 'true';
+      opPdfBtn.addEventListener('click', gerarRelatorioCustosOperacionaisPDF);
+    }
+  }
+
+  // =====================================================
+  // ASSINATURA AUTOMÁTICA EM DOCUMENTOS / RELATÓRIOS
+  // Insere a assinatura manuscrita do usuário + linha + identificação
+  // em qualquer PDF gerado (jsPDF). Reutilizável em todos os documentos.
+  // =====================================================
+  function addDocumentSignature(doc, opts = {}) {
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const marginX = opts.marginX != null ? opts.marginX : 14;
+    const accent = opts.accentColor || [100, 116, 139];
+    const reserve = 30; // espaço vertical necessário para o bloco
+
+    // Garante que estamos na última página do documento
+    try { doc.setPage(doc.internal.getNumberOfPages()); } catch (e) {}
+
+    // Decide a posição vertical: usa startY se couber, senão cria nova página
+    let y;
+    if (opts.startY != null && (opts.startY + reserve) < (pageH - 14)) {
+      y = opts.startY + 6;
+    } else {
+      doc.addPage();
+      y = 40;
+    }
+
+    // Bloco de assinatura alinhado à direita
+    const blockW = opts.blockW || 80;
+    const cx = pageW - marginX - blockW / 2;        // centro do bloco
+    const lineLeft = pageW - marginX - blockW;
+    const lineRight = pageW - marginX;
+    const lineY = y + 16;
+
+    // Imagem da assinatura manuscrita acima da linha
+    if (userSignature) {
+      try {
+        const sigImg = new Image(); sigImg.src = userSignature;
+        const aspect = (sigImg.naturalWidth || 220) / Math.max(sigImg.naturalHeight || 70, 1);
+        const maxW = blockW - 8, maxH = 15;
+        let w = Math.min(maxW, maxH * aspect); let h = w / aspect;
+        if (h > maxH) { h = maxH; w = h * aspect; }
+        doc.addImage(userSignature, 'PNG', cx - w / 2, lineY - h - 1, w, h);
+      } catch (e) {}
+    }
+
+    // Linha de assinatura
+    doc.setDrawColor(accent[0], accent[1], accent[2]);
+    doc.setLineWidth(0.5);
+    doc.line(lineLeft, lineY, lineRight, lineY);
+
+    // Identificação
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(40, 40, 40);
+    doc.text(opts.name || userInfo.name || 'Responsável', cx, lineY + 4.5, { align: 'center' });
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(6.8);
+    doc.setTextColor(120, 120, 120);
+    doc.text(opts.label || 'Assinatura do Responsável', cx, lineY + 8.5, { align: 'center' });
+    if (userInfo && userInfo.cpf && userInfo.cpf !== 'Seu CPF/CNPJ') {
+      doc.text('CPF/CNPJ: ' + userInfo.cpf, cx, lineY + 12, { align: 'center' });
+    }
+
+    return lineY + 14;
+  }
+
+  // Aplica numeração de páginas + rótulo em todas as páginas de um PDF
+  function addPdfFooter(doc, label) {
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const pages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pages; i++) {
+      doc.setPage(i);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6.5);
+      doc.setTextColor(148, 163, 184);
+      doc.text(label || 'Gerado pelo DJ Manager Pro', 14, pageH - 7);
+      doc.text(`Página ${i} de ${pages}`, pageW - 14, pageH - 7, { align: 'right' });
+    }
+  }
+
+  function gerarRelatorioCustosOperacionaisPDF() {
+    const rawData = (() => { try { return JSON.parse(localStorage.getItem('djmpro_data') || '{}'); } catch(e) { return {}; } })();
+    const transactions = rawData.transactions || [];
+    const maintenanceNotes = rawData.maintenanceNotes || [];
+    const eventOrders = rawData.eventOrders || [];
+    const fuelConfig = rawData.fuelConfig || { pricePerLiter: 0, consumption: 10 };
+
+    const startInput = document.getElementById('op-date-start')?.value;
+    const endInput = document.getElementById('op-date-end')?.value;
+    const startDate = startInput ? new Date(startInput + 'T00:00:00') : null;
+    const endDate = endInput ? new Date(endInput + 'T23:59:59') : null;
+
+    const inRange = (dateStr) => {
+      if (!dateStr) return false;
+      const d = new Date(dateStr.includes('T') ? dateStr : dateStr + 'T00:00:00');
+      if (startDate && d < startDate) return false;
+      if (endDate && d > endDate) return false;
+      return true;
+    };
+
+    let totalKm = 0;
+    let fuelCostTotal = 0;
+    const fuelDetails = [];
+    eventOrders.forEach(o => {
+      const kmRec = o.kmRecord;
+      if (!kmRec) return;
+      const dateRef = o.eventDate || o.createdAt || '';
+      if (!inRange(dateRef)) return;
+      const km = kmRec.total || 0;
+      totalKm += km;
+      const liters = km / (fuelConfig.consumption || 10);
+      const cost = liters * (fuelConfig.pricePerLiter || 0);
+      fuelCostTotal += cost;
+      const eventName = o.eventType || 'Evento';
+      fuelDetails.push([formatDate(dateRef), 'Combustível (KM)', `Ref: ${eventName} (${km.toFixed(1)} km)`, formatCurrency(cost)]);
+    });
+
+    let maintTotal = 0;
+    const maintDetails = [];
+    maintenanceNotes.forEach(n => {
+      if (!inRange(n.date || n.createdAt || '')) return;
+      const cost = parseFloat(n.cost || n.value || 0) || 0;
+      maintTotal += cost;
+      maintDetails.push([formatDate(n.date || n.createdAt), 'Manutenção', n.title || n.description || 'Manutenção', formatCurrency(cost)]);
+    });
+
+    let otherExpenses = 0;
+    const otherDetails = [];
+    transactions.forEach(t => {
+      if (t.type !== 'despesa') return;
+      if (!inRange(t.date)) return;
+      const category = (t.category || '').toLowerCase();
+      const description = (t.description || '').toLowerCase();
+      
+      if (category.includes('combustível') || category.includes('combustivel') || description.includes('combustível') || description.includes('combustivel')) {
+        fuelCostTotal += t.amount;
+        fuelDetails.push([formatDate(t.date), 'Combustível (Transação)', t.description, formatCurrency(t.amount)]);
+      } else {
+        otherExpenses += t.amount;
+        otherDetails.push([formatDate(t.date), t.category || 'Outros', t.description, formatCurrency(t.amount)]);
+      }
+    });
+
+    const total = fuelCostTotal + maintTotal + otherExpenses;
+
+    // Receita confirmada no período (para cálculo de margem)
+    let receita = 0;
+    transactions.forEach(t => {
+      if (t.type !== 'receita') return;
+      if (t.status !== 'confirmada' && t.status !== 'recebido' && t.status !== 'pago') return;
+      if (!inRange(t.date)) return;
+      receita += t.amount;
+    });
+
+    const allRows = [...fuelDetails, ...maintDetails, ...otherDetails];
+    if (allRows.length === 0) {
+      showToast('Nenhum custo operacional encontrado no período selecionado.', 'warning');
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const marginX = 14;
+
+    doc.setFillColor(245, 158, 11); // Orange/Warning color for Op Costs
+    doc.rect(0, 0, pageW, 30, 'F');
+    doc.setFillColor(217, 119, 6);
+    doc.rect(0, 24, pageW, 6, 'F');
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(17);
+    doc.text(userInfo.name || 'DJ Manager Pro', marginX, 13);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.text('RELATÓRIO DE CUSTOS E DESPESAS OPERACIONAIS', marginX, 21);
+    doc.setFontSize(7.5);
+    doc.text(`Emitido em: ${new Date().toLocaleString('pt-BR')}`, pageW - marginX, 13, { align: 'right' });
+    doc.text(`Período: ${startInput ? formatDate(startInput) : 'Início'} até ${endInput ? formatDate(endInput) : 'Fim'}`, pageW - marginX, 21, { align: 'right' });
+
+    const kpiY = 36;
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(marginX, kpiY, pageW - marginX * 2, 20, 3, 3, 'F');
+    doc.setDrawColor(226, 232, 240);
+    doc.roundedRect(marginX, kpiY, pageW - marginX * 2, 20, 3, 3, 'S');
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(100, 116, 139);
+    const k1 = marginX + 15, k2 = pageW / 2, k3 = pageW - marginX - 15;
+    doc.text('COMBUSTÍVEL', k1, kpiY + 6, { align: 'center' });
+    doc.text('MANUTENÇÃO', k2, kpiY + 6, { align: 'center' });
+    doc.text('TOTAL CUSTOS', k3, kpiY + 6, { align: 'center' });
+
+    doc.setFontSize(9.5); doc.setFont('helvetica', 'bold');
+    doc.setTextColor(245, 158, 11);
+    doc.text(formatCurrency(fuelCostTotal), k1, kpiY + 14, { align: 'center' });
+    doc.setTextColor(239, 68, 68);
+    doc.text(formatCurrency(maintTotal), k2, kpiY + 14, { align: 'center' });
+    doc.setTextColor(239, 68, 68);
+    doc.text(formatCurrency(total), k3, kpiY + 14, { align: 'center' });
+
+    const allRowsBody = [...fuelDetails, ...maintDetails, ...otherDetails];
+
+    doc.autoTable({
+      startY: kpiY + 25,
+      head: [['Data', 'Categoria', 'Descrição', 'Valor']],
+      body: allRowsBody,
+      theme: 'striped',
+      headStyles: { fillColor: [245, 158, 11], textColor: 255, fontSize: 8, fontStyle: 'bold' },
+      styles: { fontSize: 7.5, cellPadding: 3 },
+      columnStyles: { 3: { halign: 'right', fontStyle: 'bold' } },
+      margin: { left: marginX, right: marginX }
+    });
+
+    // ── Resumo de margem (Receita x Custos) ──
+    let summaryY = (doc.lastAutoTable ? doc.lastAutoTable.finalY : kpiY + 25) + 6;
+    if (summaryY > pageH - 40) { doc.addPage(); summaryY = 20; }
+    const margem = receita - total;
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(marginX, summaryY, pageW - marginX * 2, 16, 3, 3, 'F');
+    doc.setDrawColor(226, 232, 240);
+    doc.roundedRect(marginX, summaryY, pageW - marginX * 2, 16, 3, 3, 'S');
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(40, 40, 40);
+    doc.text(`Receita no período: ${formatCurrency(receita)}`, marginX + 4, summaryY + 6);
+    doc.text(`Total de custos: ${formatCurrency(total)}`, marginX + 4, summaryY + 12);
+    doc.setTextColor(margem >= 0 ? 16 : 239, margem >= 0 ? 185 : 68, margem >= 0 ? 129 : 68);
+    doc.text(`Resultado: ${formatCurrency(margem)}`, pageW - marginX - 4, summaryY + 9, { align: 'right' });
+
+    // ── Assinatura automática + rodapé ──
+    addDocumentSignature(doc, { startY: summaryY + 16, marginX, accentColor: [245, 158, 11] });
+    addPdfFooter(doc, 'Relatório de Custos Operacionais · DJ Manager Pro');
+
+    doc.save(`Relatorio_Custos_${new Date().getTime()}.pdf`);
+    showToast('Relatório de custos gerado com sucesso!', 'success');
+  }
+
+  // Versão acessível em qualquer escopo (corrige o botão "PDF Eventos",
+  // que antes chamava uma função aninhada fora do seu escopo).
+  function getFilteredReportOrders() {
+    const filterSelect = document.getElementById('event-type-report-filter');
+    const selectedType = filterSelect ? filterSelect.value : '';
+    const selectedStatus = (document.getElementById('rpt-status-filter') || {}).value || '';
+    const dateStart = (document.getElementById('rpt-date-start') || {}).value || '';
+    const dateEnd   = (document.getElementById('rpt-date-end')   || {}).value || '';
+    const search    = ((document.getElementById('rpt-search-input') || {}).value || '').toLowerCase().trim();
+
+    return eventOrders.filter(order => {
+      if (selectedType && order.eventType !== selectedType) return false;
+      if (selectedStatus) {
+        const comm = commitments.find(c => c.linkedOrderId === order.id);
+        if (!comm || comm.status !== selectedStatus) return false;
+      }
+      if (dateStart && order.eventDate < dateStart) return false;
+      if (dateEnd   && order.eventDate > dateEnd)   return false;
+      if (search) {
+        const client = clients.find(c => c.id === order.clientId);
+        const clientName = client ? client.name.toLowerCase() : '';
+        const type = (order.eventType || '').toLowerCase();
+        if (!clientName.includes(search) && !type.includes(search)) return false;
+      }
+      return true;
+    }).sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate));
   }
 
   function gerarRelatorioCompletoEventosPDF() {
-    const orders = [...eventOrders].sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate));
-    if (orders.length === 0) { showToast('Nenhum evento cadastrado.', 'warning'); return; }
+    const orders = getFilteredReportOrders();
+    if (orders.length === 0) { showToast('Nenhum evento encontrado com os filtros atuais.', 'warning'); return; }
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -11887,6 +12226,10 @@ function updateCommitmentOrderSelector(clientId) {
         }
       },
     });
+
+    // Assinatura automática (após a tabela, na última página)
+    const evFinalY = doc.lastAutoTable ? doc.lastAutoTable.finalY : 60;
+    addDocumentSignature(doc, { startY: evFinalY + 4, marginX, accentColor: [29, 78, 216] });
 
     // Footer
     const pages = doc.internal.getNumberOfPages();
@@ -13659,8 +14002,8 @@ function showCommitmentsForDay(dateString) {
   let sigCssW = 300;     // largura CSS do canvas
   let sigCssH = 150;     // altura CSS do canvas
   let sigDrawing = false;
-  let sigColor = '#1a1a2e';
-  let sigLineWidth = 2.5;
+  let sigColor = '#0000bb';
+  let sigLineWidth = 4.5;
   let sigStrokes = [];
   let sigCurrentStroke = [];
   let sigLastPoint = null;
@@ -14872,12 +15215,19 @@ function showCommitmentsForDay(dateString) {
     doc.setTextColor(saldoGeral > 0 ? 239 : 6, saldoGeral > 0 ? 71 : 214, saldoGeral > 0 ? 111 : 160);
     doc.text(`Saldo a Receber: ${formatCurrency(saldoGeral)}`, col3, totaisY + 14, { align: 'right' });
 
+    // ── Assinatura automática ──
+    addDocumentSignature(doc, { startY: totaisY + 18, marginX, accentColor: [108, 99, 255] });
+
     // ── Rodapé de página
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7);
-    doc.setTextColor(150, 150, 180);
-    doc.text('Gerado pelo FinancePro', marginX, pageH - 8);
-    doc.text(`${new Date().toLocaleString('pt-BR')}`, pageW - marginX, pageH - 8, { align: 'right' });
+    const evtPages = doc.internal.getNumberOfPages();
+    for (let p = 1; p <= evtPages; p++) {
+      doc.setPage(p);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(150, 150, 180);
+      doc.text('Gerado pelo DJ Manager Pro', marginX, pageH - 8);
+      doc.text(`${new Date().toLocaleString('pt-BR')} · Pág. ${p}/${evtPages}`, pageW - marginX, pageH - 8, { align: 'right' });
+    }
 
     // ── Salvar
     const periodo = (inicio && fim)
@@ -15605,6 +15955,9 @@ function showCommitmentsForDay(dateString) {
     doc.setTextColor(100, 60, 0);
     doc.text(`${entries.length} trajeto(s)`, mX + 4, finalY + 13);
     doc.text(`Total: ${formatCurrency(totalCost)}`, pageW - mX - 4, finalY + 13, { align: 'right' });
+
+    // ── Assinatura automática ──
+    addDocumentSignature(doc, { startY: finalY + 18, marginX: mX, accentColor: [217, 119, 6] });
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7);
@@ -17459,7 +17812,7 @@ function showCommitmentsForDay(dateString) {
   }
 
   // ── Relatório Operacional ──
-  function renderOpCosts() {
+  window.renderOpCosts = function() {
     const rawData = (() => { try { return JSON.parse(localStorage.getItem('djmpro_data') || '{}'); } catch(e) { return {}; } })();
     const transactions = rawData.transactions || [];
     const maintenanceNotes = rawData.maintenanceNotes || [];
@@ -17514,10 +17867,17 @@ function showCommitmentsForDay(dateString) {
     transactions.forEach(t => {
       if (t.type !== 'despesa') return;
       if (!inRange(t.date)) return;
-      if ((t.category || '').toLowerCase().includes('combustível') || (t.category || '').toLowerCase().includes('combustivel') || (t.description || '').toLowerCase().includes('combustível') || (t.description || '').toLowerCase().includes('combustivel')) {
+      const category = (t.category || '').toLowerCase();
+      const description = (t.description || '').toLowerCase();
+      
+      if (category.includes('combustível') || category.includes('combustivel') || description.includes('combustível') || description.includes('combustivel')) {
         fuelTxs.push(t);
         fuelCostTotal += t.amount;
+      } else if (category.includes('operacional') || category.includes('operacionais')) {
+        otherExpenses += t.amount;
+        otherTxs.push(t);
       } else {
+        // Incluir outras despesas que não sejam estritamente operacionais mas que o usuário possa querer ver aqui
         otherExpenses += t.amount;
         otherTxs.push(t);
       }
@@ -17527,7 +17887,8 @@ function showCommitmentsForDay(dateString) {
     let receita = 0;
     transactions.forEach(t => {
       if (t.type !== 'receita') return;
-      if (t.status !== 'confirmada') return;
+      // Considerar confirmada ou recebida
+      if (t.status !== 'confirmada' && t.status !== 'recebido' && t.status !== 'pago') return;
       if (!inRange(t.date)) return;
       receita += t.amount;
     });
@@ -17565,9 +17926,28 @@ function showCommitmentsForDay(dateString) {
       const cat = t.category || 'Outros';
       catMap[cat] = (catMap[cat] || 0) + t.amount;
     });
-    const iconMap = { 'Alimentação':'fa-utensils', 'Transporte':'fa-car', 'Marketing':'fa-bullhorn', 'Equipamento':'fa-plug', 'Software':'fa-laptop', 'Internet':'fa-wifi' };
-    Object.entries(catMap).sort((a,b) => b[1]-a[1]).slice(0, 8).forEach(([cat, amt]) => {
-      items.push({ icon: iconMap[cat] || 'fa-receipt', iconBg: 'rgba(139,92,246,0.12)', iconColor: 'var(--accent)', name: cat, sub: `despesas confirmadas`, amount: amt });
+    const iconMap = { 
+      'Alimentação':'fa-utensils', 
+      'Transporte':'fa-car', 
+      'Marketing':'fa-bullhorn', 
+      'Equipamento':'fa-plug', 
+      'Software':'fa-laptop', 
+      'Internet':'fa-wifi',
+      'Despesas Operacionais':'fa-cogs',
+      'Despesa Operacional':'fa-cogs'
+    };
+    Object.entries(catMap).sort((a,b) => b[1]-a[1]).slice(0, 12).forEach(([cat, amt]) => {
+      let icon = iconMap[cat] || 'fa-receipt';
+      let color = 'var(--accent)';
+      let bg = 'rgba(139,92,246,0.12)';
+      
+      if (cat.toLowerCase().includes('operacional')) {
+        icon = 'fa-briefcase';
+        color = 'var(--primary)';
+        bg = 'var(--primary-glow)';
+      }
+
+      items.push({ icon: icon, iconBg: bg, iconColor: color, name: cat, sub: `despesas confirmadas`, amount: amt });
     });
 
     if (items.length === 0) {
@@ -17978,454 +18358,6 @@ function showCommitmentsForDay(dateString) {
   document.readyState === 'loading'
     ? document.addEventListener('DOMContentLoaded', initCombustivelTab)
     : setTimeout(initCombustivelTab, 700);
-})();
-</script>
-
-<!-- ============================================================
-     PDF: CUSTOS OPERACIONAIS & EVENTOS AGENDADOS/CONFIRMADOS/PENDENTES
-============================================================ -->
-<script>
-(function () {
-  'use strict';
-
-  /* ─── helpers ─── */
-  function fmtBRL(v) {
-    return (v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  }
-  function fmtDate(str) {
-    if (!str) return '—';
-    const d = new Date(str.includes('T') ? str : str + 'T00:00:00');
-    return d.toLocaleDateString('pt-BR');
-  }
-  function getRawData() {
-    try { return JSON.parse(localStorage.getItem('djmpro_data') || '{}'); } catch(e) { return {}; }
-  }
-  function getUserInfo() {
-    try { return JSON.parse(localStorage.getItem('userInfo') || '{}'); } catch(e) { return {}; }
-  }
-
-  /* ════════════════════════════════════════════════════════════
-     1.  PDF — CUSTOS OPERACIONAIS
-  ════════════════════════════════════════════════════════════ */
-  function gerarCustosPDF() {
-    if (!window.jspdf) { alert('jsPDF ainda não carregado. Aguarde e tente novamente.'); return; }
-    const { jsPDF } = window.jspdf;
-
-    const raw           = getRawData();
-    const userInfo      = getUserInfo();
-    const transactions  = raw.transactions   || [];
-    const maintenanceNotes = raw.maintenanceNotes || [];
-    const eventOrders   = raw.eventOrders    || [];
-    const fuelConfig    = raw.fuelConfig     || { pricePerLiter: 0, consumption: 10 };
-
-    /* Pega o período selecionado na interface */
-    const startInput = document.getElementById('op-date-start')?.value;
-    const endInput   = document.getElementById('op-date-end')?.value;
-    const startDate  = startInput ? new Date(startInput + 'T00:00:00') : null;
-    const endDate    = endInput   ? new Date(endInput   + 'T23:59:59') : null;
-
-    const inRange = (dateStr) => {
-      if (!dateStr) return !startDate && !endDate; // sem data: incluir só se sem filtro
-      const d = new Date(dateStr.includes('T') ? dateStr : dateStr + 'T00:00:00');
-      if (startDate && d < startDate) return false;
-      if (endDate   && d > endDate)   return false;
-      return true;
-    };
-
-    /* Combustível via km dos pedidos */
-    let totalKm = 0, fuelCostKm = 0;
-    const fuelEventsRows = [];
-    eventOrders.forEach(o => {
-      const kmRec = o.kmRecord;
-      if (!kmRec) return;
-      const dateRef = o.eventDate || o.createdAt || '';
-      if (!inRange(dateRef)) return;
-      const km = kmRec.total || 0;
-      totalKm += km;
-      const liters = km / (fuelConfig.consumption || 10);
-      const cost   = liters * (fuelConfig.pricePerLiter || 0);
-      fuelCostKm += cost;
-      fuelEventsRows.push([
-        o.clientName || '—',
-        fmtDate(o.eventDate || o.createdAt),
-        km.toFixed(1) + ' km',
-        liters.toFixed(2) + ' L',
-        fmtBRL(cost)
-      ]);
-    });
-
-    /* Combustível via transações */
-    let fuelCostTx = 0;
-    const fuelTxRows = [];
-    /* Manutenção */
-    let maintTotal = 0;
-    const maintRows = [];
-    /* Outros */
-    let otherTotal = 0;
-    const otherRows = [];
-    /* Receita */
-    let receita = 0;
-
-    transactions.forEach(t => {
-      if (t.type === 'receita' && t.status === 'confirmada' && inRange(t.date)) {
-        receita += t.amount;
-        return;
-      }
-      if (t.type !== 'despesa' || !inRange(t.date)) return;
-      const cat = (t.category || '').toLowerCase();
-      const desc = (t.description || '').toLowerCase();
-      if (cat.includes('combustível') || cat.includes('combustivel') || desc.includes('combustível') || desc.includes('combustivel')) {
-        fuelCostTx += t.amount;
-        fuelTxRows.push([fmtDate(t.date), t.description || '—', t.category || '—', fmtBRL(t.amount)]);
-      } else {
-        otherTotal += t.amount;
-        otherRows.push([fmtDate(t.date), t.description || '—', t.category || '—', fmtBRL(t.amount)]);
-      }
-    });
-
-    maintenanceNotes.forEach(n => {
-      if (!inRange(n.date || n.createdAt || '')) return;
-      const cost = parseFloat(n.cost || n.value || 0) || 0;
-      maintTotal += cost;
-      maintRows.push([fmtDate(n.date || n.createdAt), n.title || n.description || '—', n.type || '—', fmtBRL(cost)]);
-    });
-
-    const totalFuel  = fuelCostKm + fuelCostTx;
-    const totalCosts = totalFuel + maintTotal + otherTotal;
-    const resultado  = receita - totalCosts;
-
-    /* ── Build PDF ── */
-    const doc  = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const pW   = doc.internal.pageSize.getWidth();
-    const pH   = doc.internal.pageSize.getHeight();
-    const mX   = 14;
-
-    /* Cabeçalho */
-    doc.setFillColor(245, 158, 11);
-    doc.rect(0, 0, pW, 30, 'F');
-    doc.setFillColor(217, 119, 6);
-    doc.rect(0, 24, pW, 6, 'F');
-
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(17);
-    doc.text(userInfo.name || 'DJ Manager Pro', mX, 13);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.text('RELATÓRIO DE CUSTOS OPERACIONAIS', mX, 21);
-
-    const periodoStr = (startInput && endInput)
-      ? `Período: ${fmtDate(startInput)} a ${fmtDate(endInput)}`
-      : 'Período: Todos os registros';
-    doc.setFontSize(8);
-    doc.text(periodoStr, pW - mX, 12, { align: 'right' });
-    doc.text('Emitido em: ' + new Date().toLocaleDateString('pt-BR'), pW - mX, 20, { align: 'right' });
-
-    let curY = 36;
-
-    /* KPI summary boxes */
-    const kpis = [
-      { label: 'Combustível', value: fmtBRL(totalFuel),  color: [245, 158, 11] },
-      { label: 'Manutenção',  value: fmtBRL(maintTotal), color: [239, 68, 68]  },
-      { label: 'Outros',      value: fmtBRL(otherTotal), color: [139, 92, 246] },
-      { label: 'Total Custos',value: fmtBRL(totalCosts), color: [220, 38, 38]  },
-    ];
-    const boxW = (pW - mX * 2 - 9) / 4;
-    kpis.forEach((k, i) => {
-      const x = mX + i * (boxW + 3);
-      doc.setFillColor(...k.color);
-      doc.roundedRect(x, curY, boxW, 18, 2, 2, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7.5);
-      doc.text(k.label, x + boxW / 2, curY + 6, { align: 'center' });
-      doc.setFontSize(9);
-      doc.text(k.value, x + boxW / 2, curY + 13, { align: 'center' });
-    });
-    curY += 24;
-
-    /* Receita vs Custos */
-    doc.setFillColor(240, 250, 244);
-    doc.roundedRect(mX, curY, pW - mX * 2, 14, 2, 2, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
-    doc.setTextColor(30, 30, 30);
-    doc.text('Receita no período: ' + fmtBRL(receita), mX + 4, curY + 6);
-    const resColor = resultado >= 0 ? [5, 150, 105] : [220, 38, 38];
-    doc.setTextColor(...resColor);
-    doc.text('Resultado líquido: ' + fmtBRL(resultado), pW - mX - 4, curY + 6, { align: 'right' });
-    doc.setTextColor(30, 30, 30);
-    doc.text('Total de custos: ' + fmtBRL(totalCosts), mX + 4, curY + 12);
-    curY += 20;
-
-    const tableStyles = {
-      font: 'helvetica', fontSize: 7.5, cellPadding: 2.5, valign: 'middle', overflow: 'linebreak',
-    };
-    const headStyles = { fillColor: [245, 158, 11], textColor: 255, fontStyle: 'bold', fontSize: 8 };
-    const altStyles  = { fillColor: [255, 248, 230] };
-
-    function addSection(title, head, rows, color) {
-      if (!rows.length) return;
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      doc.setTextColor(...color);
-      doc.text('▸ ' + title, mX, curY + 1);
-      curY += 5;
-      doc.autoTable({
-        startY: curY,
-        head: [head],
-        body: rows,
-        margin: { left: mX, right: mX },
-        styles: tableStyles,
-        headStyles: { ...headStyles, fillColor: color },
-        alternateRowStyles: altStyles,
-        didDrawPage: () => {},
-      });
-      curY = doc.lastAutoTable.finalY + 8;
-      doc.setTextColor(30, 30, 30);
-    }
-
-    addSection('Combustível — Deslocamentos para Eventos',
-      ['Cliente', 'Data', 'KM', 'Litros', 'Custo'],
-      fuelEventsRows,
-      [245, 158, 11]);
-
-    addSection('Combustível — Transações Registradas',
-      ['Data', 'Descrição', 'Categoria', 'Valor'],
-      fuelTxRows,
-      [234, 179, 8]);
-
-    addSection('Manutenção de Equipamentos',
-      ['Data', 'Descrição', 'Tipo', 'Custo'],
-      maintRows,
-      [239, 68, 68]);
-
-    addSection('Outras Despesas',
-      ['Data', 'Descrição', 'Categoria', 'Valor'],
-      otherRows,
-      [139, 92, 246]);
-
-    /* Rodapé */
-    const pages = doc.internal.getNumberOfPages();
-    for (let p = 1; p <= pages; p++) {
-      doc.setPage(p);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7);
-      doc.setTextColor(150, 150, 150);
-      doc.text('Gerado pelo DJ Manager Pro', mX, pH - 8);
-      doc.text(`Página ${p} de ${pages}  •  ${new Date().toLocaleString('pt-BR')}`, pW - mX, pH - 8, { align: 'right' });
-    }
-
-    const periodo = (startInput && endInput) ? `${startInput}_a_${endInput}` : new Date().toISOString().split('T')[0];
-    doc.save(`custos_operacionais_${periodo}.pdf`);
-    if (typeof showToast === 'function') showToast('PDF de Custos Operacionais gerado! ✅', 'success');
-  }
-
-  /* ════════════════════════════════════════════════════════════
-     2.  PDF — EVENTOS AGENDADOS, CONFIRMADOS E PENDENTES
-  ════════════════════════════════════════════════════════════ */
-  function gerarEventosPendentesPDF() {
-    if (!window.jspdf) { alert('jsPDF ainda não carregado. Aguarde e tente novamente.'); return; }
-    const { jsPDF } = window.jspdf;
-
-    const raw        = getRawData();
-    const userInfo   = getUserInfo();
-    const commitments = raw.commitments || (window.commitments ? window.commitments : []);
-    const eventOrders = raw.eventOrders || (window.eventOrders ? window.eventOrders : []);
-    const clients     = raw.clients     || (window.clients     ? window.clients     : []);
-    const receipts    = raw.receipts    || (window.receipts    ? window.receipts    : []);
-
-    /* Filtrar apenas agendados e confirmados (pendentes = não realizados nem cancelados) */
-    const today = new Date(); today.setHours(23, 59, 59, 999);
-    const filtered = commitments
-      .filter(c => c.status === 'agendado' || c.status === 'confirmado')
-      .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-    if (filtered.length === 0) {
-      if (typeof showToast === 'function') showToast('Nenhum evento agendado ou confirmado encontrado.', 'warning');
-      return;
-    }
-
-    /* ── Build PDF ── */
-    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-    const pW  = doc.internal.pageSize.getWidth();
-    const pH  = doc.internal.pageSize.getHeight();
-    const mX  = 12;
-
-    /* Cabeçalho */
-    doc.setFillColor(16, 185, 129);
-    doc.rect(0, 0, pW, 30, 'F');
-    doc.setFillColor(5, 150, 105);
-    doc.rect(0, 24, pW, 6, 'F');
-
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(17);
-    doc.text(userInfo.name || 'DJ Manager Pro', mX, 13);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.text('EVENTOS AGENDADOS E CONFIRMADOS — PENDENTES', mX, 21);
-
-    doc.setFontSize(8);
-    doc.text(`Total: ${filtered.length} evento(s)`, pW - mX, 12, { align: 'right' });
-    doc.text('Emitido em: ' + new Date().toLocaleDateString('pt-BR'), pW - mX, 20, { align: 'right' });
-
-    /* Contadores KPI */
-    const agendados   = filtered.filter(c => c.status === 'agendado').length;
-    const confirmados = filtered.filter(c => c.status === 'confirmado').length;
-
-    let totalValor = 0, totalRecebido = 0;
-    const rows = filtered.map(c => {
-      const client     = clients.find(cl => cl.id === c.clientId);
-      const clientName = client ? client.name : (c.clientName || '—');
-      const clientPhone= client ? (client.phone || '—') : '—';
-
-      const dtEvento  = new Date(c.date.includes('T') ? c.date : c.date + 'T00:00:00');
-      const dataStr   = dtEvento.toLocaleDateString('pt-BR');
-      const horaStr   = dtEvento.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-
-      let valor = 0, recebido = 0;
-      if (c.linkedOrderId) {
-        const order = eventOrders.find(o => o.id === c.linkedOrderId);
-        if (order) valor = order.totalValue || 0;
-        recebido = receipts
-          .filter(r => r.orderId === c.linkedOrderId && r.status === 'pago')
-          .reduce((sum, r) => sum + r.amount, 0);
-      }
-      totalValor    += valor;
-      totalRecebido += recebido;
-      const saldo    = valor - recebido;
-      const diasRestantes = Math.ceil((dtEvento - new Date()) / (1000 * 60 * 60 * 24));
-      const diasStr  = diasRestantes > 0 ? `${diasRestantes}d` : diasRestantes === 0 ? 'Hoje' : 'Passado';
-
-      const statusLabel = c.status === 'agendado' ? 'Agendado' : 'Confirmado';
-
-      return [
-        clientName,
-        clientPhone,
-        c.title || '—',
-        c.location || '—',
-        dataStr,
-        horaStr,
-        diasStr,
-        statusLabel,
-        valor > 0 ? fmtBRL(valor) : '—',
-        recebido > 0 ? fmtBRL(recebido) : '—',
-        valor > 0 ? fmtBRL(saldo) : '—',
-      ];
-    });
-
-    /* KPI strip */
-    const kpis = [
-      { label: 'Agendados',   value: String(agendados),             color: [76, 201, 240] },
-      { label: 'Confirmados', value: String(confirmados),           color: [16, 185, 129] },
-      { label: 'Valor Total', value: fmtBRL(totalValor),            color: [59, 130, 246] },
-      { label: 'Recebido',    value: fmtBRL(totalRecebido),         color: [5, 150, 105]  },
-      { label: 'A Receber',   value: fmtBRL(totalValor - totalRecebido), color: [239, 68, 68] },
-    ];
-    const boxW = (pW - mX * 2 - 16) / 5;
-    let kx = mX;
-    kpis.forEach(k => {
-      doc.setFillColor(...k.color);
-      doc.roundedRect(kx, 34, boxW, 16, 2, 2, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7);
-      doc.text(k.label, kx + boxW / 2, 40, { align: 'center' });
-      doc.setFontSize(8.5);
-      doc.text(k.value, kx + boxW / 2, 47, { align: 'center' });
-      kx += boxW + 4;
-    });
-
-    /* Tabela */
-    doc.autoTable({
-      startY: 56,
-      head: [['Cliente', 'Telefone', 'Evento', 'Local', 'Data', 'Hora', 'Dias', 'Status', 'Valor', 'Recebido', 'Saldo']],
-      body: rows,
-      margin: { left: mX, right: mX },
-      styles: { font: 'helvetica', fontSize: 7, cellPadding: 2, valign: 'middle', overflow: 'linebreak' },
-      headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold', fontSize: 7.5 },
-      alternateRowStyles: { fillColor: [240, 253, 248] },
-      columnStyles: {
-        0: { cellWidth: 34 },
-        1: { cellWidth: 24 },
-        2: { cellWidth: 30 },
-        3: { cellWidth: 30 },
-        4: { cellWidth: 18 },
-        5: { cellWidth: 12 },
-        6: { cellWidth: 12, halign: 'center' },
-        7: { cellWidth: 20, halign: 'center' },
-        8: { cellWidth: 22, halign: 'right' },
-        9: { cellWidth: 22, halign: 'right' },
-        10:{ cellWidth: 22, halign: 'right' },
-      },
-      didParseCell: function(data) {
-        if (data.section === 'body') {
-          if (data.column.index === 7) {
-            if (data.cell.text[0] === 'Confirmado') data.cell.styles.textColor = [16, 185, 129];
-            else data.cell.styles.textColor = [76, 201, 240];
-          }
-          if (data.column.index === 6) {
-            const v = data.cell.text[0];
-            if (v === 'Hoje') data.cell.styles.textColor = [245, 158, 11];
-            else if (v === 'Passado') data.cell.styles.textColor = [239, 68, 68];
-          }
-          if (data.column.index === 10) {
-            const raw = data.cell.text[0];
-            if (raw && raw !== '—') data.cell.styles.textColor = [239, 68, 68];
-          }
-        }
-      },
-    });
-
-    const finalY = doc.lastAutoTable.finalY || 56;
-
-    /* Rodapé totais */
-    const tY = finalY + 4;
-    doc.setFillColor(230, 253, 244);
-    doc.roundedRect(mX, tY, pW - mX * 2, 16, 2, 2, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
-    doc.setTextColor(30, 30, 30);
-    doc.text(`Total de eventos: ${filtered.length}  |  Agendados: ${agendados}  |  Confirmados: ${confirmados}`, mX + 4, tY + 7);
-    doc.text(`Valor total: ${fmtBRL(totalValor)}  |  Recebido: ${fmtBRL(totalRecebido)}  |  A receber: ${fmtBRL(totalValor - totalRecebido)}`, pW - mX - 4, tY + 7, { align: 'right' });
-
-    /* Rodapé de páginas */
-    const pages = doc.internal.getNumberOfPages();
-    for (let p = 1; p <= pages; p++) {
-      doc.setPage(p);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7);
-      doc.setTextColor(150, 150, 150);
-      doc.text('Gerado pelo DJ Manager Pro', mX, pH - 6);
-      doc.text(`Página ${p} de ${pages}  •  ${new Date().toLocaleString('pt-BR')}`, pW - mX, pH - 6, { align: 'right' });
-    }
-
-    const hoje = new Date().toISOString().split('T')[0];
-    doc.save(`eventos_agendados_confirmados_${hoje}.pdf`);
-    if (typeof showToast === 'function') showToast(`PDF gerado com ${filtered.length} evento(s)! ✅`, 'success');
-  }
-
-  /* ── Wire up buttons after DOM ready ── */
-  function wireButtons() {
-    /* Custos Operacionais */
-    const btnCustos = document.getElementById('op-costs-pdf-btn');
-    if (btnCustos) {
-      btnCustos.addEventListener('click', gerarCustosPDF);
-    }
-
-    /* Eventos Pendentes/Agendados/Confirmados */
-    const btnPendentes = document.getElementById('relatorio-pendentes-btn');
-    if (btnPendentes) {
-      btnPendentes.addEventListener('click', gerarEventosPendentesPDF);
-    }
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', wireButtons);
-  } else {
-    setTimeout(wireButtons, 800); // aguarda outros scripts inicializarem
-  }
 })();
 </script>
 
