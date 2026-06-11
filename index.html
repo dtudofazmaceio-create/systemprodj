@@ -7537,6 +7537,18 @@ if (typeof activeModalCallback === 'function') {
     document.getElementById('commitment-modal').classList.remove('active');
     showTab('Agenda');
     showToast(id ? 'Compromisso atualizado em todo o sistema!' : 'Compromisso criado com sucesso!', 'success');
+
+    // ── NOVO: ao salvar compromisso como "realizado" com KM informado,
+    // registrar custo de combustível como despesa operacional automaticamente.
+    // Só faz isso quando NÃO há pedido vinculado (com pedido, o painel de trajeto já registra).
+    if (data.status === 'realizado' && !data.linkedOrderId) {
+      const savedCommitment = id
+        ? commitments.find(c => c.id === parseFloat(id))
+        : commitments[commitments.length - 1];
+      if (savedCommitment) {
+        setTimeout(() => _autoRegisterFuelFromCommitment(savedCommitment), 300);
+      }
+    }
   }
   
   function handleDJContractSubmit(e) {
@@ -8447,6 +8459,12 @@ function openCommitmentModal(mode, id = null, date = null) {
             if(o){
               o.kmRecord={total:n,ida:n*0.5,volta:n*0.5,duration:0,date:new Date().toISOString(),manual:true};
               saveData();
+              // Registrar custo de combustível como despesa operacional
+              if(fuelConfig.pricePerLiter>0 && fuelConfig.consumption>0){
+                const litros=n/fuelConfig.consumption;
+                const custo=litros*fuelConfig.pricePerLiter;
+                if(custo>0) registerOperationalCostExpense(o, custo, n);
+              }
               openViewOrderModal(${order.id});
               showToast('Distância registrada: '+n.toFixed(1)+' km','success');
             }
@@ -12888,8 +12906,8 @@ function showCommitmentsForDay(dateString) {
     const totalPaid = receipts.filter(r => r.orderId === orderId && r.status === 'pago').reduce((s,r) => s+r.amount, 0);
     const lucroLiquido = custo > 0 ? (order.totalValue || 0) - custo : null;
 
-    // Contabiliza o combustível como custo operacional (despesa) ao finalizar o pedido
-    if (custo > 0 && km && km.total > 0 && order.status === 'finalizado') {
+    // Contabiliza o combustível como custo operacional (despesa) ao finalizar ou realizar o pedido
+    if (custo > 0 && km && km.total > 0 && (order.status === 'finalizado' || order.status === 'realizado')) {
       registerOperationalCostExpense(order, custo, km.total);
     }
 
@@ -13056,8 +13074,8 @@ function showCommitmentsForDay(dateString) {
           }
           // Registrar no fuelLog
           fuelLog.push({ id: Date.now(), date: new Date().toISOString().split('T')[0], orderId, orderNumber: order.orderNumber, eventLocation: order.eventLocation||'', distanceKm: n, idaKm: kmRecord.ida, voltaKm: kmRecord.volta, durationSec: 0, fuelType: fuelConfig.type, pricePerLiter: fuelConfig.pricePerLiter, consumptionKmL: fuelConfig.consumption, liters: +litros2.toFixed(3), fuelCost: +custo2.toFixed(2) });
-          // Contabiliza como custo operacional (despesa) ao finalizar o pedido
-          if (custo2 > 0 && order.status === 'finalizado') {
+          // Contabiliza como custo operacional (despesa) ao finalizar ou realizar o pedido
+          if (custo2 > 0 && (order.status === 'finalizado' || order.status === 'realizado')) {
             registerOperationalCostExpense(order, custo2, n);
           }
           saveData();
@@ -14776,6 +14794,69 @@ function showCommitmentsForDay(dateString) {
     if (newStatus === 'realizado' && c.linkedOrderId) {
       setTimeout(() => showTravelSummaryPanel(c.linkedOrderId), 350);
     }
+    // ── NOVO: registrar custo de combustível automaticamente ao marcar como realizado
+    // quando o compromisso tem KM percorrido informado e NÃO tem pedido vinculado
+    // (se tiver pedido vinculado, o showTravelSummaryPanel já cuida do registro)
+    if (newStatus === 'realizado' && !c.linkedOrderId) {
+      _autoRegisterFuelFromCommitment(c);
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // _autoRegisterFuelFromCommitment
+  // Chamada quando um compromisso é marcado como "Realizado".
+  // Calcula o custo de combustível a partir do KM percorrido e
+  // registra automaticamente como Despesa Operacional nas transações.
+  // ─────────────────────────────────────────────────────────────────
+  function _autoRegisterFuelFromCommitment(commitment) {
+    if (!commitment) return;
+
+    // Calcula km percorrido
+    let totalKm = 0;
+    if (commitment.kmInicial != null && commitment.kmFinal != null && commitment.kmFinal > commitment.kmInicial) {
+      totalKm = commitment.kmFinal - commitment.kmInicial;
+    }
+    if (totalKm <= 0) return; // Sem KM informado, nada a fazer
+
+    // Verifica configuração de combustível
+    if (!fuelConfig || !(fuelConfig.consumption > 0) || !(fuelConfig.pricePerLiter > 0)) {
+      // Sem configuração de combustível — registra apenas os km sem custo calculado
+      showToast('Configure o combustível na aba Combustível para registrar o custo automaticamente.', 'warning');
+      return;
+    }
+
+    const litros = totalKm / fuelConfig.consumption;
+    const custo  = litros * fuelConfig.pricePerLiter;
+    if (custo <= 0) return;
+
+    const defaultAccount = accounts.length > 0 ? accounts[0].id : null;
+    const today = new Date().toISOString().split('T')[0];
+    const txDate = commitment.date ? commitment.date.split('T')[0] : today;
+
+    // Evita duplicação: verifica se já existe despesa vinculada a este compromisso
+    const alreadyExists = transactions.some(t => t.linkedCommitmentId === commitment.id);
+    if (alreadyExists) return;
+
+    transactions.push({
+      id: Date.now() + Math.floor(Math.random() * 1000),
+      type: 'despesa',
+      amount: +custo.toFixed(2),
+      date: txDate,
+      description: `Combustível — ${commitment.title || 'Evento'} (${totalKm.toFixed(1)} km)`,
+      category: 'Custos Operacionais',
+      status: 'confirmada',
+      toAccount: defaultAccount,
+      fromAccount: defaultAccount,
+      linkedCommitmentId: commitment.id,
+      createdAt: new Date().toISOString(),
+    });
+
+    saveData();
+    updateUI();
+    showToast(
+      `✅ Custo de combustível (${formatCurrency(custo)}) lançado em Despesas Operacionais automaticamente!`,
+      'success'
+    );
   }
 
   function deleteCommitmentFromDetail(commitmentId) {
