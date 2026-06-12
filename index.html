@@ -17401,7 +17401,7 @@ function showCommitmentsForDay(dateString) {
     const n    = client.name || 'Cliente';
     const tipo = quote.eventType || 'evento';
     const data = quote.eventDate ? fmtDate(quote.eventDate) : 'data a confirmar';
-    const val  = fmtCurrency((quote.services && quote.services.length > 0) ? (quote.services).reduce((s,sv) => s + (sv.value||0), 0) : (quote.totalValue || 0));
+    const val  = fmtCurrency((quote.services || []).reduce((s,sv) => s + (sv.value||0), 0));
     return encodeURIComponent(
       `Olá, ${n}! 👋\n\n` +
       `Gostaríamos de saber se você teve a oportunidade de analisar nosso orçamento:\n\n` +
@@ -17549,9 +17549,7 @@ function showCommitmentsForDay(dateString) {
         const waUrl   = phone
           ? `https://wa.me/${phone}?text=${waMsg}`
           : `https://api.whatsapp.com/send?text=${waMsg}`;
-        const valTotal = (quote.services && quote.services.length > 0)
-          ? (quote.services).reduce((s, sv) => s + (sv.value || 0), 0)
-          : (quote.totalValue || 0);
+        const valTotal = (quote.services || []).reduce((s, sv) => s + (sv.value || 0), 0);
         const dateRef  = (quote.createdAt || '').split('T')[0] || quote.emissionDate;
         const initStr  = getInitials(client.name || '?');
         const clientName = client.name || 'Cliente desconhecido';
@@ -18620,5 +18618,364 @@ function showCommitmentsForDay(dateString) {
   }
 })();
 </script>
+<!-- ============================================================
+     DJ Manager Pro — Persistência em IndexedDB + Sincronização (GitHub Gist)
+     O localStorage continua funcionando como cache síncrono e tudo é
+     espelhado/sincronizado pelo IndexedDB. Baixa ao entrar e envia a cada alteração.
+============================================================ -->
+<script>
+(function () {
+  'use strict';
+
+  /* ============ Camada IndexedDB (KV) ============ */
+  const IDB_NAME = 'djmpro_db', IDB_STORE = 'kv', IDB_VER = 1;
+  let _db = null, _dbp = null;
+  function openDB() {
+    if (_dbp) return _dbp;
+    _dbp = new Promise((res) => {
+      let r;
+      try { r = indexedDB.open(IDB_NAME, IDB_VER); } catch (e) { res(null); return; }
+      r.onupgradeneeded = () => { const db = r.result; if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE); };
+      r.onsuccess = () => { _db = r.result; res(_db); };
+      r.onerror = () => res(null);
+    });
+    return _dbp;
+  }
+  function idbSet(k, v) {
+    return openDB().then(db => db && new Promise((res) => {
+      try { const tx = db.transaction(IDB_STORE, 'readwrite'); tx.objectStore(IDB_STORE).put(v, k); tx.oncomplete = () => res(); tx.onerror = () => res(); } catch (e) { res(); }
+    }));
+  }
+  function idbGet(k) {
+    return openDB().then(db => db ? new Promise((res) => {
+      try { const tx = db.transaction(IDB_STORE, 'readonly'); const rq = tx.objectStore(IDB_STORE).get(k); rq.onsuccess = () => res(rq.result === undefined ? null : rq.result); rq.onerror = () => res(null); } catch (e) { res(null); }
+    }) : null);
+  }
+  function idbDel(k) {
+    return openDB().then(db => db && new Promise((res) => {
+      try { const tx = db.transaction(IDB_STORE, 'readwrite'); tx.objectStore(IDB_STORE).delete(k); tx.oncomplete = () => res(); tx.onerror = () => res(); } catch (e) { res(); }
+    }));
+  }
+  function idbAll() {
+    return openDB().then(db => db ? new Promise((res) => {
+      const out = {};
+      try {
+        const tx = db.transaction(IDB_STORE, 'readonly');
+        const rq = tx.objectStore(IDB_STORE).openCursor();
+        rq.onsuccess = () => { const c = rq.result; if (c) { out[c.key] = c.value; c.continue(); } else res(out); };
+        rq.onerror = () => res(out);
+      } catch (e) { res(out); }
+    }) : {});
+  }
+
+  /* ============ Espelho localStorage <-> IndexedDB ============ */
+  const nativeSet = localStorage.setItem.bind(localStorage);
+  const nativeRemove = localStorage.removeItem.bind(localStorage);
+  const nativeClear = localStorage.clear.bind(localStorage);
+  let applying = false;        // aplicando dados vindos da nuvem (não dispara push)
+  let holdMirror = false;      // segura a gravação no IDB durante recuperação de localStorage vazio
+  let hydratedReload = false;
+  function isSyncKey(k) { return !k || String(k).indexOf('__sync_') === 0; }
+
+  // Quantas chaves de dados existem agora? (decide se o localStorage estava vazio ao abrir)
+  let _n = 0; for (let i = 0; i < localStorage.length; i++) { if (!isSyncKey(localStorage.key(i))) _n++; }
+  const lsEmptyAtStart = (_n === 0);
+  holdMirror = lsEmptyAtStart;
+
+  localStorage.setItem = function (k, v) {
+    nativeSet(k, v);
+    if (isSyncKey(k)) return;
+    if (!holdMirror) idbSet(k, v);
+    if (!applying) markDirty();
+  };
+  localStorage.removeItem = function (k) {
+    nativeRemove(k);
+    if (isSyncKey(k)) return;
+    if (!holdMirror) idbDel(k);
+    if (!applying) markDirty();
+  };
+  localStorage.clear = function () {
+    const keys = []; for (let i = 0; i < localStorage.length; i++) { const kk = localStorage.key(i); if (!isSyncKey(kk)) keys.push(kk); }
+    nativeClear();
+    if (!holdMirror) keys.forEach(k => idbDel(k));
+    if (!applying) markDirty();
+  };
+
+  async function migrateAndHydrate() {
+    const idb = await idbAll();
+    const idbAppKeys = Object.keys(idb).filter(k => !isSyncKey(k));
+    if (lsEmptyAtStart) {
+      if (idbAppKeys.length > 0) {
+        // localStorage foi limpo/evictado mas o IndexedDB tem os dados: restaura e recarrega
+        for (const k of idbAppKeys) { try { nativeSet(k, idb[k]); } catch (e) {} }
+        holdMirror = false; hydratedReload = true; return;
+      }
+      // Primeira execução real: nada salvo ainda
+      holdMirror = false;
+      for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (!isSyncKey(k)) await idbSet(k, localStorage.getItem(k)); }
+      return;
+    }
+    // localStorage já tinha dados: garante que o IndexedDB contenha tudo
+    holdMirror = false;
+    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (isSyncKey(k)) continue; if (!(k in idb)) await idbSet(k, localStorage.getItem(k)); }
+  }
+
+  function safeReload() {
+    try {
+      const now = Date.now();
+      const last = parseInt(sessionStorage.getItem('__sync_reload_ts') || '0', 10);
+      let cnt = parseInt(sessionStorage.getItem('__sync_reload_cnt') || '0', 10);
+      cnt = (now - last < 4000) ? cnt + 1 : 0;
+      sessionStorage.setItem('__sync_reload_ts', String(now));
+      sessionStorage.setItem('__sync_reload_cnt', String(cnt));
+      if (cnt > 3) { console.warn('sync: reload suprimido para evitar loop'); return; }
+      location.reload();
+    } catch (e) { try { location.reload(); } catch (_) {} }
+  }
+
+  /* ============ Sincronização (GitHub Gist) ============ */
+  const FILE = 'djmanager-sync.json';
+  const DESC = 'DJ Manager Pro — sincronização (não editar manualmente)';
+  const PUSH_DELAY = 600;
+
+  let TOKEN = null, gistId = null, enabled = false, DEVICE = null;
+  let lastPulledAt = null, lastPushedAt = null;
+  let dirty = false, busy = false, conflict = false, pendingPush = false, pushTimer = null;
+  let statusText = 'Não configurado', booted = false;
+
+  function toast(msg, type) { try { if (typeof window.showToast === 'function') { window.showToast(msg, type || 'info'); return; } } catch (e) {} miniToast(msg, type); }
+  function miniToast(msg, type) {
+    try {
+      let host = document.getElementById('__sync_toast');
+      if (!host) { host = document.createElement('div'); host.id = '__sync_toast'; host.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:99999;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;'; document.body.appendChild(host); }
+      const el = document.createElement('div');
+      const bg = type === 'error' ? '#ef4444' : (type === 'success' ? '#10b981' : '#334155');
+      el.style.cssText = 'background:' + bg + ';color:#fff;padding:10px 16px;border-radius:10px;font:600 13px system-ui;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:88vw;text-align:center;';
+      el.textContent = msg; host.appendChild(el);
+      setTimeout(() => { el.style.transition = 'opacity .4s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 400); }, 3000);
+    } catch (e) {}
+  }
+
+  function ghHeaders() { return { 'Authorization': 'Bearer ' + TOKEN, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', 'Content-Type': 'application/json' }; }
+  async function ghFind() {
+    const r = await fetch('https://api.github.com/gists?per_page=100', { headers: ghHeaders() });
+    if (!r.ok) throw new Error('GitHub ' + r.status + (r.status === 401 ? ' (token inválido)' : ''));
+    const arr = await r.json(); const g = arr.find(x => x.files && x.files[FILE]); return g ? g.id : null;
+  }
+  async function ghCreate(content) {
+    const r = await fetch('https://api.github.com/gists', { method: 'POST', headers: ghHeaders(), body: JSON.stringify({ description: DESC, public: false, files: { [FILE]: { content } } }) });
+    if (!r.ok) throw new Error('GitHub ' + r.status); return (await r.json()).id;
+  }
+  async function ghRead(id) {
+    const r = await fetch('https://api.github.com/gists/' + id, { headers: ghHeaders() });
+    if (!r.ok) throw new Error('GitHub ' + r.status);
+    const g = await r.json(); const f = g.files && g.files[FILE]; if (!f) return null;
+    if (f.truncated && f.raw_url) { const rr = await fetch(f.raw_url); return await rr.text(); }
+    return f.content;
+  }
+  async function ghWrite(id, content) {
+    const r = await fetch('https://api.github.com/gists/' + id, { method: 'PATCH', headers: ghHeaders(), body: JSON.stringify({ files: { [FILE]: { content } } }) });
+    if (!r.ok) throw new Error('GitHub ' + r.status); return true;
+  }
+
+  function buildSnapshot() {
+    const data = {};
+    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (!isSyncKey(k)) data[k] = localStorage.getItem(k); }
+    return { v: 1, app: 'djmanagerpro', updatedAt: new Date().toISOString(), device: DEVICE, data };
+  }
+  async function applySnapshot(snap) {
+    applying = true;
+    try {
+      const data = snap.data || {};
+      const localKeys = []; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (!isSyncKey(k)) localKeys.push(k); }
+      for (const k of localKeys) { if (!(k in data)) { nativeRemove(k); await idbDel(k); } }
+      for (const k in data) { try { nativeSet(k, data[k]); } catch (e) {} await idbSet(k, data[k]); }
+    } finally { applying = false; }
+  }
+
+  /* config persistida no IndexedDB (chaves __sync_*) */
+  async function loadCfg() {
+    TOKEN = await idbGet('__sync_token');
+    gistId = await idbGet('__sync_gistId');
+    enabled = (await idbGet('__sync_enabled')) === '1';
+    lastPulledAt = await idbGet('__sync_lastPulledAt');
+    lastPushedAt = await idbGet('__sync_lastPushedAt');
+    DEVICE = await idbGet('__sync_device');
+    if (!DEVICE) { DEVICE = 'dev_' + Math.random().toString(36).slice(2) + Date.now().toString(36); await idbSet('__sync_device', DEVICE); }
+  }
+
+  function setStatus(s) { statusText = s; const e = document.getElementById('sync-status'); if (e) e.textContent = s; }
+
+  async function doPull(force) {
+    if (!enabled || !TOKEN || !gistId || applying || busy) return false;
+    busy = true; setStatus('Verificando nuvem…'); renderPanel();
+    let ok = false, changed = false;
+    try {
+      const txt = await ghRead(gistId);
+      if (txt) {
+        const snap = JSON.parse(txt);
+        const isNewer = force || !lastPulledAt || (snap.updatedAt && snap.updatedAt > lastPulledAt);
+        const isOurs = snap.device === DEVICE && snap.updatedAt === lastPushedAt;
+        if (isNewer && !isOurs) { await applySnapshot(snap); changed = true; }
+        lastPulledAt = snap.updatedAt; await idbSet('__sync_lastPulledAt', snap.updatedAt);
+        conflict = false; setStatus('Sincronizado');
+      } else { setStatus('Sincronizado'); }
+      ok = true;
+    } catch (e) { console.warn(e); setStatus('Erro: ' + e.message); toast('Sincronização: ' + e.message, 'error'); }
+    finally { busy = false; renderPanel(); }
+    if (changed) { toast('Dados atualizados da nuvem ✅', 'success'); safeReload(); }
+    return ok;
+  }
+
+  async function doPush(forceOverwrite) {
+    if (!enabled || !TOKEN || !gistId || applying || busy) return;
+    busy = true; pendingPush = false; setStatus('Enviando…'); renderPanel();
+    try {
+      if (!forceOverwrite) {
+        const remoteTxt = await ghRead(gistId);
+        if (remoteTxt) {
+          const r = JSON.parse(remoteTxt);
+          if (r.updatedAt && lastPulledAt && r.updatedAt > lastPulledAt && r.device !== DEVICE) {
+            conflict = true; setStatus('Conflito detectado');
+            toast('A nuvem tem alterações de outro aparelho. Resolva o conflito.', 'error'); return;
+          }
+        }
+      }
+      const snap = buildSnapshot();
+      await ghWrite(gistId, JSON.stringify(snap));
+      lastPushedAt = snap.updatedAt; lastPulledAt = snap.updatedAt;
+      await idbSet('__sync_lastPushedAt', snap.updatedAt); await idbSet('__sync_lastPulledAt', snap.updatedAt);
+      dirty = false; conflict = false; setStatus('Sincronizado');
+    } catch (e) {
+      console.warn(e); setStatus('Erro: ' + e.message); toast('Falha ao enviar: ' + e.message, 'error');
+      pendingPush = true;
+    } finally {
+      busy = false; renderPanel();
+      if (pendingPush && enabled && !conflict) { pendingPush = false; clearTimeout(pushTimer); pushTimer = setTimeout(() => doPush(false), PUSH_DELAY); }
+    }
+  }
+
+  async function syncNow() { await doPull(false); if (!conflict) await doPush(false); }
+
+  function markDirty() {
+    if (!enabled || applying || !booted) return;
+    dirty = true; setStatus('Alterações pendentes…');
+    if (busy) { pendingPush = true; return; }
+    clearTimeout(pushTimer); pushTimer = setTimeout(() => doPush(false), PUSH_DELAY);
+  }
+
+  async function connect(token) {
+    if (!token) { toast('Cole o token', 'error'); return; }
+    busy = true; setStatus('Conectando…'); renderPanel();
+    try {
+      TOKEN = token.trim(); await idbSet('__sync_token', TOKEN);
+      let id = gistId || await idbGet('__sync_gistId');
+      let created = false;
+      if (!id) id = await ghFind();
+      if (!id) { const snap = buildSnapshot(); id = await ghCreate(JSON.stringify(snap)); lastPushedAt = snap.updatedAt; lastPulledAt = snap.updatedAt; await idbSet('__sync_lastPushedAt', snap.updatedAt); await idbSet('__sync_lastPulledAt', snap.updatedAt); created = true; }
+      gistId = id; await idbSet('__sync_gistId', id);
+      enabled = true; await idbSet('__sync_enabled', '1');
+      busy = false;
+      if (!created) { await doPull(true); }   // entrou numa sincronização existente: nuvem manda (recarrega)
+      setStatus('Sincronizado'); toast('Sincronização ativada ✅', 'success'); renderPanel();
+    } catch (e) { busy = false; console.warn(e); setStatus('Erro: ' + e.message); toast('Falha: ' + e.message, 'error'); renderPanel(); }
+  }
+  async function disconnect() { enabled = false; await idbSet('__sync_enabled', '0'); setStatus('Pausada'); toast('Sincronização pausada'); renderPanel(); }
+  async function forget() {
+    enabled = false;
+    for (const k of ['__sync_token', '__sync_gistId', '__sync_enabled', '__sync_lastPulledAt', '__sync_lastPushedAt']) await idbDel(k);
+    TOKEN = null; gistId = null; lastPulledAt = null; lastPushedAt = null;
+    setStatus('Não configurado'); toast('Credenciais removidas deste aparelho'); renderPanel();
+  }
+
+  /* ============ Interface ============ */
+  function fmtWhen(iso) { if (!iso) return '—'; try { return new Date(iso).toLocaleString('pt-BR'); } catch (e) { return iso; } }
+
+  function renderPanel() {
+    const host = document.getElementById('sync-panel');
+    if (!host) return;
+    const C = (id, fn) => { const e = document.getElementById(id); if (e) e.onclick = fn; };
+    if (!enabled) {
+      host.innerHTML =
+        '<div class="card" style="margin-top:4px;">'
+        + '<h2 style="margin-bottom:14px;"><i class="fas fa-cloud" style="color:var(--primary);"></i> Sincronização na nuvem</h2>'
+        + '<div style="font-size:0.82rem;color:var(--text2);line-height:1.6;margin-bottom:14px;">Mantém seus dados iguais em todos os aparelhos usando um <strong>Gist privado do GitHub</strong> (grátis). Baixa ao abrir o app e envia automaticamente a cada alteração.</div>'
+        + '<div style="font-size:0.82rem;color:var(--text2);line-height:1.7;margin-bottom:12px;">'
+        + '1. Tenha uma conta no <strong>github.com</strong>.<br>'
+        + '2. Abra <a href="https://github.com/settings/tokens/new?scopes=gist&description=DJManagerPro" target="_blank" rel="noopener" style="color:var(--primary);font-weight:700;">este link</a> para gerar um <strong>token</strong> (o escopo <em>gist</em> já vem marcado) e clique em <em>Generate token</em>.<br>'
+        + '3. Copie o token (começa com <code>ghp_</code>) e cole abaixo.<br>'
+        + '4. Nos <strong>outros aparelhos</strong>, cole o <strong>mesmo token</strong>.'
+        + '</div>'
+        + '<input id="sync-token" type="password" placeholder="ghp_..." autocomplete="off" style="width:100%;box-sizing:border-box;padding:12px;border-radius:var(--r-md);border:1px solid rgba(148,163,184,.3);background:var(--surface2);color:var(--text);font-size:0.95rem;">'
+        + '<button id="sync-connect-btn" style="width:100%;margin-top:12px;padding:12px;border:none;border-radius:var(--r-md);background:var(--primary);color:#fff;font-weight:700;font-size:0.95rem;cursor:pointer;"><i class="fas fa-plug"></i> Conectar e sincronizar</button>'
+        + '<div style="font-size:0.78rem;color:var(--warning);margin-top:10px;line-height:1.5;"><i class="fas fa-triangle-exclamation"></i> Ao conectar a uma sincronização que já existe, os dados da nuvem <strong>substituem</strong> os locais. Conecte primeiro o aparelho com os dados certos.</div>'
+        + '</div>';
+      C('sync-connect-btn', () => connect((document.getElementById('sync-token') || {}).value || ''));
+      return;
+    }
+    host.innerHTML =
+      '<div class="card" style="margin-top:4px;">'
+      + '<h2 style="margin-bottom:14px;"><i class="fas fa-cloud" style="color:var(--primary);"></i> Sincronização na nuvem</h2>'
+      + (conflict
+        ? '<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:var(--r-md);padding:12px;margin-bottom:12px;">'
+          + '<div style="font-weight:700;color:#ef4444;margin-bottom:8px;"><i class="fas fa-triangle-exclamation"></i> Conflito</div>'
+          + '<div style="font-size:0.82rem;color:var(--text2);margin-bottom:10px;">A nuvem foi alterada por outro aparelho depois da sua última sincronização. Escolha qual versão vale:</div>'
+          + '<button id="sync-resolve-pull" style="width:100%;padding:10px;border:none;border-radius:var(--r-md);background:var(--primary);color:#fff;font-weight:700;cursor:pointer;margin-bottom:6px;">Usar a da nuvem (descarta as deste aparelho)</button>'
+          + '<button id="sync-resolve-push" style="width:100%;padding:10px;border:1px solid #ef4444;border-radius:var(--r-md);background:transparent;color:#ef4444;font-weight:700;cursor:pointer;">Usar a deste aparelho (sobrescreve a nuvem)</button>'
+          + '</div>'
+        : '')
+      + '<div style="display:flex;justify-content:space-between;gap:10px;background:var(--surface2);border-radius:var(--r-md);padding:12px;margin-bottom:12px;">'
+      + '<div><div style="font-size:0.72rem;color:var(--text3);">Status</div><div id="sync-status" style="font-weight:700;font-size:0.9rem;color:var(--text);">' + statusText + '</div></div>'
+      + '<div style="text-align:right;"><div style="font-size:0.72rem;color:var(--text3);">Último envio</div><div style="font-weight:600;font-size:0.85rem;color:var(--text2);">' + fmtWhen(lastPushedAt) + '</div></div>'
+      + '</div>'
+      + '<button id="sync-now-btn"' + (busy ? ' disabled' : '') + ' style="width:100%;padding:12px;border:none;border-radius:var(--r-md);background:var(--primary);color:#fff;font-weight:700;font-size:0.95rem;cursor:pointer;' + (busy ? 'opacity:.6;' : '') + '"><i class="fas fa-arrows-rotate"></i> Sincronizar agora</button>'
+      + '<div style="font-size:0.78rem;color:var(--text3);margin-top:12px;line-height:1.6;">Envio automático e imediato a cada alteração, e baixa automática ao abrir o app ou voltar para ele. Resolução por “último a salvar vence”.</div>'
+      + '<div style="display:flex;gap:8px;margin-top:12px;">'
+      + '<button id="sync-pause-btn" style="flex:1;padding:10px;border:1px solid rgba(148,163,184,.3);border-radius:var(--r-md);background:transparent;color:var(--text2);font-weight:600;cursor:pointer;"><i class="fas fa-pause"></i> Pausar</button>'
+      + '<button id="sync-forget-btn" style="flex:1;padding:10px;border:1px solid rgba(148,163,184,.3);border-radius:var(--r-md);background:transparent;color:#ef4444;font-weight:600;cursor:pointer;"><i class="fas fa-trash"></i> Remover token</button>'
+      + '</div>'
+      + '</div>';
+    C('sync-now-btn', syncNow);
+    C('sync-pause-btn', disconnect);
+    C('sync-forget-btn', forget);
+    C('sync-resolve-pull', async () => { conflict = false; await doPull(true); });
+    C('sync-resolve-push', async () => { conflict = false; await doPush(true); });
+  }
+
+  function injectUI() {
+    const tab = document.getElementById('backup-content');
+    if (!tab || document.getElementById('sync-panel')) return;
+    const wrap = document.createElement('div'); wrap.id = 'sync-panel';
+    tab.appendChild(wrap);
+    renderPanel();
+  }
+
+  /* ============ Boot ============ */
+  async function boot() {
+    await openDB();
+    await migrateAndHydrate();
+    if (hydratedReload) { safeReload(); return; }
+    await loadCfg();
+    injectUI();
+    setStatus(enabled ? 'Sincronizado' : (TOKEN ? 'Pausada' : 'Não configurado'));
+    renderPanel();
+    booted = true;
+    if (enabled && TOKEN && gistId) { await doPull(false); }   // baixa automática ao entrar
+  }
+
+  function start() { boot().catch(e => console.warn('sync boot', e)); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(start, 300));
+  else setTimeout(start, 300);
+
+  document.addEventListener('visibilitychange', () => {
+    if (!enabled || !booted) return;
+    if (document.hidden) { if (dirty && !busy) doPush(false); }
+    else if (!busy) doPull(false);
+  });
+  setInterval(() => { if (enabled && booted && !document.hidden && !busy && !dirty) doPull(false); }, 180000);
+
+})();
+</script>
+
 </body>
 </html>
