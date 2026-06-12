@@ -17401,7 +17401,7 @@ function showCommitmentsForDay(dateString) {
     const n    = client.name || 'Cliente';
     const tipo = quote.eventType || 'evento';
     const data = quote.eventDate ? fmtDate(quote.eventDate) : 'data a confirmar';
-    const val  = fmtCurrency((quote.services || []).reduce((s,sv) => s + (sv.value||0), 0));
+    const val  = fmtCurrency((quote.services && quote.services.length > 0) ? (quote.services).reduce((s,sv) => s + (sv.value||0), 0) : (quote.totalValue || 0));
     return encodeURIComponent(
       `Olá, ${n}! 👋\n\n` +
       `Gostaríamos de saber se você teve a oportunidade de analisar nosso orçamento:\n\n` +
@@ -17549,7 +17549,9 @@ function showCommitmentsForDay(dateString) {
         const waUrl   = phone
           ? `https://wa.me/${phone}?text=${waMsg}`
           : `https://api.whatsapp.com/send?text=${waMsg}`;
-        const valTotal = (quote.services || []).reduce((s, sv) => s + (sv.value || 0), 0);
+        const valTotal = (quote.services && quote.services.length > 0)
+          ? (quote.services).reduce((s, sv) => s + (sv.value || 0), 0)
+          : (quote.totalValue || 0);
         const dateRef  = (quote.createdAt || '').split('T')[0] || quote.emissionDate;
         const initStr  = getInitials(client.name || '?');
         const clientName = client.name || 'Cliente desconhecido';
