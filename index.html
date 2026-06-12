@@ -3509,25 +3509,29 @@
   /* Modal de alertas de clientes */
   .alerts-modal-overlay {
     position: fixed; inset: 0;
-    background: var(--modal-bg);
+    background: rgba(0,0,0,0.55);
     z-index: 800;
     opacity: 0; pointer-events: none;
-    transition: var(--t-normal);
+    transition: opacity 0.3s ease;
     backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
   }
   .alerts-modal-overlay.open { opacity: 1; pointer-events: all; }
   .alerts-modal {
     position: fixed;
-    top: 0; left: 0; right: 0;
+    bottom: 0; left: 0; right: 0;
+    top: auto;
     background: var(--surface);
-    border-radius: 0 0 var(--r-xl) var(--r-xl);
+    border-radius: 24px 24px 0 0;
     z-index: 810;
-    padding: 0 var(--space-md) var(--space-lg);
-    transform: translateY(-100%);
-    transition: transform var(--t-slow);
-    max-height: 88vh;
+    padding: 0 var(--space-md) calc(var(--space-lg) + env(safe-area-inset-bottom, 0px));
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+    max-height: 88dvh;
     overflow-y: auto;
-    padding-top: calc(60px + env(safe-area-inset-top, 0px));
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    box-shadow: 0 -8px 40px rgba(0,0,0,0.2);
   }
   .alerts-modal.open { transform: translateY(0); }
   .alerts-modal-header {
@@ -3535,9 +3539,10 @@
     padding: 20px 0 16px;
     border-bottom: 1px solid var(--border-soft);
     margin-bottom: 16px;
-    position: sticky; top: calc(60px + env(safe-area-inset-top, 0px));
+    position: sticky; top: 0;
     background: var(--surface);
     z-index: 1;
+    border-radius: 24px 24px 0 0;
   }
   .alerts-modal-title {
     display: flex; align-items: center; gap: 10px;
@@ -3864,6 +3869,7 @@
   <!-- Overlay + Modal de Alertas de Clientes -->
   <div class="alerts-modal-overlay" id="alerts-modal-overlay"></div>
   <div class="alerts-modal" id="alerts-modal">
+    <div style="width:40px;height:4px;background:var(--border);border-radius:4px;margin:14px auto 0;flex-shrink:0;"></div>
     <div class="alerts-modal-header">
       <div class="alerts-modal-title">
         <div class="title-icon"><i class="fas fa-bell"></i></div>
