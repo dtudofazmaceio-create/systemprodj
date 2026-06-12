@@ -3563,14 +3563,17 @@
 
   /* Card de alerta individual */
   .alert-client-card {
-    background: var(--surface2);
+    background: var(--surface);
     border: 1px solid var(--border-soft);
     border-left: 4px solid var(--warning);
-    border-radius: var(--r-md);
-    padding: 14px 14px 14px 16px;
-    margin-bottom: 10px;
+    border-radius: var(--r-lg);
+    padding: 16px;
+    margin-bottom: 12px;
     animation: tabIn 0.3s var(--t-normal) both;
+    box-shadow: var(--card-shadow);
+    transition: box-shadow var(--t-fast);
   }
+  .alert-client-card:active { transform: scale(0.99); }
   .alert-client-card:nth-child(2) { animation-delay: 0.05s; }
   .alert-client-card:nth-child(3) { animation-delay: 0.1s; }
   .alert-client-card:nth-child(4) { animation-delay: 0.15s; }
@@ -3581,7 +3584,7 @@
     border-bottom: 1px solid var(--border-soft);
   }
   .alert-client-avatar {
-    width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
+    width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
     font-size: 0.95rem; font-weight: 800; color: white;
     background: linear-gradient(135deg, var(--warning), var(--accent2));
@@ -3598,15 +3601,16 @@
   .alert-days-badge {
     display: inline-flex; align-items: center; gap: 4px;
     background: var(--warning-bg); color: var(--warning);
-    padding: 4px 10px; border-radius: var(--r-full);
+    padding: 5px 10px; border-radius: var(--r-full);
     font-size: 0.72rem; font-weight: 800;
     flex-shrink: 0;
-    border: 1px solid rgba(245,158,11,0.2);
+    border: 1px solid rgba(245,158,11,0.25);
+    white-space: nowrap;
   }
   .alert-order-detail {
-    background: var(--surface);
+    background: var(--surface2);
     border: 1px solid var(--border-soft);
-    border-radius: var(--r-sm);
+    border-radius: var(--r-md);
     padding: 10px 12px;
     font-size: 0.82rem;
     color: var(--text2);
@@ -3620,21 +3624,23 @@
   .alert-whatsapp-btn {
     width: 100%;
     display: flex; align-items: center; justify-content: center; gap: 8px;
-    padding: 11px 16px;
+    padding: 12px 16px;
     background: linear-gradient(135deg, #25D366, #128C7E);
     color: white;
     border: none; border-radius: var(--r-md);
     font-family: var(--font-body);
-    font-size: 0.88rem; font-weight: 700;
+    font-size: 0.92rem; font-weight: 700;
     cursor: pointer;
     transition: var(--t-fast);
     text-decoration: none;
+    box-shadow: 0 3px 12px rgba(37,211,102,0.3);
   }
   .alert-whatsapp-btn:hover, .alert-whatsapp-btn:active {
-    filter: brightness(1.1);
+    filter: brightness(1.08);
     transform: translateY(-1px);
+    box-shadow: 0 5px 16px rgba(37,211,102,0.4);
   }
-  .alert-whatsapp-btn i { font-size: 1.05rem; }
+  .alert-whatsapp-btn i { font-size: 1.1rem; }
   .alerts-empty {
     text-align: center; padding: 40px 20px;
     color: var(--text3);
@@ -3666,10 +3672,10 @@
   .alert-action-btn {
     flex: 1;
     display: flex; align-items: center; justify-content: center; gap: 6px;
-    padding: 9px 10px;
+    padding: 10px 12px;
     border: none; border-radius: var(--r-md);
     font-family: var(--font-body);
-    font-size: 0.76rem; font-weight: 700;
+    font-size: 0.8rem; font-weight: 700;
     cursor: pointer;
     transition: var(--t-fast);
     white-space: nowrap;
@@ -3678,14 +3684,17 @@
   .alert-action-cancel {
     background: var(--danger-bg);
     color: var(--danger);
+    border: 1.5px solid rgba(239,68,68,0.2);
   }
   .alert-action-cancel:hover, .alert-action-cancel:active {
     background: var(--danger);
     color: white;
+    box-shadow: 0 3px 10px rgba(239,68,68,0.3);
   }
   .alert-action-snooze {
     background: var(--surface3);
     color: var(--text2);
+    border: 1.5px solid var(--border);
   }
   .alert-action-snooze:hover, .alert-action-snooze:active {
     background: var(--border);
@@ -17473,35 +17482,52 @@ function showCommitmentsForDay(dateString) {
         const clientPhone = client.phone || '—';
         return `
           <div class="alert-client-card" id="alert-card-order-${order.id}" data-open-type="order" data-open-id="${order.id}" style="cursor:pointer;">
-            <div class="alert-client-header">
+            <!-- Cabeçalho do card -->
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
               <div class="alert-client-avatar">${initStr}</div>
-              <div class="alert-client-info">
+              <div style="flex:1;min-width:0;">
                 <div class="alert-client-name">${clientName}</div>
-                <div class="alert-client-meta">${order.eventType || 'Pedido'}${order.eventDate ? ' · ' + fmtDate(order.eventDate) : ''}</div>
+                <div style="font-size:0.75rem;color:var(--text3);margin-top:2px;display:flex;align-items:center;gap:5px;">
+                  <i class="fas fa-calendar-alt" style="font-size:0.7rem;"></i>
+                  ${order.eventType || 'Pedido'}${order.eventDate ? ' · ' + fmtDate(order.eventDate) : ''}
+                </div>
               </div>
-              <div class="alert-days-badge"><i class="fas fa-clock"></i> ${dias}d</div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+                <div class="alert-days-badge"><i class="fas fa-clock"></i> ${dias}d sem pgto</div>
+              </div>
             </div>
-            <div class="alert-order-detail">
-              <span class="detail-label">Cliente</span>
-              <span class="detail-value" style="color:var(--primary);font-weight:800;">${clientName}</span>
-              <span class="detail-label">Valor total</span>
-              <span class="detail-value danger">${total}</span>
-              <span class="detail-label">Criado em</span>
-              <span class="detail-value">${dateRef ? fmtDate(dateRef) : '—'}</span>
-              <span class="detail-label">Sem pagamento há</span>
-              <span class="detail-value danger">${dias} dia${dias !== 1 ? 's' : ''}</span>
-              <span class="detail-label">Telefone</span>
-              <span class="detail-value">${clientPhone}</span>
+
+            <!-- Linha de info compacta -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+              <div style="background:var(--danger-bg);border-radius:var(--r-sm);padding:10px 12px;">
+                <div style="font-size:0.62rem;font-weight:700;color:var(--danger);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Valor Total</div>
+                <div style="font-size:1rem;font-weight:800;color:var(--danger);font-family:var(--font-display);">${total}</div>
+              </div>
+              <div style="background:var(--surface3);border-radius:var(--r-sm);padding:10px 12px;">
+                <div style="font-size:0.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Criado em</div>
+                <div style="font-size:0.88rem;font-weight:700;color:var(--text);">${dateRef ? fmtDate(dateRef) : '—'}</div>
+              </div>
             </div>
+
+            <!-- Telefone -->
+            ${clientPhone !== '—' ? `
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface2);border-radius:var(--r-sm);margin-bottom:10px;border:1px solid var(--border-soft);">
+              <i class="fas fa-phone" style="color:var(--text3);font-size:0.8rem;flex-shrink:0;"></i>
+              <span style="font-size:0.85rem;font-weight:600;color:var(--text);">${clientPhone}</span>
+            </div>` : ''}
+
+            <!-- WhatsApp -->
             <a class="alert-whatsapp-btn" href="${waUrl}" target="_blank" rel="noopener" data-wa-btn>
               <i class="fab fa-whatsapp"></i> Contatar via WhatsApp${!phone ? ' (sem telefone)' : ''}
             </a>
-            <div class="alert-actions-row">
-              <button class="alert-action-btn alert-action-cancel" data-action="cancel-order" data-id="${order.id}">
-                <i class="fas fa-times-circle"></i> Marcar como Cancelado
+
+            <!-- Ações -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
+              <button class="alert-action-btn alert-action-cancel" data-action="cancel-order" data-id="${order.id}" style="border-radius:var(--r-sm);">
+                <i class="fas fa-times-circle"></i> Cancelar Pedido
               </button>
-              <button class="alert-action-btn alert-action-snooze" data-action="snooze" data-id="${order.id}" data-type="order">
-                <i class="fas fa-bell-slash"></i> Fechar (avisar amanhã)
+              <button class="alert-action-btn alert-action-snooze" data-action="snooze" data-id="${order.id}" data-type="order" style="border-radius:var(--r-sm);">
+                <i class="fas fa-bell-slash"></i> Avisar amanhã
               </button>
             </div>
           </div>`;
@@ -17524,35 +17550,50 @@ function showCommitmentsForDay(dateString) {
         const clientPhone = client.phone || '—';
         return `
           <div class="alert-client-card" style="border-left-color:var(--primary);cursor:pointer;" id="alert-card-quote-${quote.id}" data-open-type="quote" data-open-id="${quote.id}">
-            <div class="alert-client-header">
+            <!-- Cabeçalho -->
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
               <div class="alert-client-avatar" style="background:linear-gradient(135deg,var(--primary),var(--accent));">${initStr}</div>
-              <div class="alert-client-info">
+              <div style="flex:1;min-width:0;">
                 <div class="alert-client-name">${clientName}</div>
-                <div class="alert-client-meta">${quote.eventType || 'Orçamento'}${quote.eventDate ? ' · ' + fmtDate(quote.eventDate) : ''}</div>
+                <div style="font-size:0.75rem;color:var(--text3);margin-top:2px;display:flex;align-items:center;gap:5px;">
+                  <i class="fas fa-file-alt" style="font-size:0.7rem;color:var(--primary);"></i>
+                  ${quote.eventType || 'Orçamento'}${quote.eventDate ? ' · ' + fmtDate(quote.eventDate) : ''}
+                </div>
               </div>
-              <div class="alert-days-badge" style="background:rgba(59,130,246,0.12);color:var(--primary);"><i class="fas fa-clock"></i> ${dias}d</div>
+              <div class="alert-days-badge" style="background:rgba(59,130,246,0.12);color:var(--primary);"><i class="fas fa-clock"></i> ${dias}d aguardando</div>
             </div>
-            <div class="alert-order-detail">
-              <span class="detail-label">Cliente</span>
-              <span class="detail-value" style="color:var(--primary);font-weight:800;">${clientName}</span>
-              <span class="detail-label">Valor orçado</span>
-              <span class="detail-value" style="color:var(--primary);">${fmtCurrency(valTotal)}</span>
-              <span class="detail-label">Emitido em</span>
-              <span class="detail-value">${dateRef ? fmtDate(dateRef) : '—'}</span>
-              <span class="detail-label">Aguardando há</span>
-              <span class="detail-value" style="color:var(--primary);">${dias} dia${dias !== 1 ? 's' : ''}</span>
-              <span class="detail-label">Telefone</span>
-              <span class="detail-value">${clientPhone}</span>
+
+            <!-- Info compacta -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+              <div style="background:rgba(59,130,246,0.08);border-radius:var(--r-sm);padding:10px 12px;border:1px solid rgba(59,130,246,0.15);">
+                <div style="font-size:0.62rem;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Valor Orçado</div>
+                <div style="font-size:1rem;font-weight:800;color:var(--primary);font-family:var(--font-display);">${fmtCurrency(valTotal)}</div>
+              </div>
+              <div style="background:var(--surface3);border-radius:var(--r-sm);padding:10px 12px;">
+                <div style="font-size:0.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Emitido em</div>
+                <div style="font-size:0.88rem;font-weight:700;color:var(--text);">${dateRef ? fmtDate(dateRef) : '—'}</div>
+              </div>
             </div>
+
+            <!-- Telefone -->
+            ${clientPhone !== '—' ? `
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface2);border-radius:var(--r-sm);margin-bottom:10px;border:1px solid var(--border-soft);">
+              <i class="fas fa-phone" style="color:var(--text3);font-size:0.8rem;flex-shrink:0;"></i>
+              <span style="font-size:0.85rem;font-weight:600;color:var(--text);">${clientPhone}</span>
+            </div>` : ''}
+
+            <!-- WhatsApp -->
             <a class="alert-whatsapp-btn" href="${waUrl}" target="_blank" rel="noopener" data-wa-btn>
               <i class="fab fa-whatsapp"></i> Contatar via WhatsApp${!phone ? ' (sem telefone)' : ''}
             </a>
-            <div class="alert-actions-row">
-              <button class="alert-action-btn alert-action-cancel" data-action="reject-quote" data-id="${quote.id}">
-                <i class="fas fa-times-circle"></i> Marcar como Não Aceito
+
+            <!-- Ações -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
+              <button class="alert-action-btn alert-action-cancel" data-action="reject-quote" data-id="${quote.id}" style="border-radius:var(--r-sm);">
+                <i class="fas fa-times-circle"></i> Não Aceito
               </button>
-              <button class="alert-action-btn alert-action-snooze" data-action="snooze" data-id="${quote.id}" data-type="quote">
-                <i class="fas fa-bell-slash"></i> Fechar (avisar amanhã)
+              <button class="alert-action-btn alert-action-snooze" data-action="snooze" data-id="${quote.id}" data-type="quote" style="border-radius:var(--r-sm);">
+                <i class="fas fa-bell-slash"></i> Avisar amanhã
               </button>
             </div>
           </div>`;
