@@ -16764,6 +16764,30 @@ function showCommitmentsForDay(dateString) {
   window.openKmTracker = openKmTracker;
   window.openOrderStatusSheet = openOrderStatusSheet;
   window.openQuoteStatusSheet = openQuoteStatusSheet;
+
+  // ── Exclusão definitiva usada pelo painel de Alertas de Cobrança ──
+  // Opera sobre os arrays EM MEMÓRIA e persiste com saveData(), evitando
+  // que um saveData() posterior "ressuscite" o registro (bug: itens voltavam).
+  const _looseId = (a, b) => String(a) === String(b);
+
+  window.deleteOrderById = function(orderId) {
+    let removed = false;
+    const oIdx = eventOrders.findIndex(o => _looseId(o.id, orderId));
+    if (oIdx > -1) { eventOrders.splice(oIdx, 1); removed = true; }
+    // Remove também o compromisso vinculado, se houver
+    const cIdx = commitments.findIndex(c => _looseId(c.linkedOrderId, orderId));
+    if (cIdx > -1) commitments.splice(cIdx, 1);
+    if (removed) { saveData(); if (typeof updateUI === 'function') updateUI(); }
+    return removed;
+  };
+
+  window.deleteQuoteById = function(quoteId) {
+    let removed = false;
+    const qIdx = eventQuotes.findIndex(q => _looseId(q.id, quoteId));
+    if (qIdx > -1) { eventQuotes.splice(qIdx, 1); removed = true; }
+    if (removed) { saveData(); if (typeof updateUI === 'function') updateUI(); }
+    return removed;
+  };
 });
 
 </script>
@@ -17412,34 +17436,57 @@ function showCommitmentsForDay(dateString) {
     );
   }
 
-  // ── Ação: cancelar pedido ──
+  // ── Util: remove registro do localStorage tolerando tipo de ID ──
+  function removeFromStore(key, id) {
+    try {
+      const arr = JSON.parse(localStorage.getItem(key) || '[]');
+      const next = arr.filter(item => String(item.id) !== String(id));
+      localStorage.setItem(key, JSON.stringify(next));
+      return next.length !== arr.length;
+    } catch(e) { return false; }
+  }
+
+  // ── Ação: cancelar pedido (EXCLUI definitivamente) ──
   function cancelOrder(orderId) {
     try {
-      const orders = JSON.parse(localStorage.getItem('eventOrders') || '[]');
-      const idx = orders.findIndex(o => o.id === orderId);
-      if (idx < 0) return;
-      orders[idx].status = 'cancelado';
-      localStorage.setItem('eventOrders', JSON.stringify(orders));
-      if (typeof window.updateUI === 'function') window.updateUI();
+      // Preferencial: usa o helper do app, que mexe nos arrays EM MEMÓRIA
+      // e salva — assim um saveData() posterior não traz o pedido de volta.
+      let done = false;
+      if (typeof window.deleteOrderById === 'function') {
+        done = window.deleteOrderById(orderId);
+      }
+      // Fallback (caso o app ainda não tenha carregado): exclui no localStorage
+      if (!done) {
+        removeFromStore('eventOrders', orderId);
+        // Remove também o compromisso vinculado, se existir
+        try {
+          const comms = JSON.parse(localStorage.getItem('commitments') || '[]');
+          const next = comms.filter(c => String(c.linkedOrderId) !== String(orderId));
+          if (next.length !== comms.length) localStorage.setItem('commitments', JSON.stringify(next));
+        } catch(e) {}
+        if (typeof window.updateUI === 'function') window.updateUI();
+      }
       if (typeof window.updateOrdersKPI === 'function') window.updateOrdersKPI();
       updateBellBadge();
       renderAlertsModal();
-      if (typeof window.showToast === 'function') window.showToast('Pedido marcado como cancelado.', 'warning');
+      if (typeof window.showToast === 'function') window.showToast('Pedido excluído.', 'warning');
     } catch(e) {}
   }
 
-  // ── Ação: marcar orçamento como não aceito ──
+  // ── Ação: orçamento não aceito (EXCLUI definitivamente) ──
   function rejectQuoteAlert(quoteId) {
     try {
-      const quotes = JSON.parse(localStorage.getItem('eventQuotes') || '[]');
-      const idx = quotes.findIndex(q => q.id === quoteId);
-      if (idx < 0) return;
-      quotes[idx].status = 'recusado';
-      localStorage.setItem('eventQuotes', JSON.stringify(quotes));
-      if (typeof window.updateUI === 'function') window.updateUI();
+      let done = false;
+      if (typeof window.deleteQuoteById === 'function') {
+        done = window.deleteQuoteById(quoteId);
+      }
+      if (!done) {
+        removeFromStore('eventQuotes', quoteId);
+        if (typeof window.updateUI === 'function') window.updateUI();
+      }
       updateBellBadge();
       renderAlertsModal();
-      if (typeof window.showToast === 'function') window.showToast('Orçamento marcado como não aceito.', 'warning');
+      if (typeof window.showToast === 'function') window.showToast('Orçamento excluído.', 'warning');
     } catch(e) {}
   }
 
@@ -17612,13 +17659,13 @@ function showCommitmentsForDay(dateString) {
     body.querySelectorAll('[data-action="cancel-order"]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (confirm('Confirmar cancelamento do pedido?')) cancelOrder(parseFloat(btn.dataset.id));
+        if (confirm('Excluir este pedido? O compromisso agendado vinculado também será removido. Esta ação não pode ser desfeita.')) cancelOrder(parseFloat(btn.dataset.id));
       });
     });
     body.querySelectorAll('[data-action="reject-quote"]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (confirm('Confirmar orçamento como não aceito?')) rejectQuoteAlert(parseFloat(btn.dataset.id));
+        if (confirm('Excluir este orçamento? Esta ação não pode ser desfeita.')) rejectQuoteAlert(parseFloat(btn.dataset.id));
       });
     });
     body.querySelectorAll('[data-action="snooze"]').forEach(btn => {
