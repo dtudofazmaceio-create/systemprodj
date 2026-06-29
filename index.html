@@ -6397,6 +6397,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupNavigation();
     setupEventListeners();
     backfillOperationalCosts();
+    backfillFuelLog();
     updateUI();
     updateDashboardHero();
     updateDashboardRecent();
@@ -9645,23 +9646,34 @@ function openCommitmentModal(mode, id = null, date = null) {
 
       // Save to fuel log
       const order = eventOrders.find(o => o.id === _state.orderId);
-      const fuelLogEntry = {
-        id: Date.now(),
-        date: new Date().toISOString().split('T')[0],
-        orderId: _state.orderId,
-        orderNumber: order ? order.orderNumber : '',
-        eventLocation: _state.location || '',
-        distanceKm: record.total,
-        idaKm: record.ida,
-        voltaKm: record.volta,
-        durationSec: record.duration,
-        fuelType: fuelConfig.type || 'Gasolina',
-        pricePerLiter: fuelConfig.pricePerLiter || 0,
-        consumptionKmL: fuelConfig.consumption || 0,
-        liters: +litros.toFixed(3),
-        fuelCost: +fuelCost.toFixed(2),
-      };
-      fuelLog.push(fuelLogEntry);
+      if (order) {
+        upsertFuelLogEntry(order, {
+          distanceKm: record.total,
+          idaKm: record.ida,
+          voltaKm: record.volta,
+          durationSec: record.duration,
+          liters: litros,
+          fuelCost: fuelCost,
+          eventLocation: _state.location || order.eventLocation || '',
+        });
+      } else {
+        fuelLog.push({
+          id: Date.now(),
+          date: new Date().toISOString().split('T')[0],
+          orderId: _state.orderId,
+          orderNumber: '',
+          eventLocation: _state.location || '',
+          distanceKm: record.total,
+          idaKm: record.ida,
+          voltaKm: record.volta,
+          durationSec: record.duration,
+          fuelType: fuelConfig.type || 'Gasolina',
+          pricePerLiter: fuelConfig.pricePerLiter || 0,
+          consumptionKmL: fuelConfig.consumption || 0,
+          liters: +litros.toFixed(3),
+          fuelCost: +fuelCost.toFixed(2),
+        });
+      }
       saveData();
 
       // Show summary
@@ -12850,6 +12862,84 @@ function showCommitmentsForDay(dateString) {
   }
 
   // =====================================================
+  // LOG DE COMBUSTÍVEL — garante exatamente 1 registro por pedido
+  // no fuelLog (fonte de dados do Relatório de Combustível).
+  // Atualiza se já existir, cria caso contrário. Sem duplicar.
+  // =====================================================
+  function upsertFuelLogEntry(order, data) {
+    if (!order) return false;
+    data = data || {};
+    const km = +(data.distanceKm || 0);
+    if (km <= 0) return false; // sem trajeto não há o que registrar
+
+    const existing = fuelLog.find(f => f.orderId === order.id);
+    const fields = {
+      orderId: order.id,
+      orderNumber: order.orderNumber || (existing && existing.orderNumber) || '',
+      eventLocation: data.eventLocation || order.eventLocation || (existing && existing.eventLocation) || '',
+      distanceKm: km,
+      idaKm: data.idaKm != null ? data.idaKm : (existing ? existing.idaKm : +(km * 0.5).toFixed(2)),
+      voltaKm: data.voltaKm != null ? data.voltaKm : (existing ? existing.voltaKm : +(km * 0.5).toFixed(2)),
+      durationSec: data.durationSec != null ? data.durationSec : (existing ? existing.durationSec : 0),
+      fuelType: data.fuelType || fuelConfig.type || 'Gasolina',
+      pricePerLiter: data.pricePerLiter != null ? data.pricePerLiter : (fuelConfig.pricePerLiter || 0),
+      consumptionKmL: data.consumptionKmL != null ? data.consumptionKmL : (fuelConfig.consumption || 0),
+      liters: data.liters != null ? +(+data.liters).toFixed(3) : (existing ? existing.liters : 0),
+      fuelCost: data.fuelCost != null ? +(+data.fuelCost).toFixed(2) : (existing ? existing.fuelCost : 0),
+    };
+
+    if (existing) {
+      Object.assign(existing, fields); // preserva id e data originais
+    } else {
+      fuelLog.push(Object.assign({
+        id: Date.now() + Math.floor(Math.random() * 1000),
+        date: data.date || order.eventDate || new Date().toISOString().split('T')[0],
+      }, fields));
+    }
+    return true;
+  }
+
+  // =====================================================
+  // BACKFILL DO RELATÓRIO — registra no fuelLog os trajetos de
+  // pedidos já concluídos que possuem quilometragem mas ficaram
+  // de fora do Relatório de Combustível (executa sem duplicar).
+  // =====================================================
+  function backfillFuelLog() {
+    let created = 0;
+    eventOrders.forEach(order => {
+      if (!order) return;
+      if (order.status !== 'finalizado' && order.status !== 'realizado') return;
+
+      // Busca kmRecord no objeto ou no localStorage como fallback
+      let km = order.kmRecord;
+      if (!km) {
+        try { const raw = localStorage.getItem('djmgr_km_' + order.id); if (raw) { km = JSON.parse(raw); order.kmRecord = km; } } catch (e) {}
+      }
+      if (!km || !(km.total > 0)) return;
+
+      // Já existe registro no relatório para este pedido?
+      if (fuelLog.some(f => f.orderId === order.id)) return;
+
+      const litros = fuelConfig.consumption > 0 ? km.total / fuelConfig.consumption : 0;
+      const custo  = litros > 0 && fuelConfig.pricePerLiter > 0 ? litros * fuelConfig.pricePerLiter : 0;
+
+      const ok = upsertFuelLogEntry(order, {
+        distanceKm: km.total,
+        idaKm: km.ida,
+        voltaKm: km.volta,
+        durationSec: km.duration || 0,
+        liters: litros,
+        fuelCost: custo,
+        eventLocation: order.eventLocation,
+        date: order.eventDate || (km.date ? new Date(km.date).toISOString().split('T')[0] : undefined),
+      });
+      if (ok) created++;
+    });
+    if (created > 0) saveData();
+    return created;
+  }
+
+  // =====================================================
   // BACKFILL — lança em Despesas o combustível de pedidos
   // já finalizados anteriormente (executa 1x, sem duplicar).
   // =====================================================
@@ -12921,9 +13011,22 @@ function showCommitmentsForDay(dateString) {
     const totalPaid = receipts.filter(r => r.orderId === orderId && r.status === 'pago').reduce((s,r) => s+r.amount, 0);
     const lucroLiquido = custo > 0 ? (order.totalValue || 0) - custo : null;
 
-    // Contabiliza o combustível como custo operacional (despesa) ao finalizar ou realizar o pedido
-    if (custo > 0 && km && km.total > 0 && (order.status === 'finalizado' || order.status === 'realizado')) {
-      registerOperationalCostExpense(order, custo, km.total);
+    // Ao finalizar/realizar o pedido com trajeto registrado:
+    // 1) garante que o trajeto apareça no Relatório de Combustível (fuelLog)
+    // 2) lança o combustível como custo operacional (despesa)
+    if (km && km.total > 0 && (order.status === 'finalizado' || order.status === 'realizado')) {
+      upsertFuelLogEntry(order, {
+        distanceKm: km.total,
+        idaKm: km.ida,
+        voltaKm: km.volta,
+        durationSec: km.duration || 0,
+        liters: litros,
+        fuelCost: custo,
+        eventLocation: order.eventLocation,
+        date: km.date ? new Date(km.date).toISOString().split('T')[0] : undefined,
+      });
+      if (custo > 0) registerOperationalCostExpense(order, custo, km.total);
+      saveData();
     }
 
     panel.innerHTML = `
@@ -13087,8 +13190,16 @@ function showCommitmentsForDay(dateString) {
                 </div>
               </div>`;
           }
-          // Registrar no fuelLog
-          fuelLog.push({ id: Date.now(), date: new Date().toISOString().split('T')[0], orderId, orderNumber: order.orderNumber, eventLocation: order.eventLocation||'', distanceKm: n, idaKm: kmRecord.ida, voltaKm: kmRecord.volta, durationSec: 0, fuelType: fuelConfig.type, pricePerLiter: fuelConfig.pricePerLiter, consumptionKmL: fuelConfig.consumption, liters: +litros2.toFixed(3), fuelCost: +custo2.toFixed(2) });
+          // Registrar/atualizar no fuelLog (Relatório de Combustível) sem duplicar
+          upsertFuelLogEntry(order, {
+            distanceKm: n,
+            idaKm: kmRecord.ida,
+            voltaKm: kmRecord.volta,
+            durationSec: 0,
+            liters: litros2,
+            fuelCost: custo2,
+            eventLocation: order.eventLocation || '',
+          });
           // Contabiliza como custo operacional (despesa) ao finalizar ou realizar o pedido
           if (custo2 > 0 && (order.status === 'finalizado' || order.status === 'realizado')) {
             registerOperationalCostExpense(order, custo2, n);
