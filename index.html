@@ -7776,6 +7776,65 @@ if (typeof activeModalCallback === 'function') {
     }
   }
 
+  // NOVO RECURSO: Sheet de ação pós-criação (Baixar PDF / Enviar ao Cliente)
+  // Usado ao criar um orçamento (e reutilizável para outros documentos).
+  function showSaveActionSheet(opts) {
+    opts = opts || {};
+    document.getElementById('_savesheet-overlay')?.remove();
+    document.getElementById('_savesheet')?.remove();
+
+    const ov = document.createElement('div');
+    ov.id = '_savesheet-overlay';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:1600;animation:fadeIn .2s ease both;';
+
+    const sh = document.createElement('div');
+    sh.id = '_savesheet';
+    sh.style.cssText = 'position:fixed;bottom:0;left:0;right:0;max-width:600px;margin:0 auto;background:var(--surface);border-radius:20px 20px 0 0;z-index:1601;padding:24px 16px calc(24px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 40px rgba(0,0,0,0.25);animation:sheetUp .35s cubic-bezier(0.4,0,0.2,1) both;';
+    sh.innerHTML = `
+      <div style="width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px;"></div>
+      <div style="width:56px;height:56px;border-radius:50%;background:var(--success-bg);color:var(--success);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 14px;"><i class="fas fa-circle-check"></i></div>
+      <h3 style="font-family:var(--font-display);font-size:1rem;font-weight:800;text-align:center;margin-bottom:6px;color:var(--text);">${opts.title || 'Criado com sucesso!'}</h3>
+      <p style="text-align:center;color:var(--text3);font-size:0.88rem;line-height:1.5;margin-bottom:22px;">${opts.message || 'O que deseja fazer agora?'}</p>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button id="_ss-pdf" class="btn" style="background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;justify-content:center;"><i class="fas fa-file-pdf"></i> ${opts.pdfLabel || 'Baixar PDF'}</button>
+        <button id="_ss-send" class="btn" style="background:#25d366;color:#fff;justify-content:center;"><i class="fab fa-whatsapp"></i> ${opts.sendLabel || 'Enviar ao Cliente'}</button>
+        <button id="_ss-cancel" class="btn btn-ghost" style="color:var(--text3);justify-content:center;">Agora não</button>
+      </div>`;
+
+    document.body.appendChild(ov);
+    document.body.appendChild(sh);
+
+    const close = () => { ov.remove(); sh.remove(); };
+    ov.addEventListener('click', close);
+    sh.querySelector('#_ss-pdf').onclick = () => { close(); if (typeof opts.onPdf === 'function') setTimeout(opts.onPdf, 150); };
+    sh.querySelector('#_ss-send').onclick = () => { close(); if (typeof opts.onSend === 'function') setTimeout(opts.onSend, 150); };
+    sh.querySelector('#_ss-cancel').onclick = close;
+  }
+
+  // NOVO RECURSO: Envia o orçamento ao cliente via WhatsApp
+  function sendQuoteToClientWhatsApp(quote) {
+    if (!quote) return;
+    const client = clients.find(c => c.id === quote.clientId) || {};
+    const rawPhone = (client.phone || '').replace(/\D/g, '');
+    const total = (quote.totalValue != null)
+      ? quote.totalValue
+      : (quote.services || []).reduce((s, sv) => s + (sv.value || 0), 0);
+    const msg = encodeURIComponent(
+      `Olá ${client.name || 'Cliente'}! 👋\n\nSegue o seu orçamento *${quote.quoteNumber || ''}*:\n` +
+      `🎵 *Serviço:* ${quote.eventType || 'Evento'}\n` +
+      `📅 *Data:* ${quote.eventDate ? formatDate(quote.eventDate) : 'a confirmar'}\n` +
+      (quote.eventLocation ? `📍 *Local:* ${quote.eventLocation}\n` : '') +
+      `💰 *Valor orçado:* ${formatCurrency(total)}\n` +
+      (quote.validity ? `🗓 *Validade:* ${quote.validity} dias\n` : '') +
+      `\nQualquer dúvida, estou à disposição! 😊`
+    );
+    const url = rawPhone
+      ? `https://wa.me/${rawPhone.startsWith('55') ? rawPhone : '55' + rawPhone}?text=${msg}`
+      : `https://api.whatsapp.com/send?text=${msg}`;
+    if (!rawPhone) showToast('Cliente sem telefone cadastrado — abrindo o WhatsApp para escolher o contato.', 'info');
+    window.open(url, '_blank');
+  }
+
   // NOVO RECURSO: Função para submeter o formulário de orçamento
   function handleEventQuoteSubmit(e) {
     e.preventDefault();
@@ -7810,6 +7869,11 @@ if (typeof activeModalCallback === 'function') {
             eventQuotes[index] = { ...eventQuotes[index], ...quoteData };
         }
         showToast('Orçamento atualizado com sucesso!', 'success');
+
+        saveData();
+        updateUI();
+        modal.classList.remove('active');
+        showTab('pedidos');
     } else {
         quoteData.status = 'emitido';
         const newQuote = {
@@ -7820,12 +7884,22 @@ if (typeof activeModalCallback === 'function') {
         };
         eventQuotes.push(newQuote);
         showToast('Orçamento criado com sucesso!', 'success');
-    }
 
-    saveData();
-    updateUI();
-    modal.classList.remove('active');
-    showTab('pedidos');
+        // Pergunta se deseja baixar em PDF ou enviar ao cliente (igual aos pedidos)
+        saveData();
+        updateUI();
+        modal.classList.remove('active');
+        showTab('pedidos');
+
+        setTimeout(() => {
+          showSaveActionSheet({
+            title: `Orçamento ${newQuote.quoteNumber} criado!`,
+            message: 'Como deseja prosseguir com este orçamento?',
+            onPdf: () => downloadExistingQuoteAsPDF(newQuote.id),
+            onSend: () => sendQuoteToClientWhatsApp(newQuote),
+          });
+        }, 400);
+    }
   }
 
   function populateContractFormFromOrder(orderId) {
