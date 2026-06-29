@@ -7166,8 +7166,65 @@ document.getElementById('add-client-from-contract-btn')?.addEventListener('click
             console.error(e);
         }
     }
+    // Espelha os dados de combustível também no blob 'djmpro_data',
+    // usado por relatórios/históricos legados (mantém tudo em sincronia).
+    try {
+      const raw = (() => { try { return JSON.parse(localStorage.getItem('djmpro_data') || '{}'); } catch(e2) { return {}; } })();
+      raw.transactions = transactions;
+      raw.eventOrders = eventOrders;
+      raw.accounts = accounts;
+      raw.maintenanceNotes = maintenanceNotes;
+      raw.fuelConfig = fuelConfig;
+      raw.fuelLog = fuelLog;
+      raw.receipts = receipts;
+      raw.clients = clients;
+      localStorage.setItem('djmpro_data', JSON.stringify(raw));
+    } catch (e3) { /* ignora se faltar espaço */ }
   }
-  
+
+  // =====================================================
+  // FONTE DE DADOS UNIFICADA (ao vivo)
+  // Os módulos de combustível/relatórios liam historicamente de um
+  // blob 'djmpro_data' separado que não recebia os pedidos/transações
+  // do app principal. Esta função entrega os dados ao vivo (chaves
+  // individuais), mesclando itens legados do blob para não perder nada.
+  // =====================================================
+  window.getAppData = function() {
+    const ls = (k) => { try { const v = localStorage.getItem(k); return v != null ? JSON.parse(v) : null; } catch(e) { return null; } };
+    let legacy = {}; try { legacy = JSON.parse(localStorage.getItem('djmpro_data') || '{}') || {}; } catch(e) {}
+    const mergeById = (a, b) => {
+      const out = []; const seen = new Set();
+      [...(Array.isArray(a) ? a : []), ...(Array.isArray(b) ? b : [])].forEach(it => {
+        if (!it) return;
+        const key = (it.id != null) ? ('id:' + it.id) : JSON.stringify(it);
+        if (seen.has(key)) return; seen.add(key); out.push(it);
+      });
+      return out;
+    };
+    return {
+      transactions: mergeById(ls('transactions'), legacy.transactions),
+      eventOrders: ls('eventOrders') || legacy.eventOrders || [],
+      accounts: ls('accounts') || legacy.accounts || [],
+      receipts: ls('receipts') || legacy.receipts || [],
+      clients: ls('clients') || legacy.clients || [],
+      commitments: ls('commitments') || legacy.commitments || [],
+      maintenanceNotes: ls('maintenanceNotes') || legacy.maintenanceNotes || [],
+      fuelConfig: ls('fuelConfig') || legacy.fuelConfig || { type: 'Gasolina', pricePerLiter: 0, consumption: 10 },
+      fuelLog: ls('fuelLog') || legacy.fuelLog || [],
+    };
+  };
+
+  // Permite que módulos separados (calculadora de combustível) lancem uma
+  // transação na fonte de verdade do app principal, de forma durável.
+  window.addAppTransaction = function(tx) {
+    if (!tx) return false;
+    if (tx.id == null) tx.id = Date.now() + Math.floor(Math.random() * 1000);
+    transactions.push(tx);
+    saveData();
+    if (typeof updateUI === 'function') updateUI();
+    return true;
+  };
+
   function deleteItem(array, id, name, condition, message) {
     if (condition && condition()) { showToast(message, 'warning'); return; }
     showConfirm(`Tem certeza que deseja excluir este(a) ${name}?`, `Excluir ${name}`, () => {
@@ -11985,7 +12042,9 @@ function updateCommitmentOrderSelector(clientId) {
   }
 
   function gerarRelatorioCustosOperacionaisPDF() {
-    const rawData = (() => { try { return JSON.parse(localStorage.getItem('djmpro_data') || '{}'); } catch(e) { return {}; } })();
+    const rawData = (typeof window.getAppData === 'function')
+      ? window.getAppData()
+      : (() => { try { return JSON.parse(localStorage.getItem('djmpro_data') || '{}'); } catch(e) { return {}; } })();
     const transactions = rawData.transactions || [];
     const maintenanceNotes = rawData.maintenanceNotes || [];
     const eventOrders = rawData.eventOrders || [];
@@ -17999,7 +18058,9 @@ function showCommitmentsForDay(dateString) {
     if (!overlay) return;
     // Pré-preencher com fuelConfig salvo
     try {
-      const fc = JSON.parse(localStorage.getItem('djmpro_data') || '{}').fuelConfig || {};
+      const fc = (typeof window.getAppData === 'function')
+        ? (window.getAppData().fuelConfig || {})
+        : (JSON.parse(localStorage.getItem('djmpro_data') || '{}').fuelConfig || {});
       const cons = document.getElementById('fc-consumption');
       const price = document.getElementById('fc-price');
       if (cons && !cons.value && fc.consumption) cons.value = fc.consumption;
@@ -18069,27 +18130,33 @@ function showCommitmentsForDay(dateString) {
     const desc = btn.dataset.desc || 'Combustível';
     if (!amount) return;
 
-    // Add transaction via existing system
     try {
-      const rawData = JSON.parse(localStorage.getItem('djmpro_data') || '{}');
-      const txs = rawData.transactions || [];
       const today = new Date().toISOString().split('T')[0];
-      const accounts = rawData.accounts || [];
-      const firstAccId = accounts.length > 0 ? accounts[0].id : null;
-      txs.push({
+      const tx = {
         id: Date.now(),
         type: 'despesa',
         amount: amount,
         date: today,
         description: desc,
         category: 'Combustível',
-        account: firstAccId,
         status: 'confirmada',
         createdAt: new Date().toISOString()
-      });
-      rawData.transactions = txs;
-      localStorage.setItem('djmpro_data', JSON.stringify(rawData));
-      if (typeof updateUI === 'function') updateUI();
+      };
+      // Lança na fonte de verdade do app principal (durável e visível em tudo)
+      if (typeof window.addAppTransaction === 'function') {
+        window.addAppTransaction(tx);
+      } else {
+        // Fallback legado
+        const rawData = JSON.parse(localStorage.getItem('djmpro_data') || '{}');
+        const txs = rawData.transactions || [];
+        const accounts = rawData.accounts || [];
+        tx.account = accounts.length > 0 ? accounts[0].id : null;
+        txs.push(tx);
+        rawData.transactions = txs;
+        localStorage.setItem('djmpro_data', JSON.stringify(rawData));
+        if (typeof updateUI === 'function') updateUI();
+      }
+      if (typeof window.renderOpCosts === 'function') window.renderOpCosts();
       if (typeof showToast === 'function') showToast('Despesa de combustível registrada! ⛽', 'success');
       closeFuelCalc();
     } catch(e) {
@@ -18099,7 +18166,9 @@ function showCommitmentsForDay(dateString) {
 
   // ── Relatório Operacional ──
   window.renderOpCosts = function() {
-    const rawData = (() => { try { return JSON.parse(localStorage.getItem('djmpro_data') || '{}'); } catch(e) { return {}; } })();
+    const rawData = (typeof window.getAppData === 'function')
+      ? window.getAppData()
+      : (() => { try { return JSON.parse(localStorage.getItem('djmpro_data') || '{}'); } catch(e) { return {}; } })();
     const transactions = rawData.transactions || [];
     const maintenanceNotes = rawData.maintenanceNotes || [];
     const eventOrders = rawData.eventOrders || [];
@@ -18352,8 +18421,17 @@ function showCommitmentsForDay(dateString) {
 
   const FMT = v => (typeof v === 'number' ? v : 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   const STORE_KEY = 'djmpro_data';
-  const getData = () => { try { return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch(e) { return {}; } };
-  const setData = d => localStorage.setItem(STORE_KEY, JSON.stringify(d));
+  // Lê os dados ao vivo do app principal (chaves individuais). Mantém
+  // fallback ao blob legado caso a função unificada ainda não exista.
+  const getData = () => {
+    try { if (typeof window.getAppData === 'function') return window.getAppData(); } catch (e) {}
+    try { return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch (e) { return {}; }
+  };
+  const setData = d => {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(d)); } catch (e) {}
+    // Mantém a configuração de combustível sincronizada com o app principal
+    try { if (d && d.fuelConfig) localStorage.setItem('fuelConfig', JSON.stringify(d.fuelConfig)); } catch (e) {}
+  };
 
   // ── helpers ──
   function getFuelConfig() {
@@ -18464,25 +18542,31 @@ function showCommitmentsForDay(dateString) {
     const desc = btn.dataset.desc || 'Combustível';
     const today = btn.dataset.date || new Date().toISOString().split('T')[0];
 
-    const d = getData();
-    const txs = d.transactions || [];
-    const accounts = d.accounts || [];
-    txs.push({
+    const tx = {
       id: Date.now(),
       type: 'despesa',
       amount,
       date: today,
       description: desc,
       category: 'Combustível',
-      account: accounts.length > 0 ? accounts[0].id : null,
       status: 'confirmada',
       createdAt: new Date().toISOString(),
       _fuelKm: parseFloat(btn.dataset.km) || 0,
       _fuelLiters: parseFloat(btn.dataset.liters) || 0,
-    });
-    d.transactions = txs;
-    setData(d);
-    if (typeof updateUI === 'function') updateUI();
+    };
+    // Lança na fonte de verdade do app principal (durável e visível em tudo)
+    if (typeof window.addAppTransaction === 'function') {
+      window.addAppTransaction(tx);
+    } else {
+      const d = getData();
+      const txs = d.transactions || [];
+      const accounts = d.accounts || [];
+      tx.account = accounts.length > 0 ? accounts[0].id : null;
+      txs.push(tx);
+      d.transactions = txs;
+      setData(d);
+      if (typeof updateUI === 'function') updateUI();
+    }
     renderFuelHistory();
     if (typeof renderOpCosts === 'function') renderOpCosts();
     if (typeof showToast === 'function') showToast('Despesa de combustível salva! ✅', 'success');
